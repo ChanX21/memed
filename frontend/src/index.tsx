@@ -29,12 +29,10 @@ root.render(
   <React.StrictMode>
     <WagmiProvider config={config} >
       <QueryClientProvider client={queryClient}>
-        <AuthenticationProvider>
           <RainbowKitProvider>
             <App />
           </RainbowKitProvider>
-        </AuthenticationProvider>
-      </QueryClientProvider>
+</QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>
 );

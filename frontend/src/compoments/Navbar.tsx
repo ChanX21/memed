@@ -10,7 +10,7 @@ const Navbar: React.FC = () => {
 
   const [component1, setComponent1] = useState<DynamicComponent>({
     bgColor: 'bg-gray-200',
-    text: '[Address] bought or sold BNB amount of [Token]',
+    text: '[Address] bought BNB amount of [Token]',
   });
 
   const [component2, setComponent2] = useState<DynamicComponent>({
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
     const interval = setInterval(() => {
       setComponent1({
         bgColor: getRandomColor(),
-        text: `${randomAddress()} bought or sold ${randomAmount()} BNB of ${randomToken()}`,
+        text: `${randomAddress()} bought ${randomAmount()} BNB of ${randomToken()}`,
       });
       setComponent2({
         bgColor: getRandomColor(),
@@ -33,8 +33,8 @@ const Navbar: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const getRandomColor = (): string =>
-    `bg-[${`#${Math.floor(Math.random() * 16777215).toString(16)}`}]`;
+  const getRandomColor = (): string => `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
 
   const randomAddress = (): string =>
     `0x${Math.random().toString(36).substring(2, 10)}`;
@@ -46,21 +46,24 @@ const Navbar: React.FC = () => {
     ).toLocaleDateString();
 
   return (
-    <nav className="flex justify-between items-center p-4 bg-blue-600 text-white">
-      <div className="text-lg font-bold">Dynamic Navbar</div>
+    <nav className="flex justify-between items-center p-4 bg-black text-white">
+      <div className="text-lg font-bold">Memed</div>
       <div className="flex space-x-4">
         <div
-          className={`p-2 rounded-md text-sm text-black ${component1.bgColor}`}
+          className="p-2 rounded-md text-sm text-black"
+          style={{ backgroundColor: component1.bgColor }}
         >
           {component1.text}
         </div>
         <div
-          className={`p-2 rounded-md text-sm text-black ${component2.bgColor}`}
+          className="p-2 rounded-md text-sm text-black"
+          style={{ backgroundColor: component2.bgColor }}
         >
           {component2.text}
         </div>
+
       </div>
-    <ConnectButton />
+      <ConnectButton />
     </nav>
   );
 };
