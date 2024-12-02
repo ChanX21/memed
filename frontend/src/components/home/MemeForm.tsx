@@ -61,9 +61,9 @@ export function MemeForm() {
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader className="text-left">
-          <DrawerTitle>Edit profile</DrawerTitle>
+          <DrawerTitle> Create Meme</DrawerTitle>
           <DrawerDescription>
-            Make changes to your profile here. Click save when you're done.
+            Provide informations required to create your meme.
           </DrawerDescription>
         </DrawerHeader>
         <ProfileForm className="px-4" />
