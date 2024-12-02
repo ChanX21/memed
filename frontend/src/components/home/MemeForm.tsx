@@ -43,9 +43,9 @@ export function MemeForm() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit profile</DialogTitle>
+            <DialogTitle>Create Meme</DialogTitle>
             <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
+              Provide informations required to create your meme.
             </DialogDescription>
           </DialogHeader>
           <ProfileForm />
