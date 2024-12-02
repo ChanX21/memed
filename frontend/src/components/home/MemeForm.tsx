@@ -103,6 +103,10 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
         <Input type="text" id="name" />
       </div>
       <div className="grid gap-2">
+        <Label htmlFor="name">Ticker</Label>
+        <Input type="text" id="name" />
+      </div>
+      <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
         <Textarea id="description" />
         <p className="text-sm text-muted-foreground">
