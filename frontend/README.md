@@ -1,140 +1,50 @@
-## use @rainbow-me/rainbowkit 
+# React + TypeScript + Vite
 
-uxuyWallet is a wallet that integrates with the UXUY Wallet SDK. It allows users to connect their UXUY Wallet to the dApp.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-[uxuyWallet](/src/wallets/uxuyWallet.ts)
-``` ts 
-import { connectorsForWallets } from '@rainbow-me/rainbowkit';
-import { rainbowWallet,  walletConnectWallet } from '@rainbow-me/rainbowkit/wallets';
+Currently, two official plugins are available:
 
-import { WagmiProvider, createConfig, http } from 'wagmi';
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-const logoUrl = "<app-logo-url>"
-const uxuyWallet = ({
-    walletConnectParameters,
-    projectId,
-}: DefaultWalletOptions): Wallet => {
-    let provider: unknown | EIP1193Provider
-    return {
-        id: 'uxuyWallet',
-        name: 'UXUY Wallet',
-        // iconUrl: sdk.getAppInfo().logo,
-        iconUrl: logoUrl,
-        installed: true,
-        iconBackground: '#000000',
-        createConnector: (walletDetails) => {
-            return createConnector((config) => ({
-                ...injected({
-                    // shimDisconnect: false
-                })(config),
-                ...walletDetails,
-                getProvider: async () => {
-                    if (provider) return provider
-                    const { WalletTgSdk } = (await import("@uxuycom/web3-tg-sdk")).default
-                    const sdk = new WalletTgSdk({
-                        // @ts-ignore
-                        metaData: {
-                            icon: walletConnectParameters?.metadata?.icons?.[0],
-                            name: walletConnectParameters?.metadata?.name,
-                            description: walletConnectParameters?.metadata?.description,
-                            url: walletConnectParameters?.metadata?.url,
-                        }
-                    })
-                    provider = sdk.ethereum
-                    return provider
-                },
-            }))
-        },
+## Expanding the ESLint configuration
 
-    };
-};
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-const chains: readonly [Chain, ...Chain[]] = [
-  mainnet,
-  polygon,
-  optimism,
-  arbitrum,
-  base,
-];
+- Configure the top-level `parserOptions` property like this:
 
-
-const connectors = connectorsForWallets(
-  [
-    {
-      groupName: 'Recommended',
-      wallets: [uxuyWallet, rainbowWallet, walletConnectWallet],
+```js
+export default tseslint.config({
+  languageOptions: {
+    // other options...
+    parserOptions: {
+      project: ['./tsconfig.node.json', './tsconfig.app.json'],
+      tsconfigRootDir: import.meta.dirname,
     },
-  ],
-  {
-    appName: 'test demo',
-    projectId: 'YOUR_PROJECT_ID',
-  }
-);
-
-const config = createConfig({
-  // use rainbowkit wallets
-  connectors,
-
-  // only use wagmin connectors
-  // connectors:[uxuyWalletConnector, injected()],
-  chains: chains,
-  // https://wagmi.sh/react/api/transports
-  transports: {
-    [mainnet.id]: http("<YOUR_RPC_URL>")
-  }
-});
-
-
+  },
+})
 ```
 
+- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
+- Optionally add `...tseslint.configs.stylisticTypeChecked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
 
-## use wagmi
+```js
+// eslint.config.js
+import react from 'eslint-plugin-react'
 
-uxuyWallet is a wallet that integrates with the UXUY Wallet SDK. It allows users to connect their UXUY Wallet to the dApp.
-
-[uxuyWalletConnector](/src/wallets/uxuyWallet.ts)
-``` ts 
-
-import { createConnector, Connector, createConfig, http } from "wagmi"
-import { injected } from 'wagmi/connectors';
-
-
-const logoUrl = "<app-logo-url>"
-
-export const uxuyWalletConnector = createConnector((config) => {
-    const sdk = new WalletTgSdk()
-    return {
-        ...injected(
-            {
-                shimDisconnect: false,
-                target: () => ({
-                    id: "uxuyWallet",
-                    name: "UXUY Wallet",
-                    icon: logoUrl,
-                    provider: sdk.ethereum as EIP1193Provider,
-                })
-            }
-        )(config)
-    }
+export default tseslint.config({
+  // Set the react version
+  settings: { react: { version: '18.3' } },
+  plugins: {
+    // Add the react plugin
+    react,
+  },
+  rules: {
+    // other rules...
+    // Enable its recommended rules
+    ...react.configs.recommended.rules,
+    ...react.configs['jsx-runtime'].rules,
+  },
 })
-
-const config = createConfig({
-  connectors:[uxuyWalletConnector, injected()],
-  chains: [
-    mainnet,
-    polygon,
-    optimism,
-    arbitrum,
-    base,
-  ],
-  // https://wagmi.sh/react/api/transports
-  transports: {
-    [mainnet.id]: http("<YOUR_RPC_URL>"),
-    [polygon.id]: http("<YOUR_RPC_URL>"),
-    [optimism.id]: http("<YOUR_RPC_URL>"),
-    [arbitrum.id]: http("<YOUR_RPC_URL>"),
-    [base.id]: http("<YOUR_RPC_URL>"),
-  }
-});
-
 ```
