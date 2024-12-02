@@ -1,34 +1,91 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Memecoin, NewMeme } from "../types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { MemeForm } from "@/components/home/MemeForm";
+import Uploady from "@rpldy/uploady";
 
+interface DynamicComponent {
+  bgColor: string;
+  text: string;
+}
 
 const initialMemecoins: Memecoin[] = [
   {
-    image: "https://via.placeholder.com/50", // Replace with actual image URLs
+    image: "https://via.placeholder.com/200", // Replace with actual image URLs
     name: "DogeCoin",
     address: "0x0000000000000000000000000000000000000000",
     creator: "0x0000000000000000000000000000000000000001",
     time: "2013-12-06",
-    description: "A popular meme coin",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
     marketCap: "$10 Billion", // Add marketCap here
   },
   {
-    image: "https://via.placeholder.com/50",
+    image: "https://via.placeholder.com/200",
     name: "Shiba Inu",
     address: "0x0000000000000000000000000000000000000001",
     creator: "0x0000000000000000000000000000000000000002",
     time: "2020-08-01",
-    description: "A dog-themed cryptocurrency",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
     marketCap: "$5 Billion", // Add marketCap here
   },
   {
-    image: "https://via.placeholder.com/50",
+    image: "https://via.placeholder.com/200",
     name: "Pepe",
     address: "0x0000000000000000000000000000000000000002",
     creator: "0x0000000000000000000000000000000000000003",
     time: "2023-04-20",
-    description: "Pepe meme-based coin",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
+    marketCap: "$1 Billion", // Add marketCap here
+  },
+  {
+    image: "https://via.placeholder.com/200",
+    name: "Pepe",
+    address: "0x0000000000000000000000000000000000000002",
+    creator: "0x0000000000000000000000000000000000000003",
+    time: "2023-04-20",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
+    marketCap: "$1 Billion", // Add marketCap here
+  },
+  {
+    image: "https://via.placeholder.com/200",
+    name: "Pepe",
+    address: "0x0000000000000000000000000000000000000002",
+    creator: "0x0000000000000000000000000000000000000003",
+    time: "2023-04-20",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
+    marketCap: "$1 Billion", // Add marketCap here
+  },
+  {
+    image: "https://via.placeholder.com/200",
+    name: "Pepe",
+    address: "0x0000000000000000000000000000000000000002",
+    creator: "0x0000000000000000000000000000000000000003",
+    time: "2023-04-20",
+    description:
+      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
     marketCap: "$1 Billion", // Add marketCap here
   },
 ];
@@ -42,7 +99,19 @@ const Home: React.FC = () => {
     description: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const [component1, setComponent1] = useState<DynamicComponent>({
+    bgColor: "bg-gray-200",
+    text: "[Address] bought BNB amount of [Token]",
+  });
+
+  const [component2, setComponent2] = useState<DynamicComponent>({
+    bgColor: "bg-gray-200",
+    text: "[Address] created [Token] on [Date]",
+  });
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     setNewMeme((prev) => ({ ...prev, [name]: value }));
   };
@@ -65,55 +134,128 @@ const Home: React.FC = () => {
     }
   };
 
+  const getRandomColor = (): string =>
+    `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+
+  const randomAddress = (): string =>
+    `0x${Math.random().toString(36).substring(2, 10)}`;
+  const randomToken = (): string => `Token-${Math.floor(Math.random() * 100)}`;
+  const randomAmount = (): string => (Math.random() * 10).toFixed(2);
+  const randomDate = (): string =>
+    new Date(
+      Date.now() - Math.floor(Math.random() * 10000000000),
+    ).toLocaleDateString();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setComponent1({
+        bgColor: getRandomColor(),
+        text: `${randomAddress()} bought ${randomAmount()} BNB of ${randomToken()}`,
+      });
+      setComponent2({
+        bgColor: getRandomColor(),
+        text: `${randomAddress()} created ${randomToken()} on ${randomDate()}`,
+      });
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="min-h-screen p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Memes</h1>
-      <div className="flex justify-between max-w-4xl mx-auto mb-4">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700"
-        >
-          Create Meme
-        </button>
+    <div className="min-h-screen p-6 ">
+      <div className="flex w-full max-w-3xl items-center m-auto h-12 space-x-2">
+        <Input type="text" placeholder="Search meme" className="h-full" />
+        <Button type="submit" variant="secondary" className="h-full w-52">
+          Search
+        </Button>
       </div>
-      <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
-        <table className="min-w-full text-left border-collapse text-black">
-          <thead className="bg-gray-200">
-            <tr>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Image</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Name</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Creator</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Created</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Description</th>
-              <th className="px-6 py-3 text-sm font-medium text-gray-900">Market Cap</th> {/* Added Market Cap column */}
-            </tr>
-          </thead>
-          <tbody>
-            {memecoins.map((coin, index) => (
-              <tr
-                key={index}
-                className={`border-b ${
-                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
-                }`}
-              >
-                <td className="px-6 py-4">
-                  <img
-                    src={coin.image}
-                    alt={coin.name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                </td>
-                <Link to={`/coin/${coin.address}`}>
-                  <td className="px-6 py-4 text-teal-500 font-bold">{coin.name}</td>
-                </Link>
-                <td className="px-6 py-4">{`${coin.creator.slice(0, 5)}...${coin.creator.slice(-4)}`}</td>
-                <td className="px-6 py-4">{coin.time}</td>
-                <td className="px-6 py-4">{coin.description}</td> {/* Display description */}
-                <td className="px-6 py-4 text-green-500 font-semibold">{coin.marketCap}</td> {/* Display Market Cap */}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+
+      <div className="flex flex-col lg:flex-row items-center gap-5  my-8 w-full justify-center">
+        <div
+          className="p-2 rounded-md text-sm text-black"
+          style={{ backgroundColor: component1.bgColor }}
+        >
+          {component1.text}
+        </div>
+        <div
+          className="p-2 rounded-md text-sm text-black"
+          style={{ backgroundColor: component2.bgColor }}
+        >
+          {component2.text}
+        </div>
+      </div>
+      <div className="flex justify-between max-w-4xl mx-auto mb-4"></div>
+      <div className="w-full h-auto mb-3 flex justify-between">
+        <Uploady
+          multiple
+          grouped
+          maxGroupSize={2}
+          method="PUT"
+          destination={{
+            url: "https://my-server",
+            headers: { "x-custom": "123" },
+          }}
+        >
+          <MemeForm />
+        </Uploady>
+        <Select defaultValue="date">
+          <SelectTrigger className="w-[180px] ">Sort</SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="date" className="cursor-pointer">
+                Date
+              </SelectItem>
+              <SelectItem value="trade" className="cursor-pointer">
+                Trade
+              </SelectItem>
+              <SelectItem value="marketcap" className="cursor-pointer">
+                Market cap
+              </SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
+        {memecoins.map((coin, index) => (
+          <Card className="w-full max-w-[400px]">
+            <CardHeader>
+              <CardTitle className="text-sm flex justify-between items-center">
+                <div className="flex gap-2">
+                  <p className="text-gray-500">By: </p>
+                  <p className="">0x00 </p>
+                </div>
+
+                <p className="text-gray-500 text-sm">8 days ago </p>
+              </CardTitle>
+              {/* <CardDescription className="h-56"></CardDescription> */}
+            </CardHeader>
+            <CardContent>
+              <img
+                src={coin.image}
+                alt={coin.name}
+                className="w-full h-full rounded-xl"
+              />
+            </CardContent>
+            <CardDescription className=" px-6 flex flex-col gap-3">
+              <div className="flex items-center justify-between w-full">
+                <h4 className="font-semibold">{coin.name}</h4>
+                <span className="text-primary font-semibold text-md">
+                  {coin.marketCap}
+                </span>
+              </div>
+              <div className="  w-full">
+                {coin.description.substring(0, 100)}
+                {"   "}
+                {coin.description.length > 100 && (
+                  <span className="font-semibold hover:underline cursor-pointer ">
+                    More...
+                  </span>
+                )}
+              </div>
+            </CardDescription>
+            <CardFooter className="flex justify-between"></CardFooter>
+          </Card>
+        ))}
       </div>
 
       {/* Modal */}

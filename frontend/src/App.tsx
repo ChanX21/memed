@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Navbar from "@/components/shared/Navbar";
 import Home from "./pages/Home";
 import CoinDetailPage from "./pages/Coin";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -15,15 +16,17 @@ const App: React.FC = () => {
     };
   }, []);
   return (
-    <Router>
-      <Navbar />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/coin/:id" element={<CoinDetailPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      <Router>
+        <Navbar />
+        <div className=" ">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/coin/:id" element={<CoinDetailPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 };
 
