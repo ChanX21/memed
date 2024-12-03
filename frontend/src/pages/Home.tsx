@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
+import { Link } from "react-router-dom";
 
 interface DynamicComponent {
   bgColor: string;
@@ -217,44 +218,47 @@ const Home: React.FC = () => {
       </div>
       <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
         {memecoins.map((coin, index) => (
-          <Card className="w-full max-w-[400px]">
-            <CardHeader>
-              <CardTitle className="text-sm flex justify-between items-center">
-                <div className="flex gap-2">
-                  <p className="text-gray-500">By: </p>
-                  <p className="">0x00 </p>
-                </div>
+          <Link to={`coin/${coin.address}`}>
+            {" "}
+            <Card className="w-full max-w-[400px]">
+              <CardHeader>
+                <CardTitle className="text-sm flex justify-between items-center">
+                  <div className="flex gap-2">
+                    <p className="text-gray-500">By: </p>
+                    <p className="">0x00 </p>
+                  </div>
 
-                <p className="text-gray-500 text-sm">8 days ago </p>
-              </CardTitle>
-              {/* <CardDescription className="h-56"></CardDescription> */}
-            </CardHeader>
-            <CardContent>
-              <img
-                src={coin.image}
-                alt={coin.name}
-                className="w-full h-full rounded-xl"
-              />
-            </CardContent>
-            <CardDescription className=" px-6 flex flex-col gap-3">
-              <div className="flex items-center justify-between w-full">
-                <h4 className="font-semibold">{coin.name}</h4>
-                <span className="text-primary font-semibold text-md">
-                  {coin.marketCap}
-                </span>
-              </div>
-              <div className="  w-full">
-                {coin.description.substring(0, 100)}
-                {"   "}
-                {coin.description.length > 100 && (
-                  <span className="font-semibold hover:underline cursor-pointer ">
-                    More...
+                  <p className="text-gray-500 text-sm">8 days ago </p>
+                </CardTitle>
+                {/* <CardDescription className="h-56"></CardDescription> */}
+              </CardHeader>
+              <CardContent>
+                <img
+                  src={coin.image}
+                  alt={coin.name}
+                  className="w-full h-full rounded-xl"
+                />
+              </CardContent>
+              <CardDescription className=" px-6 flex flex-col gap-3">
+                <div className="flex items-center justify-between w-full">
+                  <h4 className="font-semibold">{coin.name}</h4>
+                  <span className="text-primary font-semibold text-md">
+                    {coin.marketCap}
                   </span>
-                )}
-              </div>
-            </CardDescription>
-            <CardFooter className="flex justify-between"></CardFooter>
-          </Card>
+                </div>
+                <div className="  w-full">
+                  {coin.description.substring(0, 100)}
+                  {"   "}
+                  {coin.description.length > 100 && (
+                    <span className="font-semibold hover:underline cursor-pointer ">
+                      More...
+                    </span>
+                  )}
+                </div>
+              </CardDescription>
+              <CardFooter className="flex justify-between"></CardFooter>
+            </Card>
+          </Link>
         ))}
       </div>
 
