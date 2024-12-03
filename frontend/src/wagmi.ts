@@ -1,7 +1,7 @@
 import { createConfig, http } from "wagmi";
 import { Chain } from "@rainbow-me/rainbowkit";
 
-import { opBNB, opBNBTestnet } from "wagmi/chains";
+import { bsc, bscTestnet } from "wagmi/chains";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 
@@ -11,7 +11,7 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { uxuyWallet } from "./wallets/uxuyWallet";
 
-const chains: readonly [Chain, ...Chain[]] = [opBNB, opBNBTestnet];
+const chains: readonly [Chain, ...Chain[]] = [bsc, bscTestnet];
 
 const connectors = connectorsForWallets(
   [
@@ -37,7 +37,7 @@ export const config = createConfig({
 
   // https://wagmi.sh/react/api/transports
   transports: {
-    [opBNB.id]: http("<YOUR_RPC_URL>"),
-    [opBNBTestnet.id]: http("<YOUR_RPC_URL>"),
+    [bsc.id]: http("<YOUR_RPC_URL>"),
+    [bscTestnet.id]: http("<YOUR_RPC_URL>"),
   },
 });
