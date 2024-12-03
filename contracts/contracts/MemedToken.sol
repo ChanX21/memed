@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract MemedToken is ERC20, Ownable {
     constructor(string memory _name, string memory _ticker)
         ERC20(_name, _ticker)
+        Ownable(msg.sender)
     {}
 
     function mint(uint256 _amount) public onlyOwner {
