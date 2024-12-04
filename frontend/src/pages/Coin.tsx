@@ -1,4 +1,3 @@
-import { CoinForms } from "@/components/coin/forms/form";
 import React, { useState } from "react";
 
 import {
@@ -16,6 +15,7 @@ import { Separator } from "@radix-ui/react-separator";
 import { MobileForm } from "@/components/coin/forms/mobileForm";
 import TradingViewWidget from "@/components/coin/TradingViewWidget";
 import Thread from "@/components/coin/thread";
+import { TradeForm } from "@/components/coin/forms/tradeForm";
 
 const CoinDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
@@ -61,7 +61,7 @@ const CoinDetailPage: React.FC = () => {
               <TradingViewWidget />
             </div>
             <div className=" h-full hidden lg:block col-span-2 ">
-              <CoinForms />
+              <TradeForm />
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ const CoinDetailPage: React.FC = () => {
 
         {/* Coin Details */}
         <div className="p-6 ">
-          <Tabs defaultValue="thread" className="w-full">
+          <Tabs defaultValue="about" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="about">About</TabsTrigger>
               <TabsTrigger value="trades">Trades</TabsTrigger>
