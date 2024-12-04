@@ -11,7 +11,7 @@ const CoinInfo: React.FC<Props> = ({ title, onClick }) => {
       <div className="col-span-1 h-auto max-h-[400px] place-items-center ">
         <img src="/assets/meme.jpeg" className="w-auto h-full" />
       </div>
-      <div className=" lg:col-span-2 h-auto   ">
+      <div className=" lg:col-span-2 h-auto  pb-10 ">
         <p>
           Prime Coin is a pioneering cryptocurrency tailored for people who
           embody strength, ambition, and unrelenting drive. Prime Coin is not
