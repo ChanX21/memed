@@ -12,12 +12,16 @@
   },
   "dependencies": {
     "@custom-react-hooks/all": "^1.5.1",
+    "@hookform/resolvers": "^3.9.1",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tabs": "^1.1.1",
+    "@radix-ui/react-toast": "^1.2.2",
+    "@radix-ui/react-tooltip": "^1.1.4",
     "@rainbow-me/rainbowkit": "^2.2.0",
     "@rainbow-me/rainbowkit-siwe-next-auth": "^0.5.0",
     "@rpldy/upload-preview": "^1.8.3",
@@ -31,6 +35,8 @@
     "lucide-react": "^0.462.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.2",
+    "react-icons": "^5.4.0",
     "react-router-dom": "^7.0.1",
     "siwe": "^2.3.2",
     "tailwind-merge": "^2.5.5",
@@ -38,7 +44,8 @@
     "util": "^0.12.5",
     "vaul": "^1.1.1",
     "viem": "^2.21.53",
-    "wagmi": "^2.13.3"
+    "wagmi": "^2.13.3",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

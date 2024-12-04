@@ -1,7 +1,5 @@
-import { CoinForms } from "@/components/coin/form";
 import React, { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,13 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CoinInfo from "@/components/coin/coinInfo";
 import { Separator } from "@radix-ui/react-separator";
-import { MobileForm } from "@/components/coin/mobileForm";
+import { MobileForm } from "@/components/coin/forms/mobileForm";
 import TradingViewWidget from "@/components/coin/TradingViewWidget";
+import Thread from "@/components/coin/thread";
+import { TradeForm } from "@/components/coin/forms/tradeForm";
 
 const CoinDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
@@ -62,7 +61,7 @@ const CoinDetailPage: React.FC = () => {
               <TradingViewWidget />
             </div>
             <div className=" h-full hidden lg:block col-span-2 ">
-              <CoinForms />
+              <TradeForm />
             </div>
           </div>
         </div>
@@ -112,21 +111,7 @@ const CoinDetailPage: React.FC = () => {
               </Card>
             </TabsContent>
             <TabsContent value="thread">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-2xl">Dogecoin</CardTitle>
-                  <CardDescription className="flex gap-3">
-                    <p>
-                      <span>By: </span>
-                      <span>0x00 </span>
-                    </p>
-                    <p> 3 days ago.</p>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <CoinInfo />
-                </CardContent>
-              </Card>
+              <Thread />
             </TabsContent>
           </Tabs>
         </div>
