@@ -22,7 +22,7 @@ router.post('/upload', fileMiddleware, async (req, res) => {
     const uploadResponse = await pinata.upload.file(file);
     await fs.unlink(filePath);
 
-    res.status(200).json({ success: true, url: `https://${process.env.PINATA_GATEWAY}/ipfs/${uploadResponse.IpfsHash}` });
+    res.status(200).json({ success: true, ipfsHash: uploadResponse.IpfsHash });
 
 });
 
