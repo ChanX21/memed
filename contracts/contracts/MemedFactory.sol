@@ -11,10 +11,10 @@ contract Factory is Ownable {
         IUniswapV2Factory(address(0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc));
     IUniswapV2Router01 router =
         IUniswapV2Router01(address(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3));
-    uint256 public constant maxSupply = (10**9) * 10**18;
+    uint256 public constant maxSupply = (10 ** 9) * 10 ** 18;
     uint256 public constant k = 46875;
     uint256 public constant offset = 18750000000000000000000000000000;
-    uint256 public constant SCALING_FACTOR = 10**18;
+    uint256 public constant SCALING_FACTOR = 10 ** 18;
     uint256 public graduationAmount = 30 ether;
     uint256 public constant creationFee = 0.002 ether;
     uint256 public constant tradeFeePercent = 10;
@@ -34,6 +34,20 @@ contract Factory is Ownable {
         address owner;
         TokenStages stage;
         uint256 collateral;
+        uint createdAt;
+    }
+
+    struct AllTokenData {
+        address token;
+        string name;
+        string ticker;
+        string description;
+        string image;
+        address owner;
+        TokenStages stage;
+        uint256 collateral;
+        uint supply;
+        uint createdAt;
     }
 
     mapping(address => TokenData) public tokenData;
@@ -46,7 +60,8 @@ contract Factory is Ownable {
         string name,
         string ticker,
         string description,
-        string image
+        string image,
+        uint createdAt
     );
     event TokensBought(
         address indexed token,
@@ -90,7 +105,8 @@ contract Factory is Ownable {
             image: _image,
             owner: msg.sender,
             stage: TokenStages.BOUNDING_CURVE,
-            collateral: 0
+            collateral: 0,
+            createdAt: block.timestamp
         });
         tokens.push(address(token));
         token.mint((maxSupply * 20) / 100);
@@ -101,7 +117,8 @@ contract Factory is Ownable {
             _name,
             _ticker,
             _description,
-            _image
+            _image,
+            block.timestamp
         );
     }
 
@@ -211,11 +228,10 @@ contract Factory is Ownable {
         payable(owner()).transfer(fees);
     }
 
-    function getBNBAmount(address _token, uint256 _amount)
-        public
-        view
-        returns (uint256[3] memory)
-    {
+    function getBNBAmount(
+        address _token,
+        uint256 _amount
+    ) public view returns (uint256[3] memory) {
         MemedToken token = MemedToken(_token);
         uint256 currentSupply = token.totalSupply();
         uint256 newSupply = currentSupply + _amount;
@@ -223,6 +239,28 @@ contract Factory is Ownable {
         uint256 result = ((_amount * f_b) / SCALING_FACTOR);
         uint256 fee = (result * tradeFeePercent) / 10000;
         return [result + fee, result, fee];
+    }
+
+    function getTokens(address _token) external view returns (AllTokenData[] memory) {
+        uint length = _token != address(0) ? 1 : tokens.length;
+        AllTokenData[] memory allTokens = new AllTokenData[](length);
+        for (uint256 i = 0; i < length; i++) {
+        address tokenAddress = _token != address(0) ? _token : tokens[i];
+        MemedToken token = MemedToken(tokenAddress);
+        allTokens[i] = AllTokenData({
+            token: tokenAddress,
+            supply: token.totalSupply(),
+            name: tokenData[tokenAddress].name,
+            ticker: tokenData[tokenAddress].ticker,
+            description: tokenData[tokenAddress].description,
+            image: tokenData[tokenAddress].image,
+            owner: tokenData[tokenAddress].owner,
+            stage: tokenData[tokenAddress].stage,
+            collateral: tokenData[tokenAddress].collateral,
+            createdAt: tokenData[tokenAddress].createdAt
+        });
+        }
+        return allTokens;
     }
 
     receive() external payable {}

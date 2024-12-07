@@ -38,6 +38,6 @@ export const config = createConfig({
   // https://wagmi.sh/react/api/transports
   transports: {
     [bsc.id]: http("<YOUR_RPC_URL>"),
-    [bscTestnet.id]: http("<YOUR_RPC_URL>"),
+    [bscTestnet.id]: http("https://bsc-testnet.blockpi.network/v1/rpc/public"),
   },
 });

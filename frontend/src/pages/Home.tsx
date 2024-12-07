@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Memecoin, NewMeme } from "../types";
+import { TokenData } from "../types";
 import {
   Card,
   CardContent,
@@ -22,82 +22,23 @@ import { Input } from "@/components/ui/input";
 import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
 import { Link } from "react-router-dom";
+import { useReadContract } from "wagmi";
+import config from '@/config.json';
+import { formatDistanceToNow } from "date-fns";
 
 interface DynamicComponent {
   bgColor: string;
   text: string;
 }
 
-const initialMemecoins: Memecoin[] = [
-  {
-    image: "https://via.placeholder.com/200", // Replace with actual image URLs
-    name: "DogeCoin",
-    address: "0x0000000000000000000000000000000000000000",
-    creator: "0x0000000000000000000000000000000000000001",
-    time: "2013-12-06",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$10 Billion", // Add marketCap here
-  },
-  {
-    image: "https://via.placeholder.com/200",
-    name: "Shiba Inu",
-    address: "0x0000000000000000000000000000000000000001",
-    creator: "0x0000000000000000000000000000000000000002",
-    time: "2020-08-01",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$5 Billion", // Add marketCap here
-  },
-  {
-    image: "https://via.placeholder.com/200",
-    name: "Pepe",
-    address: "0x0000000000000000000000000000000000000002",
-    creator: "0x0000000000000000000000000000000000000003",
-    time: "2023-04-20",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$1 Billion", // Add marketCap here
-  },
-  {
-    image: "https://via.placeholder.com/200",
-    name: "Pepe",
-    address: "0x0000000000000000000000000000000000000002",
-    creator: "0x0000000000000000000000000000000000000003",
-    time: "2023-04-20",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$1 Billion", // Add marketCap here
-  },
-  {
-    image: "https://via.placeholder.com/200",
-    name: "Pepe",
-    address: "0x0000000000000000000000000000000000000002",
-    creator: "0x0000000000000000000000000000000000000003",
-    time: "2023-04-20",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$1 Billion", // Add marketCap here
-  },
-  {
-    image: "https://via.placeholder.com/200",
-    name: "Pepe",
-    address: "0x0000000000000000000000000000000000000002",
-    creator: "0x0000000000000000000000000000000000000003",
-    time: "2023-04-20",
-    description:
-      "This NFT, titled Ethereal Horizon is a visually stunning digital artwork capturing the serene beauty of a futuristic landscape.",
-    marketCap: "$1 Billion", // Add marketCap here
-  },
-];
+
 
 const Home: React.FC = () => {
-  const [memecoins, setMemecoins] = useState<Memecoin[]>(initialMemecoins);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newMeme, setNewMeme] = useState<NewMeme>({
-    image: "",
-    name: "",
-    description: "",
+  const { data: memecoins }: { data: TokenData[] | undefined } = useReadContract({
+    abi: config.abi,
+    address: config.address as `0x${string}`,
+    functionName: "getTokens",
+    args: ['0x0000000000000000000000000000000000000000']
   });
 
   const [component1, setComponent1] = useState<DynamicComponent>({
@@ -110,30 +51,6 @@ const Home: React.FC = () => {
     text: "[Address] created [Token] on [Date]",
   });
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    const { name, value } = e.target;
-    setNewMeme((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewMeme((prev) => ({ ...prev, image: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleAddMeme = () => {
-    if (newMeme.image && newMeme.name && newMeme.description) {
-      setIsModalOpen(false);
-      setNewMeme({ image: "", name: "", description: "" });
-    }
-  };
 
   const getRandomColor = (): string =>
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -217,24 +134,24 @@ const Home: React.FC = () => {
         </Select>
       </div>
       <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
-        {memecoins.map((coin, index) => (
-          <Link to={`coin/${coin.address}`}>
+        {memecoins&&memecoins.map((coin, index) => (
+          <Link to={`coin/${coin.token}`}>
             {" "}
             <Card className="w-full max-w-[400px]">
               <CardHeader>
                 <CardTitle className="text-sm flex justify-between items-center">
                   <div className="flex gap-2">
                     <p className="text-gray-500">By: </p>
-                    <p className="">0x00 </p>
+                    <p className="">{`${coin.owner.slice(0,4)}...${coin.owner.slice(-4)}`} </p>
                   </div>
 
-                  <p className="text-gray-500 text-sm">8 days ago </p>
+                  <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(parseInt(coin.createdAt.toString()) * 1000), { addSuffix: true })}</p>
                 </CardTitle>
                 {/* <CardDescription className="h-56"></CardDescription> */}
               </CardHeader>
               <CardContent>
                 <img
-                  src={coin.image}
+                  src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY+coin.image}
                   alt={coin.name}
                   className="w-full h-full rounded-xl"
                 />
@@ -243,7 +160,7 @@ const Home: React.FC = () => {
                 <div className="flex items-center justify-between w-full">
                   <h4 className="font-semibold">{coin.name}</h4>
                   <span className="text-primary font-semibold text-md">
-                    {coin.marketCap}
+                    ${(coin.collateral * (coin.supply - 200_000_000n) * 700n).toString()}
                   </span>
                 </div>
                 <div className="  w-full">
@@ -261,52 +178,6 @@ const Home: React.FC = () => {
           </Link>
         ))}
       </div>
-
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-black p-6 rounded-md shadow-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Create Memecoin</h2>
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={newMeme.name}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-4 border rounded-md bg-blue-700"
-            />
-            <input
-              type="file"
-              name="image"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full p-2 mb-4 border rounded-md bg-blue-700"
-            />
-            <textarea
-              name="description"
-              placeholder="Description"
-              value={newMeme.description}
-              onChange={handleInputChange}
-              className="w-full p-2 mb-4 border rounded-md bg-blue-700"
-              rows={4}
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 mr-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleAddMeme}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,15 +1,18 @@
-export type Memecoin = {
-    image: string;
+enum TokenStages {
+    NOT_CREATED,
+    BOUNDING_CURVE,
+    GRADUATED,
+  }
+export interface TokenData {
+    token: string;
     name: string;
-    address: string;
-    creator: string;
-    time: string;
-    description: string;
-    marketCap: string;
-};
-
-export type NewMeme = {
-    name: string;
+    ticker: string;
     description: string;
     image: string;
-}
+    owner: string;
+    stage: TokenStages;
+    collateral: bigint;
+    supply: bigint;
+    createdAt: number;
+  }
+  

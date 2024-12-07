@@ -1,6 +1,7 @@
 import * as React from "react";
-
 import { cn } from "@/lib/utils";
+import { useReadContract, useWriteContract } from "wagmi";
+import config from "@/config.json";
 import { useMediaQuery } from "@custom-react-hooks/use-media-query";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,107 +24,169 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "../ui/textarea";
-import {
-  useUploady,
-  useItemFinishListener,
-  useItemProgressListener,
-} from "@rpldy/uploady";
+import { Textarea } from "@/components/ui/textarea";
+import { useUploady, useItemFinishListener } from "@rpldy/uploady";
 import UploadPreview from "@rpldy/upload-preview";
+import { formatEther } from "ethers";
 
 export function MemeForm() {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="default">Create Meme</Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Create Meme</DialogTitle>
-            <DialogDescription>
-              Provide informations required to create your meme.
-            </DialogDescription>
-          </DialogHeader>
-          <ProfileForm />
-        </DialogContent>
-      </Dialog>
-    );
-  }
+  const FormWrapper = isDesktop ? Dialog : Drawer;
+  const FormTrigger = isDesktop ? DialogTrigger : DrawerTrigger;
+  const FormContent = isDesktop ? DialogContent : DrawerContent;
+  const FormHeader = isDesktop ? DialogHeader : DrawerHeader;
+  const FormTitle = isDesktop ? DialogTitle : DrawerTitle;
+  const FormDescription = isDesktop ? DialogDescription : DrawerDescription;
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+    <FormWrapper open={open} onOpenChange={setOpen}>
+      <FormTrigger asChild>
         <Button variant="default">Create Meme</Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <DrawerHeader className="text-left">
-          <DrawerTitle> Create Meme</DrawerTitle>
-          <DrawerDescription>
-            Provide informations required to create your meme.
-          </DrawerDescription>
-        </DrawerHeader>
-        <ProfileForm className="px-4" />
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
+      </FormTrigger>
+      <FormContent className="sm:max-w-[425px]">
+        <FormHeader>
+          <FormTitle>Create Meme</FormTitle>
+          <FormDescription>Provide information to create your meme.</FormDescription>
+        </FormHeader>
+        <ProfileForm />
+        {!isDesktop && (
+          <DrawerFooter>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        )}
+      </FormContent>
+    </FormWrapper>
   );
 }
 
 function ProfileForm({ className }: React.ComponentProps<"form">) {
-  const uploady = useUploady();
-  const startUpload = () => {
-    uploady.showFileUpload();
+  const [name, setName] = React.useState("");
+  const [ticker, setTicker] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [imageFile, setImageFile] = React.useState<File | null>(null);
+  const [imageUrl, setImageUrl] = React.useState("");
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const { writeContractAsync: mintFunction } = useWriteContract();
+  const { data: bnbCost } = useReadContract({
+    abi: config.abi,
+    address: config.address as `0x${string}`,
+    functionName: "creationFee",
+  });
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) setImageFile(file);
   };
 
-  useItemFinishListener((item) => {
-    console.log(
-      `item ${item.id} finished uploading, response was: `,
-      item.uploadResponse,
-      item.uploadStatus,
-    );
-  });
+  const uploadImage = async () => {
+    if (!imageFile) {
+      alert("Please select an image first!");
+      return;
+    }
 
-  useItemProgressListener((item) => {
-    console.log(
-      `>>>>> (hook) File ${item.file.name} completed: ${item.completed}`,
-    );
-  });
+    setIsUploading(true);
+
+    const formData = new FormData();
+    formData.append("image", imageFile);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND}upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Image upload failed!");
+
+      const data = await response.json();
+      setImageUrl(data.ipfsHash);
+    } catch (error) {
+      console.error(error);
+      alert("Failed to upload image.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const mint = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!name || !ticker || !imageUrl) {
+      alert("All fields including image upload are required!");
+      return;
+    }
+
+    try {
+      await mintFunction({
+        abi: config.abi,
+        address: config.address as `0x${string}`,
+        functionName: "createMeme",
+        args: [name, ticker, description, imageUrl],
+        value: BigInt(bnbCost?.toString() || "0"),
+      });
+      alert("Meme created successfully!");
+    } catch (error) {
+      console.error("Minting failed:", error);
+    }
+  };
+
   return (
-    <form className={cn("grid items-start gap-4", className)}>
+    <form className={cn("grid items-start gap-4", className)} onSubmit={mint}>
       <div className="grid gap-2">
         <Label htmlFor="name">Name</Label>
-        <Input type="text" id="name" />
+        <Input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="name">Ticker</Label>
-        <Input type="text" id="name" />
+        <Label htmlFor="ticker">Ticker</Label>
+        <Input
+          type="text"
+          id="ticker"
+          value={ticker}
+          onChange={(e) => setTicker(e.target.value)}
+        />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea id="description" />
+        <Textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
         <p className="text-sm text-muted-foreground">
           Short description about your meme.
         </p>
       </div>
       <div className="grid gap-2">
-        <Button type="button" variant="outline" onClick={startUpload}>
-          {" "}
-          Upload{" "}
-        </Button>
-        <p className="text-sm text-muted-foreground">
-          Select an image for your meme .
-        </p>
-        <UploadPreview fallbackUrl="https://icon-library.net/images/image-placeholder-icon/image-placeholder-icon-6.jpg" />
+        <Label htmlFor="image">Upload Image</Label>
+        <Input type="file" id="image" accept="image/*" onChange={handleImageChange} />
+        {imageUrl.length==0&&<Button
+          type="button"
+          variant="outline"
+          onClick={uploadImage}
+          disabled={isUploading}
+        >
+          {isUploading ? "Uploading..." : "Upload"}
+        </Button>}
+        <p className="text-sm text-muted-foreground">Select an image for your meme.</p>
+        {imageUrl && (
+          <img src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY+imageUrl} alt="Uploaded Meme" className="w-32 h-32 object-cover" />
+        )}
       </div>
-      <Button type="submit">Create</Button>
+      <div className="text-gray-400 flex items-center gap-2 justify-between">
+        <p>Cost:</p>
+        <p>{formatEther(bnbCost?.toString() || "0")} BNB</p>
+      </div>
+      <Button type="submit" disabled={isUploading || !imageUrl}>
+        Create
+      </Button>
     </form>
   );
 }
