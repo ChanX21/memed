@@ -1,7 +1,7 @@
 import { createConfig, http } from "wagmi";
 import { Chain } from "@rainbow-me/rainbowkit";
 
-import { bsc, bscTestnet } from "wagmi/chains";
+import { bscTestnet } from "wagmi/chains";
 
 import { connectorsForWallets } from "@rainbow-me/rainbowkit";
 
@@ -11,7 +11,7 @@ import {
 } from "@rainbow-me/rainbowkit/wallets";
 import { uxuyWallet } from "./wallets/uxuyWallet";
 
-const chains: readonly [Chain, ...Chain[]] = [bsc, bscTestnet];
+const chains: readonly [Chain, ...Chain[]] = [bscTestnet];
 
 const connectors = connectorsForWallets(
   [
@@ -37,7 +37,6 @@ export const config = createConfig({
 
   // https://wagmi.sh/react/api/transports
   transports: {
-    [bsc.id]: http("<YOUR_RPC_URL>"),
     [bscTestnet.id]: http("https://bsc-testnet.blockpi.network/v1/rpc/public"),
   },
 });
