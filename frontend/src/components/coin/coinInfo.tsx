@@ -7,39 +7,23 @@ import {
 } from "@/components/ui/tooltip";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Progress } from "../ui/progress";
+import { formatEther, parseEther } from "ethers";
 
 interface Props {
-  title?: string;
-  onClick?: () => void;
+  supply: bigint;
+  description: string;
+  image: string;
 }
 
-const CoinInfo: React.FC<Props> = ({ title, onClick }) => {
+const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
   return (
     <>
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
         <div className="col-span-1 h-auto max-h-[400px] place-items-center ">
-          <img src="/assets/meme.jpeg" className="w-auto h-full" />
+          <img src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY+image} className="w-auto h-full" />
         </div>
         <div className=" lg:col-span-2 h-auto  pb-10 ">
-          <p>
-            Prime Coin is a pioneering cryptocurrency tailored for people who
-            embody strength, ambition, and unrelenting drive. Prime Coin is not
-            just a digital asset—it’s a symbol of resilience and a rallying call
-            for those who lead with purpose and embrace challenges head-on. At
-            its core, Prime Coin operates with a mission to empower its
-            community of holders by fostering strategic thinking and achieving
-            dynamic returns. The tokenomics are designed to reward discipline
-            and focus, offering benefits for long-term holding and meaningful
-            participation in the Prime ecosystem. Prime Coin thrives on the
-            principle of shared ambition and growth. It connects a global
-            network of like-minded people who view success as a journey of
-            striving and thriving. For those who believe in pushing boundaries,
-            setting new standards, and standing resilient in the face of
-            challenges, Prime Coin is more than just a cryptocurrency—it’s a
-            movement. It represents strength in action and leadership in motion.
-            This coin will rise to new heights... FIGURATIVELY and LITERALLY.
-            Together, let’s make Prime the currency of the future.
-          </p>
+          <p>{description}</p>
         </div>
       </div>
       {/* bonding curve progress */}
@@ -53,10 +37,10 @@ const CoinInfo: React.FC<Props> = ({ title, onClick }) => {
               </TooltipTrigger>
               <TooltipContent className="max-w-[300px] mr-3 bg-secondary">
                 <p className="text-gray-400">
-                  when the market cap reaches $0 (~0 sol), all the liquidity in
-                  the bonding curve will be deposited to raydium and burned.
+                  when the market cap reaches $21000 (~30 bnb), all the liquidity in
+                  the bonding curve will be deposited to pancakeswap and burned.
                   progression increases as more tokens are bought. The bonding
-                  curve still has 0 tokens available for sale.
+                  curve still has {(1_000_000_000n - BigInt(parseFloat(formatEther(supply.toString())))).toString()} tokens available for sale.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -65,7 +49,7 @@ const CoinInfo: React.FC<Props> = ({ title, onClick }) => {
 
         <Progress className="h-5 my-2 " value={33} />
         <p>
-          graduate this coin to raydium at $0 market cap there is 0 BNB in the
+          graduate this coin to pancakeswap at $21000 market cap there is 30 BNB in the
           bonding curve
         </p>
       </div>

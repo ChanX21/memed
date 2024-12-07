@@ -22,7 +22,7 @@ const App: React.FC = () => {
         <div className=" ">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/coin/:id" element={<CoinDetailPage />} />
+            <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
           </Routes>
         </div>
       </Router>

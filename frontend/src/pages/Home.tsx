@@ -25,6 +25,7 @@ import { Link } from "react-router-dom";
 import { useReadContract } from "wagmi";
 import config from '@/config.json';
 import { formatDistanceToNow } from "date-fns";
+import { formatEther, parseEther } from "ethers";
 
 interface DynamicComponent {
   bgColor: string;
@@ -160,7 +161,7 @@ const Home: React.FC = () => {
                 <div className="flex items-center justify-between w-full">
                   <h4 className="font-semibold">{coin.name}</h4>
                   <span className="text-primary font-semibold text-md">
-                    ${(coin.collateral * (coin.supply - 200_000_000n) * 700n).toString()}
+                    ${(coin.collateral * (BigInt(parseEther(formatEther(coin.supply)).toString()) - 200_000_000n) * 700n).toString()}
                   </span>
                 </div>
                 <div className="  w-full">
