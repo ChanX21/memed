@@ -53,7 +53,7 @@ const Thread: React.FC<Props> = ({ title, onClick }) => {
     <div className="pb-10">
       <ThreadForm />
 
-      {!error && data.length > 0 && (
+      {!error && data && data.length > 0 && (
         <div className="max-h-[100vh] overflow-y-auto flex flex-col gap-5">
           {data.map((comment: Comment, index: number) => (
             <Card key={index} className="w-full">
