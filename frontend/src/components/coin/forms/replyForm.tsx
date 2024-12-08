@@ -52,7 +52,7 @@ export function ReplyForm({
       text: data.reply,
       tokenAddress: tokenAddress || "",
       userAddress: address || "",
-      replyToId: commentId,
+      replyToId: commentId.toString(),
     };
 
     const formData = new FormData();
