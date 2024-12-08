@@ -21,12 +21,18 @@ import { useParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 
 const FormSchema = z.object({
-  comment: z.string().min(1, {
-    message: "comment cannot be empty",
+  reply: z.string().min(1, {
+    message: "reply cannot be empty",
   }),
 });
 
-export function ThreadForm() {
+export function ReplyForm({
+  setFocusedCommentId,
+  commentId,
+}: {
+  setFocusedCommentId: (state: null) => void;
+  commentId: number;
+}) {
   const { address } = useAccount();
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [isLoading, setIsLoading] = useState(false);
@@ -43,10 +49,10 @@ export function ThreadForm() {
     };
 
     const info: Info = {
-      text: data.comment,
+      text: data.reply,
       tokenAddress: tokenAddress || "",
       userAddress: address || "",
-      replyToId: "",
+      replyToId: commentId,
     };
 
     const formData = new FormData();
@@ -64,7 +70,7 @@ export function ThreadForm() {
         },
       );
 
-      if (!response.ok) throw new Error("Comment failed!");
+      if (!response.ok) throw new Error("Reply failed!");
 
       const data = await response.json();
     } catch (error) {
@@ -72,7 +78,7 @@ export function ThreadForm() {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "Comment submission failed.",
+        description: "Reply submission failed.",
       });
     } finally {
       setIsLoading(false);
@@ -87,24 +93,26 @@ export function ThreadForm() {
       >
         <FormField
           control={form.control}
-          name="comment"
+          name="reply"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Comment</FormLabel>
+              <FormLabel>Reply</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Make a comment..."
+                  placeholder="Write your reply..."
                   className="resize-none"
                   {...field}
                 />
               </FormControl>
-              <FormDescription>You can post a thread.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="w-full flex justify-end">
-          <Button type="submit">Post</Button>
+        <div className="mt-2 flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => setFocusedCommentId(null)}>
+            Cancel
+          </Button>
+          <Button type="submit">Reply</Button>
         </div>
       </form>
     </Form>
