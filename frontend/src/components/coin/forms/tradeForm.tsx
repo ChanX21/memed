@@ -19,8 +19,76 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useParams } from "react-router-dom";
+import { useReadContract, useWriteContract } from "wagmi";
+import { useState } from "react";
+import config from "@/config.json";
+import { useToast } from "@/hooks/use-toast";
 
 export function TradeForm() {
+  const { tokenAddress } = useParams<{ tokenAddress: string }>();
+  const [buyAmount, setBuyAmount] = useState<number | null>(null);
+  const [sellAmount, setSellAmount] = useState<number | null>(null);
+  const [tokenBuying, setTokenBuying] = useState(false);
+  const [tokenSelling, setTokenSelling] = useState(false);
+  const { toast } = useToast();
+
+  const { writeContractAsync: buyFunction } = useWriteContract();
+  const { writeContractAsync: sellFunction } = useWriteContract();
+  const { data: bnbCost } = useReadContract({
+    abi: config.abi,
+    address: config.address as `0x${string}`,
+    functionName: "creationFee",
+  });
+
+  const buy = async (e: React.FormEvent<HTMLFormElement>) => {
+    setTokenBuying(true);
+    try {
+      await buyFunction({
+        abi: config.abi,
+        address: config.address as `0x${string}`,
+        functionName: "buy",
+        args: [tokenAddress, buyAmount],
+        value: BigInt(bnbCost?.toString() || "0"),
+      });
+
+      toast({
+        description: "Token purchase completed successfully!",
+      });
+
+      setTokenBuying(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Token purchase failed.",
+      });
+      setTokenBuying(false);
+    }
+  };
+  const sell = async (e: React.FormEvent<HTMLFormElement>) => {
+    setTokenSelling(true);
+    try {
+      await sellFunction({
+        abi: config.abi,
+        address: config.address as `0x${string}`,
+        functionName: "sell",
+        args: [tokenAddress, sellAmount],
+      });
+
+      toast({
+        description: "Token sale completed successfully!",
+      });
+      setTokenSelling(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Token sale failed.",
+      });
+      setTokenSelling(false);
+    }
+  };
   return (
     <Tabs defaultValue="buy" className="w-full h-full ">
       <TabsList className="grid w-full grid-cols-2 h-[10%]">
@@ -71,33 +139,39 @@ export function TradeForm() {
               </Dialog>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 px-5 h-[50%] ">
-            <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
-              <p> Balance: </p>
-              <p> 0.00 BNB </p>
-            </div>
-            <div className="space-y-1 h-[50%] bg-gray-500 rounded-xl">
-              <Label
-                htmlFor="amount"
-                className=" h-[30%] text-gray-800 flex items-center p-3"
-              >
-                Amount ( BNB )
-              </Label>
-              <Input
-                id="amount"
-                placeholder="0.00"
-                className="h-[70%] text-3xl "
-              />
-            </div>
+          <form onSubmit={buy}>
+            <CardContent className="space-y-2 px-5 h-[50%] ">
+              <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
+                <p> Balance: </p>
+                <p> 0.00 BNB </p>
+              </div>
+              <div className="space-y-1 h-[50%] bg-gray-500 rounded-xl">
+                <Label
+                  htmlFor="amount"
+                  className=" h-[30%] text-gray-800 flex items-center p-3"
+                >
+                  Amount ( BNB )
+                </Label>
+                <Input
+                  id="amount"
+                  onChange={(e) => setBuyAmount(Number(e.target.value))}
+                  value={buyAmount || ""}
+                  placeholder="0.00"
+                  className="h-[70%] text-3xl "
+                />
+              </div>
 
-            <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
-              <p> Matching Dogecoin: </p>
-              <p> 0.00 </p>
-            </div>
-          </CardContent>
-          <CardFooter className="h-[20%]">
-            <Button className="w-full">Buy</Button>
-          </CardFooter>
+              <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
+                <p> Matching Dogecoin: </p>
+                <p> 0.00 </p>
+              </div>
+            </CardContent>
+            <CardFooter className="h-[20%]">
+              <Button disabled={tokenBuying} className="w-full">
+                Buy
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
       </TabsContent>
       <TabsContent value="sell" className="h-[90%]">
@@ -140,35 +214,43 @@ export function TradeForm() {
               </Dialog>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 px-5 h-[50%] ">
-            <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
-              <p> Balance: </p>
-              <p> 0.00 Dogecoin </p>
-            </div>
-            <div className="space-y-1 h-[60%] bg-gray-500 rounded-xl">
-              <Label
-                htmlFor="amount"
-                className=" h-[30%] text-gray-800 flex items-center p-3"
-              >
-                Amount ( Dogecoin )
-              </Label>
-              <Input
-                id="amount"
-                placeholder="0.00"
-                className="h-[70%] text-3xl "
-              />
-            </div>
+          <form onSubmit={buy}>
+            <CardContent className="space-y-2 px-5 h-[50%] ">
+              <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
+                <p> Balance: </p>
+                <p> 0.00 Dogecoin </p>
+              </div>
+              <div className="space-y-1 h-[60%] bg-gray-500 rounded-xl">
+                <Label
+                  htmlFor="amount"
+                  className=" h-[30%] text-gray-800 flex items-center p-3"
+                >
+                  Amount ( Dogecoin )
+                </Label>
+                <Input
+                  id="amount"
+                  placeholder="0.00"
+                  onChange={(e) => setSellAmount(Number(e.target.value))}
+                  value={sellAmount || ""}
+                  className="h-[70%] text-3xl "
+                />
+              </div>
 
-            <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
-              <p> Matching BNB: </p>
-              <p> 0.00 </p>
-            </div>
-          </CardContent>
-          <CardFooter className="h-[20%]">
-            <Button variant={"destructive"} className="w-full">
-              Sell
-            </Button>
-          </CardFooter>
+              <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
+                <p> Matching BNB: </p>
+                <p> 0.00 </p>
+              </div>
+            </CardContent>
+            <CardFooter className="h-[20%]">
+              <Button
+                disabled={tokenSelling}
+                variant={"destructive"}
+                className="w-full"
+              >
+                Sell
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
       </TabsContent>
     </Tabs>

@@ -4,6 +4,10 @@ import Navbar from "@/components/shared/Navbar";
 import Home from "./pages/Home";
 import CoinDetailPage from "./pages/Coin";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -18,13 +22,16 @@ const App: React.FC = () => {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <Router>
-        <Navbar />
-        <div className=" ">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
-          </Routes>
-        </div>
+        <QueryClientProvider client={queryClient}>
+          <Navbar />
+          <div className=" ">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
+            </Routes>
+          </div>
+          <Toaster />
+        </QueryClientProvider>
       </Router>
     </ThemeProvider>
   );

@@ -28,10 +28,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useUploady, useItemFinishListener } from "@rpldy/uploady";
 import UploadPreview from "@rpldy/upload-preview";
 import { formatEther } from "ethers";
+import { useToast } from "@/hooks/use-toast";
 
 export function MemeForm() {
   const [open, setOpen] = React.useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { toast } = useToast();
 
   const FormWrapper = isDesktop ? Dialog : Drawer;
   const FormTrigger = isDesktop ? DialogTrigger : DrawerTrigger;
@@ -48,7 +50,9 @@ export function MemeForm() {
       <FormContent className="sm:max-w-[425px]">
         <FormHeader>
           <FormTitle>Create Meme</FormTitle>
-          <FormDescription>Provide information to create your meme.</FormDescription>
+          <FormDescription>
+            Provide information to create your meme.
+          </FormDescription>
         </FormHeader>
         <ProfileForm />
         {!isDesktop && (
@@ -70,6 +74,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [imageUrl, setImageUrl] = React.useState("");
   const [isUploading, setIsUploading] = React.useState(false);
+  const { toast } = useToast();
 
   const { writeContractAsync: mintFunction } = useWriteContract();
   const { data: bnbCost } = useReadContract({
@@ -85,7 +90,11 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
 
   const uploadImage = async () => {
     if (!imageFile) {
-      alert("Please select an image first!");
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Please select an image first!",
+      });
       return;
     }
 
@@ -95,10 +104,13 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
     formData.append("image", imageFile);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_REACT_APP_BACKEND}upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_REACT_APP_BACKEND}upload`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
 
       if (!response.ok) throw new Error("Image upload failed!");
 
@@ -106,7 +118,11 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       setImageUrl(data.ipfsHash);
     } catch (error) {
       console.error(error);
-      alert("Failed to upload image.");
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "Failed to upload image.",
+      });
     } finally {
       setIsUploading(false);
     }
@@ -115,7 +131,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
   const mint = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name || !ticker || !imageUrl) {
-      alert("All fields including image upload are required!");
+      ("All fields including image upload are required!");
       return;
     }
 
@@ -127,7 +143,10 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
         args: [name, ticker, description, imageUrl],
         value: BigInt(bnbCost?.toString() || "0"),
       });
-      alert("Meme created successfully!");
+
+      toast({
+        description: "Meme created successfully!",
+      });
     } catch (error) {
       console.error("Minting failed:", error);
     }
@@ -166,18 +185,31 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       </div>
       <div className="grid gap-2">
         <Label htmlFor="image">Upload Image</Label>
-        <Input type="file" id="image" accept="image/*" onChange={handleImageChange} />
-        {imageUrl.length==0&&<Button
-          type="button"
-          variant="outline"
-          onClick={uploadImage}
-          disabled={isUploading}
-        >
-          {isUploading ? "Uploading..." : "Upload"}
-        </Button>}
-        <p className="text-sm text-muted-foreground">Select an image for your meme.</p>
+        <Input
+          type="file"
+          id="image"
+          accept="image/*"
+          onChange={handleImageChange}
+        />
+        {imageUrl.length == 0 && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={uploadImage}
+            disabled={isUploading}
+          >
+            {isUploading ? "Uploading..." : "Upload"}
+          </Button>
+        )}
+        <p className="text-sm text-muted-foreground">
+          Select an image for your meme.
+        </p>
         {imageUrl && (
-          <img src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY+imageUrl} alt="Uploaded Meme" className="w-32 h-32 object-cover" />
+          <img
+            src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + imageUrl}
+            alt="Uploaded Meme"
+            className="w-32 h-32 object-cover"
+          />
         )}
       </div>
       <div className="text-gray-400 flex items-center gap-2 justify-between">
