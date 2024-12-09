@@ -23,7 +23,7 @@ import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
 import { Link } from "react-router-dom";
 import { useReadContract } from "wagmi";
-import config from '@/config.json';
+import config from "@/config.json";
 import { formatDistanceToNow } from "date-fns";
 import { formatEther, parseEther } from "ethers";
 
@@ -32,15 +32,14 @@ interface DynamicComponent {
   text: string;
 }
 
-
-
 const Home: React.FC = () => {
-  const { data: memecoins }: { data: TokenData[] | undefined } = useReadContract({
-    abi: config.abi,
-    address: config.address as `0x${string}`,
-    functionName: "getTokens",
-    args: ['0x0000000000000000000000000000000000000000']
-  });
+  const { data: memecoins }: { data: TokenData[] | undefined } =
+    useReadContract({
+      abi: config.abi,
+      address: config.address as `0x${string}`,
+      functionName: "getTokens",
+      args: ["0x0000000000000000000000000000000000000000"],
+    });
 
   const [component1, setComponent1] = useState<DynamicComponent>({
     bgColor: "bg-gray-200",
@@ -51,7 +50,6 @@ const Home: React.FC = () => {
     bgColor: "bg-gray-200",
     text: "[Address] created [Token] on [Date]",
   });
-
 
   const getRandomColor = (): string =>
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
@@ -83,7 +81,11 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen p-6 ">
       <div className="flex w-full max-w-3xl items-center m-auto h-12 space-x-2">
-        <Input type="text" placeholder="Search meme" className="h-full" />
+        <Input
+          type="text"
+          placeholder="Search meme"
+          className="h-full border"
+        />
         <Button type="submit" variant="secondary" className="h-full w-52">
           Search
         </Button>
@@ -135,49 +137,67 @@ const Home: React.FC = () => {
         </Select>
       </div>
       <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
-        {memecoins&&memecoins.map((coin, index) => (
-          <Link to={`coin/${coin.token}`}>
-            {" "}
-            <Card className="w-full max-w-[400px]">
-              <CardHeader>
-                <CardTitle className="text-sm flex justify-between items-center">
-                  <div className="flex gap-2">
-                    <p className="text-gray-500">By: </p>
-                    <p className="">{`${coin.owner.slice(0,4)}...${coin.owner.slice(-4)}`} </p>
-                  </div>
+        {memecoins &&
+          memecoins.map((coin, index) => (
+            <Link to={`coin/${coin.token}`} key={index}>
+              {" "}
+              <Card className="w-full max-w-[400px]">
+                <CardHeader>
+                  <CardTitle className="text-sm flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <p className="text-gray-500">By: </p>
+                      <p className="">
+                        {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}{" "}
+                      </p>
+                    </div>
 
-                  <p className="text-gray-500 text-sm">{formatDistanceToNow(new Date(parseInt(coin.createdAt.toString()) * 1000), { addSuffix: true })}</p>
-                </CardTitle>
-                {/* <CardDescription className="h-56"></CardDescription> */}
-              </CardHeader>
-              <CardContent>
-                <img
-                  src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY+coin.image}
-                  alt={coin.name}
-                  className="w-full h-full rounded-xl"
-                />
-              </CardContent>
-              <CardDescription className=" px-6 flex flex-col gap-3">
-                <div className="flex items-center justify-between w-full">
-                  <h4 className="font-semibold">{coin.name}</h4>
-                  <span className="text-primary font-semibold text-md">
-                    ${(coin.collateral * (BigInt(parseEther(formatEther(coin.supply)).toString()) - 200_000_000n) * 700n).toString()}
-                  </span>
-                </div>
-                <div className="  w-full">
-                  {coin.description.substring(0, 100)}
-                  {"   "}
-                  {coin.description.length > 100 && (
-                    <span className="font-semibold hover:underline cursor-pointer ">
-                      More...
+                    <p className="text-gray-500 text-sm">
+                      {formatDistanceToNow(
+                        new Date(parseInt(coin.createdAt.toString()) * 1000),
+                        { addSuffix: true },
+                      )}
+                    </p>
+                  </CardTitle>
+                  {/* <CardDescription className="h-56"></CardDescription> */}
+                </CardHeader>
+                <CardContent>
+                  <img
+                    src={
+                      import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image
+                    }
+                    alt={coin.name}
+                    className="w-full h-full rounded-xl"
+                  />
+                </CardContent>
+                <CardDescription className=" px-6 flex flex-col gap-3">
+                  <div className="flex items-center justify-between w-full">
+                    <h4 className="font-semibold">{coin.name}</h4>
+                    <span className="text-primary font-semibold text-md">
+                      $
+                      {(
+                        coin.collateral *
+                        (BigInt(
+                          parseEther(formatEther(coin.supply)).toString(),
+                        ) -
+                          200_000_000n) *
+                        700n
+                      ).toString()}
                     </span>
-                  )}
-                </div>
-              </CardDescription>
-              <CardFooter className="flex justify-between"></CardFooter>
-            </Card>
-          </Link>
-        ))}
+                  </div>
+                  <div className="  w-full">
+                    {coin.description.substring(0, 100)}
+                    {"   "}
+                    {coin.description.length > 100 && (
+                      <span className="font-semibold hover:underline cursor-pointer ">
+                        More...
+                      </span>
+                    )}
+                  </div>
+                </CardDescription>
+                <CardFooter className="flex justify-between"></CardFooter>
+              </Card>
+            </Link>
+          ))}
       </div>
     </div>
   );

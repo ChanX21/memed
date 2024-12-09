@@ -24,6 +24,9 @@ import { useReadContract, useWriteContract } from "wagmi";
 import { useState } from "react";
 import config from "@/config.json";
 import { useToast } from "@/hooks/use-toast";
+import { BigNumberish, formatEther } from "ethers";
+import { useAccount, useBalance } from "wagmi";
+import tokenAbi from "@/erc20.json";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -32,14 +35,42 @@ export function TradeForm() {
   const [tokenBuying, setTokenBuying] = useState(false);
   const [tokenSelling, setTokenSelling] = useState(false);
   const { toast } = useToast();
+  const { address } = useAccount(); // Get the connected user's address
+
+  const {
+    data: balance,
+    isLoading,
+    isError,
+  } = useBalance({
+    address,
+  });
 
   const { writeContractAsync: buyFunction } = useWriteContract();
   const { writeContractAsync: sellFunction } = useWriteContract();
-  const { data: bnbCost } = useReadContract({
-    abi: config.abi,
-    address: config.address as `0x${string}`,
-    functionName: "creationFee",
-  });
+
+  const { data: tokenBalance }: { data: BigNumberish | undefined } =
+    useReadContract({
+      abi: tokenAbi,
+      address: tokenAddress as `0x${string}`,
+      functionName: "balanceOf",
+      args: [address],
+    });
+
+  const { data: bnbCost }: { data: BigNumberish[] | undefined } =
+    useReadContract({
+      abi: config.abi,
+      address: config.address as `0x${string}`,
+      functionName: "getBNBAmount",
+      args: [tokenAddress, buyAmount],
+    });
+
+  const { data: bnbSellCost }: { data: BigNumberish[] | undefined } =
+    useReadContract({
+      abi: config.abi,
+      address: config.address as `0x${string}`,
+      functionName: "getBNBAmount",
+      args: [tokenAddress, sellAmount],
+    });
 
   const buy = async (e: React.FormEvent<HTMLFormElement>) => {
     setTokenBuying(true);
@@ -89,6 +120,7 @@ export function TradeForm() {
       setTokenSelling(false);
     }
   };
+
   return (
     <Tabs defaultValue="buy" className="w-full h-full ">
       <TabsList className="grid w-full grid-cols-2 h-[10%]">
@@ -143,14 +175,14 @@ export function TradeForm() {
             <CardContent className="space-y-2 px-5 h-[50%] ">
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
-                <p> 0.00 BNB </p>
+                <p> {balance && balance.formatted} BNB </p>
               </div>
               <div className="space-y-1 h-[50%] bg-gray-500 rounded-xl">
                 <Label
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount ( BNB )
+                  Amount (DogeCoin)
                 </Label>
                 <Input
                   id="amount"
@@ -162,8 +194,8 @@ export function TradeForm() {
               </div>
 
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
-                <p> Matching Dogecoin: </p>
-                <p> 0.00 </p>
+                <p> Amount (BNB): </p>
+                <p> {bnbCost && formatEther(bnbCost[0])} </p>
               </div>
             </CardContent>
             <CardFooter className="h-[20%]">
@@ -218,7 +250,9 @@ export function TradeForm() {
             <CardContent className="space-y-2 px-5 h-[50%] ">
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
-                <p> 0.00 Dogecoin </p>
+                <p>
+                  {tokenBalance ? formatEther(tokenBalance) : "0.0"} Dogecoin
+                </p>
               </div>
               <div className="space-y-1 h-[60%] bg-gray-500 rounded-xl">
                 <Label
@@ -238,7 +272,7 @@ export function TradeForm() {
 
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Matching BNB: </p>
-                <p> 0.00 </p>
+                <p> {bnbSellCost && formatEther(bnbSellCost[0])} </p>
               </div>
             </CardContent>
             <CardFooter className="h-[20%]">
