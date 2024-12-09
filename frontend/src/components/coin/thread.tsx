@@ -12,7 +12,7 @@ import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { ReplyForm } from "./forms/replyForm";
-import formatDistanceToNow from "date-fns/esm/formatDistanceToNow/index.js";
+import { formatDistanceToNow } from "date-fns";
 import { truncateWalletAddress } from "@/utils";
 
 interface Props {
