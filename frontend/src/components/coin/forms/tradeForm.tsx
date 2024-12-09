@@ -26,7 +26,7 @@ import config from "@/config.json";
 import { useToast } from "@/hooks/use-toast";
 import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useAccount, useBalance } from "wagmi";
-import tokenAbi from "@/erc20.json";
+import tokenAbi from "@/abi/erc20.json";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
