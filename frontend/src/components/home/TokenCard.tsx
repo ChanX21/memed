@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BigNumberish, formatEther } from "ethers";
+import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useReadContract } from "wagmi";
 import { Link } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import config from "@/config.json";
 import { formatDistanceToNow } from "date-fns";
 import priceFeedAbi from "@/abi/PriceFeed.json";
 import { formatCurrency } from "@/utils";
@@ -37,13 +38,20 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
       functionName: "latestRoundData",
     });
 
+  const { data: bnbCost }: { data: BigNumberish[] | undefined } =
+    useReadContract({
+      abi: config.abi,
+      address: config.address as `0x${string}`,
+      functionName: "getBNBAmount",
+      args: [coin.token, totalSupply],
+    });
+
   useEffect(() => {
     const usdRate = bnbFeed && Number(bnbFeed[1]) / Math.pow(10, 8);
-
     const result =
-      totalSupply && usdRate && usdRate * Number(formatEther(totalSupply));
+      bnbCost && usdRate && Number(formatEther(bnbCost[0])) * usdRate;
     setMarketCap(result as number);
-  }, [bnbFeed, totalSupply]);
+  }, [bnbFeed, totalSupply, bnbCost]);
   return (
     <Link to={`coin/${coin.token}`}>
       <Card className="w-full max-w-[400px]">

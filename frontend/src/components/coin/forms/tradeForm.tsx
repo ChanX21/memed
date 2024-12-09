@@ -26,7 +26,6 @@ import config from "@/config.json";
 import { useToast } from "@/hooks/use-toast";
 import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useAccount, useBalance } from "wagmi";
-import tokenAbi from "@/abi/erc20.json";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -74,13 +73,14 @@ export function TradeForm() {
 
   const buy = async (e: React.FormEvent<HTMLFormElement>) => {
     setTokenBuying(true);
+    if (!bnbCost) return;
     try {
       await buyFunction({
         abi: config.abi,
         address: config.address as `0x${string}`,
         functionName: "buy",
         args: [tokenAddress, parseEther(buyAmount || "0")],
-        value: BigInt(bnbCost?.toString() || "0"),
+        value: BigInt(bnbCost[0]?.toString() || "0"),
       });
 
       toast({
