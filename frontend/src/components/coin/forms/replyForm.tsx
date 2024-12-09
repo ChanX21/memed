@@ -29,9 +29,11 @@ const FormSchema = z.object({
 export function ReplyForm({
   setFocusedCommentId,
   commentId,
+  refetch,
 }: {
   setFocusedCommentId: (state: null) => void;
   commentId: number;
+  refetch: () => any;
 }) {
   const { address } = useAccount();
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -45,20 +47,15 @@ export function ReplyForm({
       text: string;
       tokenAddress: string;
       userAddress: string;
-      replyToId: string;
+      replyToId: number | null;
     };
 
     const info: Info = {
       text: data.reply,
       tokenAddress: tokenAddress || "",
       userAddress: address || "",
-      replyToId: commentId.toString(),
+      replyToId: commentId, // commentId should be a number or null
     };
-
-    const formData = new FormData();
-    for (const key in info) {
-      formData.append(key, info[key as keyof Info] as string);
-    }
 
     try {
       setIsLoading(true);
@@ -66,13 +63,16 @@ export function ReplyForm({
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment`,
         {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(info),
         },
       );
 
       if (!response.ok) throw new Error("Reply failed!");
 
-      const data = await response.json();
+      const responseData = await response.json(); // Get the response data
     } catch (error) {
       console.error(error);
       toast({
@@ -81,7 +81,9 @@ export function ReplyForm({
         description: "Reply submission failed.",
       });
     } finally {
+      refetch();
       setIsLoading(false);
+      form.reset();
     }
   }
 
@@ -89,7 +91,7 @@ export function ReplyForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full space-y-6 mb-10"
+        className="w-[90%] m-auto bg-secondary px-2 py-3  space-y-6 "
       >
         <FormField
           control={form.control}
@@ -100,7 +102,7 @@ export function ReplyForm({
               <FormControl>
                 <Textarea
                   placeholder="Write your reply..."
-                  className="resize-none"
+                  className="resize-none border border-primary"
                   {...field}
                 />
               </FormControl>
@@ -112,7 +114,9 @@ export function ReplyForm({
           <Button variant="ghost" onClick={() => setFocusedCommentId(null)}>
             Cancel
           </Button>
-          <Button type="submit">Reply</Button>
+          <Button disabled={isLoading} type="submit">
+            Reply
+          </Button>
         </div>
       </form>
     </Form>

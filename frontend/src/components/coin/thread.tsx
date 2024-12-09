@@ -12,6 +12,8 @@ import { Button } from "../ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { ReplyForm } from "./forms/replyForm";
+import { formatDistanceToNow } from "date-fns";
+import { truncateWalletAddress } from "@/utils";
 
 interface Props {
   title?: string;
@@ -31,6 +33,7 @@ type Comment = {
   userAddress: string;
   replyToId: string;
   replies: Reply[];
+  createdAt: Date;
 };
 
 const Thread: React.FC<Props> = ({ title, onClick }) => {
@@ -41,17 +44,19 @@ const Thread: React.FC<Props> = ({ title, onClick }) => {
     setFocusedCommentId(focusedCommentId === commentId ? null : commentId);
   };
 
-  const { isPending, error, data } = useQuery({
+  const { isPending, error, data, refetch } = useQuery({
     queryKey: ["commentData"],
     queryFn: () =>
       fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment/${tokenAddress}`,
       ).then((res) => res.json()),
+    refetchInterval: 500,
+    refetchOnWindowFocus: true,
   });
 
   return (
     <div className="pb-10">
-      <ThreadForm />
+      <ThreadForm refetch={refetch} />
 
       {!error && data && data.length > 0 && (
         <div className="max-h-[100vh] overflow-y-auto flex flex-col gap-5">
@@ -61,9 +66,14 @@ const Thread: React.FC<Props> = ({ title, onClick }) => {
                 <CardDescription className="flex gap-3">
                   <p>
                     <span>By: </span>
-                    <span>{comment.userAddress}</span>
+                    <span>{truncateWalletAddress(comment.userAddress)}</span>
                   </p>
-                  <p>3 days ago.</p>
+                  <p>
+                    {formatDistanceToNow(
+                      new Date(comment.createdAt.toString()),
+                      { addSuffix: true },
+                    )}
+                  </p>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -74,33 +84,40 @@ const Thread: React.FC<Props> = ({ title, onClick }) => {
                   variant="ghost"
                   onClick={() => handleReplyClick(comment.id)}
                 >
-                  Reply
+                  Reply ({comment.replies.length})
                 </Button>
               </CardFooter>
 
               {/* Reply Form for the Focused Comment */}
               {focusedCommentId === comment.id && (
-                <ReplyForm
-                  setFocusedCommentId={setFocusedCommentId}
-                  commentId={comment.id}
-                />
-              )}
+                <>
+                  <ReplyForm
+                    setFocusedCommentId={setFocusedCommentId}
+                    commentId={comment.id}
+                    refetch={refetch}
+                  />
 
-              {/* Render Replies */}
-              {comment.replies.length > 0 && (
-                <div className="ml-4 mt-4 space-y-4">
-                  {comment.replies.map((reply: Reply, idx: number) => (
-                    <Card key={idx} className="w-full bg-gray-100">
-                      <CardContent className="space-y-2">
-                        <p>
-                          <span>Reply by: </span>
-                          <span>{reply.userAddress}</span>
-                        </p>
-                        <p>{reply.text}</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                  {/* Render Replies */}
+                  <div className="max-h-[100vh] overflow-y-auto">
+                    {comment.replies.length > 0 && (
+                      <div className="ml-4 mt-4 space-y-4">
+                        {comment.replies.map((reply: Reply, idx: number) => (
+                          <Card key={idx} className="w-full bg-gray-600 pt-2">
+                            <CardContent className="space-y-2">
+                              <p>
+                                <span>Reply by: </span>
+                                <span>
+                                  {truncateWalletAddress(reply.userAddress)}
+                                </span>
+                              </p>
+                              <p>{reply.text}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </Card>
           ))}

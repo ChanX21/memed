@@ -67,3 +67,22 @@
         @apply bg-background text-foreground;
     }
 }
+
+/* Hide spinner in Webkit browsers (Chrome, Safari, Edge) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide spinner in Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* Optional: to prevent up/down arrows from showing */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-ms-clear {
+    display: none;
+}

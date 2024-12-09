@@ -161,6 +161,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          className="border"
         />
       </div>
       <div className="grid gap-2">
@@ -170,6 +171,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
           id="ticker"
           value={ticker}
           onChange={(e) => setTicker(e.target.value)}
+          className="border"
         />
       </div>
       <div className="grid gap-2">

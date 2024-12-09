@@ -26,7 +26,7 @@ const FormSchema = z.object({
   }),
 });
 
-export function ThreadForm() {
+export function ThreadForm({ refetch }: { refetch: () => any }) {
   const { address } = useAccount();
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [isLoading, setIsLoading] = useState(false);
@@ -39,20 +39,15 @@ export function ThreadForm() {
       text: string;
       tokenAddress: string;
       userAddress: string;
-      replyToId: string;
+      replyToId: number | null;
     };
 
     const info: Info = {
       text: data.comment,
       tokenAddress: tokenAddress || "",
       userAddress: address || "",
-      replyToId: "",
+      replyToId: null,
     };
-
-    const formData = new FormData();
-    for (const key in info) {
-      formData.append(key, info[key as keyof Info] as string);
-    }
 
     try {
       setIsLoading(true);
@@ -60,13 +55,16 @@ export function ThreadForm() {
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment`,
         {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(info),
         },
       );
 
       if (!response.ok) throw new Error("Comment failed!");
 
-      const data = await response.json();
+      const responseData = await response.json();
     } catch (error) {
       console.error(error);
       toast({
@@ -75,7 +73,9 @@ export function ThreadForm() {
         description: "Comment submission failed.",
       });
     } finally {
+      refetch();
       setIsLoading(false);
+      form.reset();
     }
   }
 
@@ -104,7 +104,9 @@ export function ThreadForm() {
           )}
         />
         <div className="w-full flex justify-end">
-          <Button type="submit">Post</Button>
+          <Button disabled={isLoading} type="submit">
+            Post
+          </Button>
         </div>
       </form>
     </Form>

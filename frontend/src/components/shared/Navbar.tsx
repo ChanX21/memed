@@ -1,10 +1,13 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "../ui/button";
+import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   return (
     <nav className="flex justify-between items-center p-4 bg-black text-white">
-      <div className="text-lg font-bold">Memed</div>
+      <Link to="/">
+        <div className="text-lg font-bold">Memed</div>
+      </Link>
 
       <ConnectButton.Custom>
         {({
