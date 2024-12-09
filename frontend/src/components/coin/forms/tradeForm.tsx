@@ -106,7 +106,7 @@ export function TradeForm() {
         abi: config.abi,
         address: config.address as `0x${string}`,
         functionName: "sell",
-        args: [tokenAddress, parseEther(sellAmount)],
+        args: [tokenAddress, parseEther(sellAmount || "0")],
       });
 
       toast({
