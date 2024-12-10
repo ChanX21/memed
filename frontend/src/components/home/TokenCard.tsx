@@ -14,7 +14,7 @@ import {
 
 import config from "@/config.json";
 import { formatDistanceToNow } from "date-fns";
-import priceFeedAbi from "@/abi/PriceFeed.json";
+import priceFeedAbi from "@/abi/priceFeed.json";
 import { formatCurrency } from "@/utils";
 
 interface Props {
