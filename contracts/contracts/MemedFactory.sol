@@ -52,7 +52,6 @@ contract Factory is Ownable {
 
     mapping(address => TokenData) public tokenData;
     address[] public tokens;
-    mapping(address => mapping(address => uint256)) public balance;
 
     event TokenCreated(
         address indexed token,
@@ -109,7 +108,7 @@ contract Factory is Ownable {
             createdAt: block.timestamp
         });
         tokens.push(address(token));
-        token.mint((maxSupply * 20) / 100);
+        token.mint(address(this), (maxSupply * 20) / 100);
 
         emit TokenCreated(
             address(token),
@@ -139,9 +138,8 @@ contract Factory is Ownable {
         require(msg.value >= bnbRequired[0], "Not enough BNB for trade");
         feesBalance += bnbRequired[2];
 
-        token.mint(_amount);
+        token.mint(msg.sender, _amount);
         tokenData[_token].collateral += bnbRequired[1];
-        balance[_token][msg.sender] += _amount;
 
         uint256 excess = msg.value - bnbRequired[0];
         if (excess > 0) {
@@ -160,12 +158,12 @@ contract Factory is Ownable {
             tokenData[_token].stage == TokenStages.BOUNDING_CURVE,
             "Invalid token stage"
         );
+      MemedToken token = MemedToken(_token);
         require(
-            balance[_token][msg.sender] >= _amount,
+            token.balanceOf(msg.sender) >= _amount,
             "Insufficient token balance"
         );
 
-        MemedToken token = MemedToken(_token);
         uint256[3] memory bnb = getBNBAmount(_token, _amount);
         uint256 netBnb = bnb[0] - bnb[1];
 
@@ -175,9 +173,7 @@ contract Factory is Ownable {
         );
 
         feesBalance += bnb[2];
-
-        token.burn(_amount);
-        balance[_token][msg.sender] -= _amount;
+        token.burn(msg.sender, _amount);
         tokenData[_token].collateral -= bnb[1];
 
         payable(msg.sender).transfer(netBnb);
@@ -194,6 +190,7 @@ contract Factory is Ownable {
             pool = check;
         }
         MemedToken token = MemedToken(_token);
+        token.enableTransfers();
         token.approve(address(router), (maxSupply * 20) / 100);
         router.addLiquidityETH{value: (graduationAmount * 98) / 100}(
             _token,
@@ -208,25 +205,6 @@ contract Factory is Ownable {
         emit TokenGraduated(_token, pool);
     }
 
-    function withdrawTokens(address _token) public {
-        require(
-            tokenData[_token].stage == TokenStages.GRADUATED,
-            "Invalid token stage"
-        );
-        uint256 userBalance = balance[_token][msg.sender];
-        require(userBalance > 0, "Insufficient token balance");
-        MemedToken token = MemedToken(_token);
-        token.transfer(msg.sender, userBalance);
-        balance[_token][msg.sender] = 0;
-        emit TokenWithdrawn(_token, msg.sender, userBalance);
-    }
-
-    function withdrawFees() external onlyOwner {
-        require(feesBalance > 0, "No fees to withdraw");
-        uint256 fees = feesBalance;
-        feesBalance = 0;
-        payable(owner()).transfer(fees);
-    }
 
     function getBNBAmount(
         address _token,
