@@ -108,8 +108,6 @@ contract Factory is Ownable {
             createdAt: block.timestamp
         });
         tokens.push(address(token));
-        token.mint(address(this), (maxSupply * 20) / 100);
-
         emit TokenCreated(
             address(token),
             msg.sender,
@@ -191,6 +189,7 @@ contract Factory is Ownable {
         }
         MemedToken token = MemedToken(_token);
         token.enableTransfers();
+        token.mint(address(this), (maxSupply * 20) / 100);
         token.approve(address(router), (maxSupply * 20) / 100);
         router.addLiquidityETH{value: (graduationAmount * 98) / 100}(
             _token,
