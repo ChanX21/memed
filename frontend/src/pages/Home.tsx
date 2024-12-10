@@ -9,23 +9,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TokenData } from "../types";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
-import { Link } from "react-router-dom";
 import { useReadContract } from "wagmi";
 import config from "@/config.json";
-import { formatDistanceToNow } from "date-fns";
-import { formatEther, parseEther } from "ethers";
+import TokenCard from "@/components/home/TokenCard";
 
 interface DynamicComponent {
   bgColor: string;
@@ -137,67 +128,7 @@ const Home: React.FC = () => {
         </Select>
       </div>
       <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
-        {memecoins &&
-          memecoins.map((coin, index) => (
-            <Link to={`coin/${coin.token}`} key={index}>
-              {" "}
-              <Card className="w-full max-w-[400px]">
-                <CardHeader>
-                  <CardTitle className="text-sm flex justify-between items-center">
-                    <div className="flex gap-2">
-                      <p className="text-gray-500">By: </p>
-                      <p className="">
-                        {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}{" "}
-                      </p>
-                    </div>
-
-                    <p className="text-gray-500 text-sm">
-                      {formatDistanceToNow(
-                        new Date(parseInt(coin.createdAt.toString()) * 1000),
-                        { addSuffix: true },
-                      )}
-                    </p>
-                  </CardTitle>
-                  {/* <CardDescription className="h-56"></CardDescription> */}
-                </CardHeader>
-                <CardContent>
-                  <img
-                    src={
-                      import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image
-                    }
-                    alt={coin.name}
-                    className="w-full h-full rounded-xl"
-                  />
-                </CardContent>
-                <CardDescription className=" px-6 flex flex-col gap-3">
-                  <div className="flex items-center justify-between w-full">
-                    <h4 className="font-semibold">{coin.name}</h4>
-                    <span className="text-primary font-semibold text-md">
-                      $
-                      {(
-                        coin.collateral *
-                        (BigInt(
-                          parseEther(formatEther(coin.supply)).toString(),
-                        ) -
-                          200_000_000n) *
-                        700n
-                      ).toString()}
-                    </span>
-                  </div>
-                  <div className="  w-full">
-                    {coin.description.substring(0, 100)}
-                    {"   "}
-                    {coin.description.length > 100 && (
-                      <span className="font-semibold hover:underline cursor-pointer ">
-                        More...
-                      </span>
-                    )}
-                  </div>
-                </CardDescription>
-                <CardFooter className="flex justify-between"></CardFooter>
-              </Card>
-            </Link>
-          ))}
+        {memecoins && memecoins.map((coin, index) => <TokenCard coin={coin} />)}
       </div>
     </div>
   );
