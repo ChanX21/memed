@@ -37,78 +37,79 @@ export function TradeForm() {
   const { toast } = useToast();
   const { address } = useAccount(); // Get the connected user's address
 
-  const {
-    data: balance,
-    isLoading,
-    isError,
-  } = useBalance({
+  const { data: balance } = useBalance({
     address,
   });
 
   const { writeContractAsync: buyFunction } = useWriteContract();
   const { writeContractAsync: sellFunction } = useWriteContract();
   const { writeContractAsync: approveFunction } = useWriteContract();
-
+  // Fetch token balance for the specified address
   const { data: tokenBalance }: { data: BigNumberish | undefined } =
     useReadContract({
-      abi: tokenAbi,
-      address: tokenAddress as `0x${string}`,
-      functionName: "balanceOf",
-      args: [address],
+      abi: tokenAbi, // Token contract ABI
+      address: tokenAddress as `0x${string}`, // Token contract address
+      functionName: "balanceOf", // Function to get balance
+      args: [address], // Address to check balance for
     });
 
+  // Fetch BNB cost for the given token amount when buying
   const { data: bnbCost }: { data: BigNumberish[] | undefined } =
     useReadContract({
-      abi: config.abi,
-      address: config.address as `0x${string}`,
-      functionName: "getBNBAmount",
-      args: [tokenAddress, parseEther(buyAmount || "0")],
+      abi: config.abi, // Contract ABI
+      address: config.address as `0x${string}`, // Contract address
+      functionName: "getBNBAmount", // Function to get BNB cost
+      args: [tokenAddress, parseEther(buyAmount || "0")], // Token address and buy amount
     });
 
+  // Fetch BNB cost for the given token amount when selling
   const { data: bnbSellCost }: { data: BigNumberish[] | undefined } =
     useReadContract({
-      abi: config.abi,
-      address: config.address as `0x${string}`,
-      functionName: "getBNBAmount",
-      args: [tokenAddress, parseEther(sellAmount || "0")],
+      abi: config.abi, // Contract ABI
+      address: config.address as `0x${string}`, // Contract address
+      functionName: "getBNBAmount", // Function to get BNB cost
+      args: [tokenAddress, parseEther(sellAmount || "0")], // Token address and sell amount
     });
 
   const buy = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setTokenBuying(true);
-    if (!bnbCost) return;
+    e.preventDefault(); // Prevent form submission
+    setTokenBuying(true); // Set loading state to true
+    if (!bnbCost) return; // Exit if no cost is available
     try {
+      // Call the buy function with necessary parameters
       await buyFunction({
-        abi: config.abi,
-        address: config.address as `0x${string}`,
-        functionName: "buy",
-        args: [tokenAddress, parseEther(buyAmount || "0")],
-        value: BigInt(bnbCost[0]?.toString() || "0"),
+        abi: config.abi, // Contract ABI
+        address: config.address as `0x${string}`, // Contract address
+        functionName: "buy", // Function to call on contract
+        args: [tokenAddress, parseEther(buyAmount || "0")], // Arguments: token address and amount
+        value: BigInt(bnbCost[0]?.toString() || "0"), // Payment value in BNB
       });
 
+      // Show success toast
       toast({
         description: "Token purchase completed successfully!",
       });
 
-      setTokenBuying(false);
+      setTokenBuying(false); // Set loading state to false
     } catch (error) {
+      // Show error toast if purchase fails
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: "Token purchase failed.",
       });
     } finally {
-      setTokenBuying(false);
-      setBuyAmount("");
+      setTokenBuying(false); // Ensure loading state is reset
+      setBuyAmount(""); // Clear input field
     }
   };
+
   const sell = async (e: React.FormEvent<HTMLFormElement>) => {
-    //0.000000000000001
+    // Prevent form submission
     e.preventDefault();
     setTokenSelling(true);
     try {
-      //run approve for factory contract
-
+      // Approve token for factory contract
       await sellFunction({
         abi: tokenAbi,
         address: tokenAddress as `0x${string}`,
@@ -116,6 +117,7 @@ export function TradeForm() {
         args: [config.address, parseEther(sellAmount || "0")],
       });
 
+      // Execute the sale transaction
       await sellFunction({
         abi: config.abi,
         address: config.address as `0x${string}`,
@@ -123,17 +125,20 @@ export function TradeForm() {
         args: [tokenAddress, parseEther(sellAmount || "0")],
       });
 
+      // Show success toast
       toast({
         description: "Token sale completed successfully!",
       });
       setTokenSelling(false);
     } catch (error) {
+      // Show error toast if transaction fails
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: "Token sale failed.",
       });
     } finally {
+      // Reset selling state and amount
       setTokenSelling(false);
       setSellAmount("");
     }

@@ -7,18 +7,10 @@ import {
 } from "@/components/ui/tooltip";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Progress } from "../ui/progress";
-import { BigNumberish, formatEther, parseEther } from "ethers";
-import config from "@/config.json";
-import { useToast } from "@/hooks/use-toast";
-import {
-  useAccount,
-  useBalance,
-  useReadContract,
-  useWatchContractEvent,
-} from "wagmi";
+import { BigNumberish, formatEther } from "ethers";
+import { useReadContract } from "wagmi";
 import { useParams } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
-import { useQuery } from "@tanstack/react-query";
 
 interface Props {
   supply: bigint;
@@ -44,21 +36,32 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
   //   refetchOnWindowFocus: true,
   // });
 
+  // Using the useReadContract hook to fetch the total supply of the token
   const { data: totalSupply }: { data: BigNumberish | undefined } =
     useReadContract({
-      abi: tokenAbi,
-      address: tokenAddress as `0x${string}`,
-      functionName: "totalSupply",
+      abi: tokenAbi, // The ABI of the token contract
+      address: tokenAddress as `0x${string}`, // The token contract address
+      functionName: "totalSupply", // The function to get the total supply of the token
     });
 
+  // useEffect hook to calculate the percentage of the supply that has been minted/used
   useEffect(() => {
+    // Check if totalSupply data exists, if not, return early
     if (!totalSupply) return;
+
+    // Define the initial supply of the token (for comparison purposes)
     const initialSupply = 200000000;
+
+    // Convert the total supply (in wei) to ether and calculate the current supply
     const currentSupply = Number(formatEther(totalSupply));
+
+    // Calculate the percentage of the supply that has been used
     const perc = ((currentSupply - initialSupply) / currentSupply) * 100;
 
+    // Update the state with the calculated percentage of the supply used
     setPercCompleted(perc);
-  }, [totalSupply]);
+  }, [totalSupply]); // Re-run the effect whenever the totalSupply value changes
+
   return (
     <>
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">

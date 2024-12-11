@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -43,6 +42,7 @@ export function ReplyForm({
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    // Define Info type for structured data
     type Info = {
       text: string;
       tokenAddress: string;
@@ -50,40 +50,43 @@ export function ReplyForm({
       replyToId: number | null;
     };
 
+    // Prepare the info object with form data
     const info: Info = {
       text: data.reply,
-      tokenAddress: tokenAddress || "",
-      userAddress: address || "",
+      tokenAddress: tokenAddress || "", // Default to empty string if undefined
+      userAddress: address || "", // Default to empty string if undefined
       replyToId: commentId, // commentId should be a number or null
     };
 
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Set loading state
+      // Send POST request with comment data
       const response = await fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // Set content type to JSON
           },
-          body: JSON.stringify(info),
+          body: JSON.stringify(info), // Send info object as JSON
         },
       );
 
-      if (!response.ok) throw new Error("Reply failed!");
+      if (!response.ok) throw new Error("Reply failed!"); // Handle response errors
 
-      const responseData = await response.json(); // Get the response data
+      const responseData = await response.json(); // Parse response data
     } catch (error) {
-      console.error(error);
+      console.error(error); // Log errors
+      // Show toast message on error
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: "Reply submission failed.",
       });
     } finally {
-      refetch();
-      setIsLoading(false);
-      form.reset();
+      refetch(); // Refetch data after submission
+      setIsLoading(false); // Reset loading state
+      form.reset(); // Reset the form
     }
   }
 
