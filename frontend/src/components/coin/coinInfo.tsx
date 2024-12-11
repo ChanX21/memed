@@ -19,7 +19,6 @@ import {
 import { useParams } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
 import { useQuery } from "@tanstack/react-query";
-import { useTokenHolders } from "@/hooks/useTokenHolder";
 
 interface Props {
   supply: bigint;
