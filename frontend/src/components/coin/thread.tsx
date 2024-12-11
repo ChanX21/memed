@@ -40,17 +40,27 @@ const Thread: React.FC<Props> = ({ title, onClick }) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [focusedCommentId, setFocusedCommentId] = useState<number | null>(null);
 
+  // Function to handle the click event when replying to a comment
   const handleReplyClick = (commentId: number) => {
+    // Toggle the focused comment ID: if the clicked comment is already focused, un-focus it; otherwise, set it as focused
     setFocusedCommentId(focusedCommentId === commentId ? null : commentId);
   };
 
+  // Using the useQuery hook to fetch comment data from the backend
   const { isPending, error, data, refetch } = useQuery({
+    // Unique key for the query, used for caching and refetching
     queryKey: ["commentData"],
+
+    // Function to fetch the comment data from the backend API
     queryFn: () =>
       fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment/${tokenAddress}`,
-      ).then((res) => res.json()),
+      ).then((res) => res.json()), // Parse the response as JSON
+
+    // Interval in milliseconds to refetch the query data (500ms)
     refetchInterval: 500,
+
+    // Refetch the data when the window is focused (useful for real-time data updates)
     refetchOnWindowFocus: true,
   });
 

@@ -76,6 +76,7 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
   const [isUploading, setIsUploading] = React.useState(false);
   const { toast } = useToast();
 
+  //read bnb const for token creation
   const { writeContractAsync: mintFunction } = useWriteContract();
   const { data: bnbCost } = useReadContract({
     abi: config.abi,
@@ -87,67 +88,85 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
     const file = event.target.files?.[0];
     if (file) setImageFile(file);
   };
-
+  // Function to handle image upload
   const uploadImage = async () => {
+    // Check if the user has selected an image file
     if (!imageFile) {
+      // Display a toast message if no image is selected
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Please select an image first!",
+        variant: "destructive", // Style the toast as an error
+        title: "Uh oh! Something went wrong.", // Title of the error message
+        description: "Please select an image first!", // Description of the error
       });
-      return;
+      return; // Exit the function if no image is selected
     }
 
+    // Set the uploading state to true to indicate image upload is in progress
     setIsUploading(true);
 
+    // Create a new FormData object to send the image file in the request
     const formData = new FormData();
-    formData.append("image", imageFile);
+    formData.append("image", imageFile); // Append the selected image file to the form data
 
     try {
+      // Send a POST request to upload the image to the backend
       const response = await fetch(
-        `${import.meta.env.VITE_REACT_APP_BACKEND}upload`,
+        `${import.meta.env.VITE_REACT_APP_BACKEND}upload`, // Use environment variable for backend URL
         {
-          method: "POST",
-          body: formData,
+          method: "POST", // Specify POST method
+          body: formData, // Attach form data containing the image file
         },
       );
 
+      // Check if the response is not ok (i.e., the upload failed)
       if (!response.ok) throw new Error("Image upload failed!");
 
+      // Parse the JSON response from the backend
       const data = await response.json();
-      setImageUrl(data.ipfsHash);
+      setImageUrl(data.ipfsHash); // Set the image URL from the response (IPFS hash)
     } catch (error) {
+      // Log any errors that occur during the upload process
       console.error(error);
+      // Display a toast message with an error description
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Failed to upload image.",
+        variant: "destructive", // Style the toast as an error
+        title: "Uh oh! Something went wrong.", // Title of the error message
+        description: "Failed to upload image.", // Description of the error
       });
     } finally {
+      // Set the uploading state to false once the upload is complete (either success or failure)
       setIsUploading(false);
     }
   };
 
+  // Function to handle the minting process when the form is submitted
   const mint = async (e: React.FormEvent<HTMLFormElement>) => {
+    // Prevent the default form submission behavior
     e.preventDefault();
+
+    // Check if all required fields are filled (name, ticker, and imageUrl)
     if (!name || !ticker || !imageUrl) {
-      ("All fields including image upload are required!");
-      return;
+      // Display a toast message if any field is missing (this line is missing the toast call)
+      console.log("All fields including image upload are required!"); // Add a toast here to notify the user
+      return; // Exit the function if any field is missing
     }
 
     try {
+      // Call the mintFunction to interact with the blockchain
       await mintFunction({
-        abi: config.abi,
-        address: config.address as `0x${string}`,
-        functionName: "createMeme",
-        args: [name, ticker, description, imageUrl],
-        value: BigInt(bnbCost?.toString() || "0"),
+        abi: config.abi, // Contract ABI to interact with the smart contract
+        address: config.address as `0x${string}`, // Contract address (ensured to be a valid Ethereum address)
+        functionName: "createMeme", // The function in the smart contract that will be called
+        args: [name, ticker, description, imageUrl], // Arguments for the contract function
+        value: BigInt(bnbCost?.toString() || "0"), // Convert the BNB cost to BigInt and send it as value
       });
 
+      // Display a toast message upon successful minting
       toast({
-        description: "Meme created successfully!",
+        description: "Meme created successfully!", // Success message
       });
     } catch (error) {
+      // Log any errors that occur during the minting process
       console.error("Minting failed:", error);
     }
   };

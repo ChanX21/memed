@@ -35,6 +35,7 @@ export function ThreadForm({ refetch }: { refetch: () => any }) {
   });
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    // Define Info type for structured comment data
     type Info = {
       text: string;
       tokenAddress: string;
@@ -42,40 +43,43 @@ export function ThreadForm({ refetch }: { refetch: () => any }) {
       replyToId: number | null;
     };
 
+    // Prepare the info object with form data
     const info: Info = {
-      text: data.comment,
-      tokenAddress: tokenAddress || "",
-      userAddress: address || "",
-      replyToId: null,
+      text: data.comment, // Use the comment from the form
+      tokenAddress: tokenAddress || "", // Default to empty string if undefined
+      userAddress: address || "", // Default to empty string if undefined
+      replyToId: null, // No reply, set as null
     };
 
     try {
-      setIsLoading(true);
+      setIsLoading(true); // Set loading state
+      // Send POST request with the comment data
       const response = await fetch(
         `${import.meta.env.VITE_REACT_APP_BACKEND}comment`,
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // Set content type to JSON
           },
-          body: JSON.stringify(info),
+          body: JSON.stringify(info), // Send the info object as JSON
         },
       );
 
-      if (!response.ok) throw new Error("Comment failed!");
+      if (!response.ok) throw new Error("Comment failed!"); // Handle unsuccessful response
 
-      const responseData = await response.json();
+      const responseData = await response.json(); // Parse the response data
     } catch (error) {
-      console.error(error);
+      console.error(error); // Log errors
+      // Show toast message on error
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
         description: "Comment submission failed.",
       });
     } finally {
-      refetch();
-      setIsLoading(false);
-      form.reset();
+      refetch(); // Refetch data after submission
+      setIsLoading(false); // Reset loading state
+      form.reset(); // Reset the form
     }
   }
 
