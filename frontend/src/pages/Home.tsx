@@ -24,18 +24,20 @@ interface DynamicComponent {
 }
 
 const Home: React.FC = () => {
-  const { data: blockNumber } = useBlockNumber({ watch: true })
-  const { data: memecoins, refetch }: { data: TokenData[] | undefined, refetch: () => void } =
-    useReadContract({
-      abi: config.abi,
-      address: config.address as `0x${string}`,
-      functionName: "getTokens",
-      args: ["0x0000000000000000000000000000000000000000"],
-    }); 
-    
-    useEffect(() => {
-      refetch()
-    }, [blockNumber])
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+  const {
+    data: memecoins,
+    refetch,
+  }: { data: TokenData[] | undefined; refetch: () => void } = useReadContract({
+    abi: config.abi,
+    address: config.address as `0x${string}`,
+    functionName: "getTokens",
+    args: ["0x0000000000000000000000000000000000000000"],
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [blockNumber]);
 
   const [component1, setComponent1] = useState<DynamicComponent>({
     bgColor: "bg-gray-200",
@@ -132,7 +134,7 @@ const Home: React.FC = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="w-full grid grid-cols-1 lg:grid-cols-4 gap-10  place-items-center ">
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  place-items-center ">
         {memecoins && memecoins.map((coin, index) => <TokenCard coin={coin} />)}
       </div>
     </div>
