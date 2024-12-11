@@ -10,19 +10,40 @@ import { Progress } from "../ui/progress";
 import { BigNumberish, formatEther, parseEther } from "ethers";
 import config from "@/config.json";
 import { useToast } from "@/hooks/use-toast";
-import { useAccount, useBalance, useReadContract } from "wagmi";
+import {
+  useAccount,
+  useBalance,
+  useReadContract,
+  useWatchContractEvent,
+} from "wagmi";
 import { useParams } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
+import { useQuery } from "@tanstack/react-query";
+import { useTokenHolders } from "@/hooks/useTokenHolder";
 
 interface Props {
   supply: bigint;
   description: string;
   image: string;
 }
+interface Holder {
+  address: string;
+  balance: number;
+}
 
 const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [percCompleted, setPercCompleted] = useState<number>(0);
+
+  // const { isPending, error, data, refetch } = useQuery({
+  //   queryKey: ["tokenHoldersList"],
+  //   queryFn: () =>
+  //     fetch(
+  //       `https://api.etherscan.io/api?module=token&action=tokenholderlist&contractaddress=${tokenAddress}&page=1&offset=10&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`,
+  //     ).then((res) => res.json()),
+  //   refetchInterval: 500,
+  //   refetchOnWindowFocus: true,
+  // });
 
   const { data: totalSupply }: { data: BigNumberish | undefined } =
     useReadContract({
@@ -67,10 +88,9 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                   liquidity in the bonding curve will be deposited to
                   pancakeswap and burned. progression increases as more tokens
                   are bought. The bonding curve still has{" "}
-                  {(
-                    1_000_000_000n -
-                    BigInt(parseFloat(formatEther(supply.toString())))
-                  ).toString()}{" "}
+                  {(1_000_000_000n - supply)
+                    // BigInt(parseFloat(formatEther(supply.toString())))
+                    .toString()}{" "}
                   tokens available for sale.
                 </p>
               </TooltipContent>
@@ -112,25 +132,25 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
         <p>crowned king of the hill on 12/3/2024, 11:38:09 AM</p>
       </div>
 
-      {/* holdre distribution */}
-      <div className="h-auto max-h-[100vh] overflow-y-auto text-gray-400">
-        <h3 className="flex items-center h-12 justify-between font-semibold">
-          Holder distribution
-        </h3>
+      {/* holder distribution */}
+      {/* <div className="h-auto max-h-[100vh] overflow-y-auto text-gray-400"> */}
+      {/*   <h3 className="flex items-center h-12 justify-between font-semibold"> */}
+      {/*     Holder distribution */}
+      {/*   </h3> */}
 
-        <table className="min-w-full table-auto border-collapse">
-          <tbody>
-            {Array.from({ length: 10 }).map((item, index) => (
-              <tr key={index} className="">
-                <td className="  py-2">{index + 1}</td> {/* Serial Number */}
-                <td className=" py-2 ">0x000</td> {/* Column 1 Data */}
-                <td className="px-4 py-2 text-right">10%</td>{" "}
-                {/* Column 2 Data */}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/*   <table className="min-w-full table-auto border-collapse"> */}
+      {/*     <tbody> */}
+      {/*       {Array.from({ length: 10 }).map((item, index) => ( */}
+      {/*         <tr key={index} className=""> */}
+      {/*           <td className="  py-2">{index + 1}</td> {/* Serial Number */}
+      {/*           <td className=" py-2 ">0x000</td> {/* Column 1 Data */}
+      {/*           <td className="px-4 py-2 text-right">10%</td>{" "} */}
+      {/*           {/* Column 2 Data */}
+      {/*         </tr> */}
+      {/*       ))} */}
+      {/*     </tbody> */}
+      {/*   </table> */}
+      {/* </div> */}
     </>
   );
 };

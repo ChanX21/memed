@@ -54,7 +54,7 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
   }, [bnbFeed, totalSupply, bnbCost]);
   return (
     <Link to={`coin/${coin.token}`}>
-      <Card className="w-full max-w-[400px]">
+      <Card className=" w-[350px] h-[480px]">
         <CardHeader>
           <CardTitle className="text-sm flex justify-between items-center">
             <div className="flex gap-2">
@@ -73,7 +73,7 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
           </CardTitle>
           {/* <CardDescription className="h-56"></CardDescription> */}
         </CardHeader>
-        <CardContent>
+        <CardContent className="h-[300px] w-full">
           <img
             src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
             alt={coin.name}

@@ -26,6 +26,7 @@ import config from "@/config.json";
 import { useToast } from "@/hooks/use-toast";
 import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useAccount, useBalance } from "wagmi";
+import tokenAbi from "@/abi/erc20.json";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -46,13 +47,14 @@ export function TradeForm() {
 
   const { writeContractAsync: buyFunction } = useWriteContract();
   const { writeContractAsync: sellFunction } = useWriteContract();
+  const { writeContractAsync: approveFunction } = useWriteContract();
 
   const { data: tokenBalance }: { data: BigNumberish | undefined } =
     useReadContract({
-      abi: config.abi,
-      address: config.address as `0x${string}`,
-      functionName: "balance",
-      args: [tokenAddress, address],
+      abi: tokenAbi,
+      address: tokenAddress as `0x${string}`,
+      functionName: "balanceOf",
+      args: [address],
     });
 
   const { data: bnbCost }: { data: BigNumberish[] | undefined } =
@@ -72,6 +74,7 @@ export function TradeForm() {
     });
 
   const buy = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setTokenBuying(true);
     if (!bnbCost) return;
     try {
@@ -100,8 +103,19 @@ export function TradeForm() {
     }
   };
   const sell = async (e: React.FormEvent<HTMLFormElement>) => {
+    //0.000000000000001
+    e.preventDefault();
     setTokenSelling(true);
     try {
+      //run approve for factory contract
+
+      await sellFunction({
+        abi: tokenAbi,
+        address: tokenAddress as `0x${string}`,
+        functionName: "approve",
+        args: [config.address, parseEther(sellAmount || "0")],
+      });
+
       await sellFunction({
         abi: config.abi,
         address: config.address as `0x${string}`,
@@ -257,7 +271,7 @@ export function TradeForm() {
               </Dialog>
             </div>
           </CardHeader>
-          <form onSubmit={buy}>
+          <form onSubmit={sell}>
             <CardContent className="space-y-2 px-5 h-[50%] ">
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
