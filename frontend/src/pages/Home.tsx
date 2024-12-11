@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
-import { useReadContract } from "wagmi";
+import { useBlockNumber, useReadContract } from "wagmi";
 import config from "@/config.json";
 import TokenCard from "@/components/home/TokenCard";
 
@@ -24,13 +24,18 @@ interface DynamicComponent {
 }
 
 const Home: React.FC = () => {
-  const { data: memecoins }: { data: TokenData[] | undefined } =
+  const { data: blockNumber } = useBlockNumber({ watch: true })
+  const { data: memecoins, refetch }: { data: TokenData[] | undefined, refetch: () => void } =
     useReadContract({
       abi: config.abi,
       address: config.address as `0x${string}`,
       functionName: "getTokens",
       args: ["0x0000000000000000000000000000000000000000"],
-    });
+    }); 
+    
+    useEffect(() => {
+      refetch()
+    }, [blockNumber])
 
   const [component1, setComponent1] = useState<DynamicComponent>({
     bgColor: "bg-gray-200",

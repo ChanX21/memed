@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Card,
@@ -16,7 +16,7 @@ import { MobileForm } from "@/components/coin/forms/mobileForm";
 import TradingViewWidget from "@/components/coin/TradingViewWidget";
 import Thread from "@/components/coin/thread";
 import { TradeForm } from "@/components/coin/forms/tradeForm";
-import { useReadContract } from "wagmi";
+import { useBlockNumber, useReadContract } from "wagmi";
 import config from "@/config.json";
 import { TokenData } from "@/types";
 import { useParams } from "react-router-dom";
@@ -26,13 +26,16 @@ import { useToast } from "@/hooks/use-toast";
 const CoinDetailPage: React.FC = () => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const { toast } = useToast();
-  const { data }: { data: TokenData[] | undefined } = useReadContract({
+  const { data, refetch }: { data: TokenData[] | undefined, refetch:  () => void } = useReadContract({
     abi: config.abi,
     address: config.address as `0x${string}`,
     functionName: "getTokens",
     args: [tokenAddress],
   });
-
+  const { data: blockNumber } = useBlockNumber({ watch: true });
+    useEffect(() => {
+      refetch()
+    }, [blockNumber]);
   const coin: TokenData | null = data && data[0] ? data[0] : null;
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState<number>(0);
