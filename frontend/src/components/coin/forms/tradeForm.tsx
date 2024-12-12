@@ -61,7 +61,7 @@ export function TradeForm() {
 
   //Fetch token symbol
   const { data: tokenSymbol } = useReadContract({
-    abi: tokenAbi as Abi, // Token contract ABI typed as Abi
+    abi: tokenAbi, // Token contract ABI typed as Abi
     address: tokenAddress as `0x${string}`, // Token contract address
     functionName: "symbol", // Function to get the token symbol
   });
