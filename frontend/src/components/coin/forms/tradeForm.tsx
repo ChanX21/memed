@@ -52,6 +52,19 @@ export function TradeForm() {
       functionName: "balanceOf", // Function to get balance
       args: [address], // Address to check balance for
     });
+  // Fetch token name for the specified address
+  const { data: tokenName } = useReadContract({
+    abi: tokenAbi, // Token contract ABI typed as Abi
+    address: tokenAddress as `0x${string}`, // Token contract address
+    functionName: "name", // Function to get the token name
+  });
+
+  //Fetch token symbol
+  const { data: tokenSymbol } = useReadContract({
+    abi: tokenAbi, // Token contract ABI typed as Abi
+    address: tokenAddress as `0x${string}`, // Token contract address
+    functionName: "symbol", // Function to get the token symbol
+  });
 
   // Fetch BNB cost for the given token amount when buying
   const { data: bnbCost }: { data: BigNumberish[] | undefined } =
@@ -158,7 +171,9 @@ export function TradeForm() {
         <Card className="h-full">
           <CardHeader className="h-[30%]">
             <CardTitle>Buy</CardTitle>
-            <CardDescription>Trade BNB token for DogeCoin</CardDescription>
+            <CardDescription>
+              Trade BNB token for {tokenName as string}
+            </CardDescription>
             <div className="flex justify-end">
               <Dialog>
                 <DialogTrigger asChild>
@@ -205,7 +220,7 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount (DogeCoin)
+                  Amount ({tokenName as string})
                 </Label>
                 <Input
                   id="amount"
@@ -240,7 +255,9 @@ export function TradeForm() {
         <Card className="h-full">
           <CardHeader className="h-[30%]">
             <CardTitle>Sell</CardTitle>
-            <CardDescription>Trade Dogecoin token for BNB</CardDescription>
+            <CardDescription>
+              Trade {tokenName as string} token for BNB
+            </CardDescription>
             <div className="flex justify-end">
               <Dialog>
                 <DialogTrigger asChild>
@@ -281,7 +298,8 @@ export function TradeForm() {
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
                 <p>
-                  {tokenBalance ? formatEther(tokenBalance) : "0.0"} Dogecoin
+                  {tokenBalance ? formatEther(tokenBalance) : "0.0"}{" "}
+                  {tokenSymbol as string}
                 </p>
               </div>
               <div className="space-y-1 h-[60%] bg-gray-500 rounded-xl">
@@ -289,7 +307,7 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount ( Dogecoin )
+                  Amount ( {tokenName as string} )
                 </Label>
                 <Input
                   id="amount"
