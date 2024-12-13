@@ -23,7 +23,6 @@ interface Props {
 
 const TokenCard: React.FC<Props> = ({ coin }) => {
   const [marketCap, setMarketCap] = useState<number>(0);
-  console.log(coin.image, coin.name);
 
   // Using the useReadContract hook to get the total supply of a token
   const { data: totalSupply }: { data: BigNumberish | undefined } =
