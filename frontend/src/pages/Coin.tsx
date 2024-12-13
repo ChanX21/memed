@@ -26,16 +26,19 @@ import { useToast } from "@/hooks/use-toast";
 const CoinDetailPage: React.FC = () => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const { toast } = useToast();
-  const { data, refetch }: { data: TokenData[] | undefined, refetch:  () => void } = useReadContract({
+  const {
+    data,
+    refetch,
+  }: { data: TokenData[] | undefined; refetch: () => void } = useReadContract({
     abi: config.abi,
     address: config.address as `0x${string}`,
     functionName: "getTokens",
     args: [tokenAddress],
   });
   const { data: blockNumber } = useBlockNumber({ watch: true });
-    useEffect(() => {
-      refetch()
-    }, [blockNumber]);
+  useEffect(() => {
+    refetch();
+  }, [blockNumber]);
   const coin: TokenData | null = data && data[0] ? data[0] : null;
   const [activeTab, setActiveTab] = useState<"buy" | "sell">("buy");
   const [amount, setAmount] = useState<number>(0);
