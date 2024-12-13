@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Card } from "../ui/card";
 import {
   Tooltip,
   TooltipContent,
@@ -11,6 +12,7 @@ import { BigNumberish, formatEther } from "ethers";
 import { useReadContract } from "wagmi";
 import { useParams } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
+import { Crown, Rocket, TrendingUp, Users } from "lucide-react";
 
 interface Props {
   supply: bigint;
@@ -20,6 +22,12 @@ interface Props {
 interface Holder {
   address: string;
   balance: number;
+}
+
+interface StatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
 }
 
 const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
@@ -63,98 +71,164 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
   }, [totalSupply]); // Re-run the effect whenever the totalSupply value changes
 
   return (
-    <>
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
-        <div className="col-span-1 h-auto max-h-[400px] place-items-center ">
-          <img
-            src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + image}
-            className="w-auto h-full"
-          />
+    <div className="space-y-8">
+      {/* Hero Section */}
+      <Card className="p-6 bg-background/60 backdrop-blur-xl">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+          <div className="col-span-1 relative group">
+            {/* Image glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-[#050a30] via-transparent to-[#050a30] rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-all duration-500" />
+            <div className="relative aspect-square rounded-xl overflow-hidden">
+              <img
+                src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + image}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                alt="Token"
+              />
+            </div>
+          </div>
+          <div className="lg:col-span-2 space-y-6">
+            <p className="text-lg text-foreground/80 leading-relaxed">{description}</p>
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <StatCard
+                icon={<TrendingUp className="w-4 h-4" />}
+                label="Market Cap"
+                value="$21,000"
+              />
+              <StatCard
+                icon={<Users className="w-4 h-4" />}
+                label="Holders"
+                value="1,234"
+              />
+              {/* Add more stat cards as needed */}
+            </div>
+          </div>
         </div>
-        <div className=" lg:col-span-2 h-auto  pb-10 ">
-          <p>{description}</p>
-        </div>
+      </Card>
+
+      {/* Progress Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Bonding Curve Progress */}
+        <Card className="p-6 bg-background/60 backdrop-blur-xl relative group">
+          <div className="absolute -inset-[1px] bg-gradient-to-r from-[#050a30]/20 via-transparent to-[#050a30]/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          
+          <div className="relative space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Rocket className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">Bonding Curve Progress</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {percCompleted.toFixed(1)}% Complete
+                  </p>
+                </div>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <IoIosInformationCircleOutline className="w-5 h-5 text-muted-foreground hover:text-primary transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] p-4 bg-card/95 backdrop-blur-xl border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      When the market cap reaches $21,000 (~30 BNB), all the liquidity 
+                      in the bonding curve will be deposited to PancakeSwap and burned.
+                    </p>
+                    <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
+                      <p className="text-xs font-mono text-primary">
+                        Available tokens: {(1_000_000_000n - supply).toString()}
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <div className="space-y-3">
+              <div className="relative">
+                <Progress 
+                  value={percCompleted} 
+                  parentBg="bg-[#050a30]/10"
+                  childBg="bg-gradient-to-r from-[#050a30] to-primary"
+                  className="h-4"
+                />
+                {/* Milestone markers */}
+                <div className="absolute -top-1 left-[30%] h-6 w-[2px] bg-primary/30" />
+                <div className="absolute -top-1 left-[60%] h-6 w-[2px] bg-primary/30" />
+              </div>
+              
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>Start</span>
+                <span>PancakeSwap Launch</span>
+                <span>Complete</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* King of the Hill Progress */}
+        <Card className="p-6 bg-background/60 backdrop-blur-xl relative group">
+          <div className="absolute -inset-[1px] bg-gradient-to-r from-[#050a30]/20 via-transparent to-[#050a30]/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          
+          <div className="relative space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-yellow-500/10">
+                  <Crown className="w-5 h-5 text-yellow-500" />
+                </div>
+                <div>
+                  <h3 className="font-semibold">King of the Hill</h3>
+                  <p className="text-sm text-muted-foreground">33% Progress</p>
+                </div>
+              </div>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <IoIosInformationCircleOutline className="w-5 h-5 text-muted-foreground hover:text-yellow-500 transition-colors" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-[300px] p-4 bg-card/95 backdrop-blur-xl border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      When the market cap reaches $46,094, this coin will be pinned 
+                      to the top of the feed until dethroned!
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+
+            <Progress 
+              value={33} 
+              parentBg="bg-yellow-500/20"
+              childBg="bg-gradient-to-r from-yellow-500 to-yellow-300"
+              className="h-4"
+            />
+
+            <div className="flex items-center justify-between p-3 rounded-lg bg-card/50">
+              <div className="flex items-center gap-2">
+                <Crown className="w-4 h-4 text-yellow-500" />
+                <span className="text-sm">Crowned king on 12/3/2024, 11:38:09 AM</span>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
-      {/* bonding curve progress */}
-      <div className=" text-gray-400 text-sm">
-        <div className="flex justify-between items-center">
-          <p>Bonding curve progress: {percCompleted.toFixed(1)}%</p>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <IoIosInformationCircleOutline size={20} />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[300px] mr-3 bg-secondary">
-                <p className="text-gray-400">
-                  when the market cap reaches $21000 (~30 bnb), all the
-                  liquidity in the bonding curve will be deposited to
-                  pancakeswap and burned. progression increases as more tokens
-                  are bought. The bonding curve still has{" "}
-                  {(1_000_000_000n - supply)
-                    // BigInt(parseFloat(formatEther(supply.toString())))
-                    .toString()}{" "}
-                  tokens available for sale.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        <Progress className="h-5 my-2 " value={percCompleted} />
-        <p>
-          graduate this coin to pancakeswap at $21000 market cap there is 30 BNB
-          in the bonding curve
-        </p>
-      </div>
-      {/* king og the hill progress */}
-      <div className="pt-6 text-gray-400 text-sm">
-        <div className="flex justify-between items-center">
-          <p>king of the hill progress: 100%</p>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <IoIosInformationCircleOutline size={20} />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[300px] mr-3 bg-secondary">
-                <p className="text-gray-400">
-                  when the market cap reaches $46,094, this coin will be pinned
-                  to the top of the feed (until dethroned)!
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-
-        <Progress
-          className="h-5 my-2 "
-          parentBg="bg-yellow-500/50 "
-          childBg="bg-yellow-500 "
-          value={33}
-        />
-        <p>crowned king of the hill on 12/3/2024, 11:38:09 AM</p>
-      </div>
-
-      {/* holder distribution */}
-      {/* <div className="h-auto max-h-[100vh] overflow-y-auto text-gray-400"> */}
-      {/*   <h3 className="flex items-center h-12 justify-between font-semibold"> */}
-      {/*     Holder distribution */}
-      {/*   </h3> */}
-
-      {/*   <table className="min-w-full table-auto border-collapse"> */}
-      {/*     <tbody> */}
-      {/*       {Array.from({ length: 10 }).map((item, index) => ( */}
-      {/*         <tr key={index} className=""> */}
-      {/*           <td className="  py-2">{index + 1}</td> {/* Serial Number */}
-      {/*           <td className=" py-2 ">0x000</td> {/* Column 1 Data */}
-      {/*           <td className="px-4 py-2 text-right">10%</td>{" "} */}
-      {/*           {/* Column 2 Data */}
-      {/*         </tr> */}
-      {/*       ))} */}
-      {/*     </tbody> */}
-      {/*   </table> */}
-      {/* </div> */}
-    </>
+    </div>
   );
 };
+
+// Stat Card Component
+const StatCard: React.FC<StatCardProps> = ({ icon, label, value }) => (
+  <div className="p-4 rounded-xl bg-background/40 backdrop-blur border border-border/50">
+    <div className="flex items-center gap-2 mb-2">
+      <div className="p-2 rounded-lg bg-primary/10">
+        {icon}
+      </div>
+      <p className="text-sm text-muted-foreground">{label}</p>
+    </div>
+    <p className="text-lg font-semibold">{value}</p>
+  </div>
+);
 
 export default CoinInfo;

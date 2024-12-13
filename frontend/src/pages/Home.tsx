@@ -79,44 +79,139 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-6 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
           Discover Trending Memes
         </h1>
-        <div className="flex w-full max-w-3xl mx-auto h-12 space-x-3 px-4">
-          <Input
-            type="text"
-            placeholder="Search memes..."
-            className="h-full border-border/40 bg-background/50 backdrop-blur focus:ring-primary"
-          />
-          <Button 
-            type="submit" 
-            variant="secondary" 
-            className="h-full px-8 hover:shadow-lg transition-all duration-300"
-          >
-            Search
-          </Button>
+        
+        <div className="relative max-w-3xl mx-auto px-4">
+          <div className="absolute inset-0 -top-4 -bottom-4 bg-gradient-to-r from-primary/10 via-background to-primary/10 blur-xl" />
+          
+          <div className="relative flex gap-3 p-2 bg-background/40 backdrop-blur-md rounded-xl border border-border/40 shadow-lg">
+            <Input
+              type="text"
+              placeholder="Search memes..."
+              className="h-12 flex-1 bg-background/60 border-border/30 rounded-lg 
+                       text-foreground placeholder:text-muted-foreground
+                       focus:ring-2 focus:ring-primary/20 focus:border-primary/30
+                       hover:bg-background/80 hover:border-primary/50
+                       transition-all duration-300"
+            />
+            <Button 
+              type="submit" 
+              variant="secondary"
+              className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90
+                       shadow-md hover:shadow-lg transition-all duration-300
+                       hover:scale-105 active:scale-95"
+            >
+              <span className="mr-2">Search</span>
+              <svg 
+                className="w-4 h-4" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth={2} 
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                />
+              </svg>
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto mb-12">
-        <div className="flex flex-col lg:flex-row items-center gap-5 justify-center backdrop-blur-sm bg-background/50 p-4 rounded-xl border border-border/40">
-          <div
-            className="p-3 rounded-lg text-sm transition-all duration-300 hover:scale-105"
-            style={{ 
-              backgroundColor: component1.bgColor,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            {component1.text}
+        <div className="flex flex-col lg:flex-row items-center gap-5 justify-center">
+          <div className="w-full lg:w-auto">
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              
+              <div 
+                className="relative flex items-center gap-3 p-4 rounded-xl backdrop-blur-md bg-background/80 border border-border/40 shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                style={{ 
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {/* Transaction Icon */}
+                <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                  <svg 
+                    className="w-5 h-5 text-primary" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
+                    />
+                  </svg>
+                </div>
+
+                {/* Transaction Text */}
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    <span className="font-mono text-primary">
+                      {component1.text.match(/0x[a-z0-9]+/)?.[0] || ''}
+                    </span>
+                    <span className="mx-1">bought</span>
+                    <span className="font-semibold text-primary">
+                      {component1.text.match(/\d+\.?\d*/)?.[0] || ''} BNB
+                    </span>
+                    <span className="mx-1">of</span>
+                    <span className="font-medium text-primary">
+                      {component1.text.match(/Token-\d+/)?.[0] || ''}
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div
-            className="p-3 rounded-lg text-sm transition-all duration-300 hover:scale-105"
-            style={{ 
-              backgroundColor: component2.bgColor,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            {component2.text}
+
+          <div className="w-full lg:w-auto">
+            <div className="relative group">
+              {/* Glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              
+              <div 
+                className="relative flex items-center gap-3 p-4 rounded-xl backdrop-blur-md bg-background/80 border border-border/40 shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                style={{ 
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                {/* Creation Icon */}
+                <div className="flex-shrink-0 p-2 rounded-lg bg-primary/10">
+                  <svg 
+                    className="w-5 h-5 text-primary" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      strokeWidth={2} 
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </div>
+
+                {/* Creation Text */}
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    <span className="font-mono text-primary">{component2.text.split(' ')[0]}</span>
+                    <span className="mx-1">created</span>
+                    <span className="font-medium text-primary">{component2.text.split(' ')[2]}</span>
+                    <span className="mx-1">on</span>
+                    <span className="font-medium">{component2.text.split(' ')[4]}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -159,11 +254,16 @@ const Home: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 place-items-center">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 place-items-center">
           {memecoins && memecoins.map((coin, index) => (
-            <div key={index} className="w-full p-2 transition-transform duration-300 hover:scale-[1.02]">
-              <TokenCard coin={coin} />
+            <div 
+              key={index} 
+              className="w-full p-3 transition-transform duration-300 hover:scale-[1.02]"
+            >
+              <div className="flex justify-center">
+                <TokenCard coin={coin} />
+              </div>
             </div>
           ))}
         </div>

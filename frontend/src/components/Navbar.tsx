@@ -9,7 +9,7 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300">
-      <div className="container flex h-24 items-center justify-between px-4"> {/* Added padding for better spacing */}
+      <div className="container flex h-24 items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <a href="/" className="flex items-center gap-2">
             <img 
@@ -21,7 +21,9 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <ConnectButton className="transition-transform duration-200 hover:scale-110" /> {/* Added hover effect */}
+          <div className="transition-transform duration-200 hover:scale-110">
+            <ConnectButton />
+          </div>
           <Button
             variant="ghost"
             size="icon"
