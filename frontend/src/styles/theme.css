@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 206 89% 95%;
+    --foreground: 222 82% 10%;
+    
+    --card: 206 89% 95%;
+    --card-foreground: 222 82% 10%;
+ 
+    --popover: 206 89% 95%;
+    --popover-foreground: 222 82% 10%;
+ 
+    --primary: 222 82% 10%;
+    --primary-foreground: 206 89% 95%;
+ 
+    --secondary: 206 89% 95%;
+    --secondary-foreground: 222 82% 10%;
+ 
+    --muted: 206 89% 90%;
+    --muted-foreground: 222 82% 30%;
+ 
+    --accent: 206 89% 90%;
+    --accent-foreground: 222 82% 10%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 222 82% 10%;
+    --input: 222 82% 10%;
+    --ring: 222 82% 10%;
+    
+    --radius: 0.5rem;
+  }
+ 
+  .dark {
+    --background: 222 82% 10%;
+    --foreground: 206 89% 95%;
+ 
+    --card: 222 82% 10%;
+    --card-foreground: 206 89% 95%;
+ 
+    --popover: 222 82% 10%;
+    --popover-foreground: 206 89% 95%;
+ 
+    --primary: 206 89% 95%;
+    --primary-foreground: 222 82% 10%;
+ 
+    --secondary: 222 82% 10%;
+    --secondary-foreground: 206 89% 95%;
+ 
+    --muted: 222 82% 15%;
+    --muted-foreground: 206 89% 80%;
+ 
+    --accent: 222 82% 15%;
+    --accent-foreground: 206 89% 95%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 206 89% 95%;
+    --input: 206 89% 95%;
+    --ring: 206 89% 95%;
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+} 
+
+@layer base {
+  h1 {
+    @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-primary;
+  }
+
+  h2 {
+    @apply scroll-m-20 text-3xl font-semibold tracking-tight text-primary;
+  }
+
+  h3 {
+    @apply scroll-m-20 text-2xl font-semibold tracking-tight text-primary;
+  }
+
+  p {
+    @apply leading-7 text-foreground;
+  }
+
+  small {
+    @apply text-sm font-medium leading-none text-muted-foreground;
+  }
+
+  .prose {
+    @apply text-foreground;
+  }
+}
+  

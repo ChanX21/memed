@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Navbar from "@/components/shared/Navbar";
+import { Navbar } from "./components/Navbar";
 import Home from "./pages/Home";
 import CoinDetailPage from "./pages/Coin";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -24,11 +24,13 @@ const App: React.FC = () => {
       <Router>
         <QueryClientProvider client={queryClient}>
           <Navbar />
-          <div className=" ">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
-            </Routes>
+          <div className="min-h-screen bg-background font-sans antialiased">
+            <main className="container mx-auto py-6">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
+              </Routes>
+            </main>
           </div>
           <Toaster />
         </QueryClientProvider>

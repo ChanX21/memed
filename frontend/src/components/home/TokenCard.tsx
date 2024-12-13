@@ -64,50 +64,56 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
 
   return (
     <Link to={`coin/${coin.token}`}>
-      <Card className=" w-[350px] h-[480px]">
-        <CardHeader>
-          <CardTitle className="text-sm flex justify-between items-center">
-            <div className="flex gap-2">
-              <p className="text-gray-500">By: </p>
-              <p className="">
-                {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}{" "}
-              </p>
-            </div>
+      <Card className="w-[350px] h-[480px] relative group transition-all duration-300 hover:scale-[1.02]">
+        {/* Glow Effects */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 to-primary/30 rounded-xl blur opacity-0 group-hover:opacity-75 transition duration-300 group-hover:duration-200" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/25 via-primary/5 to-primary/25 rounded-xl blur-lg opacity-0 group-hover:opacity-75 transition duration-1000" />
+        
+        {/* Main Card Content - Added relative to stay above glow */}
+        <div className="relative bg-card rounded-xl h-full">
+          <CardHeader>
+            <CardTitle className="text-sm flex justify-between items-center">
+              <div className="flex gap-2">
+                <p className="text-gray-500">By: </p>
+                <p className="">
+                  {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}{" "}
+                </p>
+              </div>
 
-            <p className="text-gray-500 text-sm">
-              {formatDistanceToNow(
-                new Date(parseInt(coin.createdAt.toString()) * 1000),
-                { addSuffix: true },
-              )}
-            </p>
-          </CardTitle>
-          {/* <CardDescription className="h-56"></CardDescription> */}
-        </CardHeader>
-        <CardContent className="h-[300px] w-full">
-          <img
-            src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
-            alt={coin.name}
-            className="w-full h-full rounded-xl"
-          />
-        </CardContent>
-        <CardDescription className=" px-6 flex flex-col gap-3">
-          <div className="flex items-center justify-between w-full">
-            <h4 className="font-semibold">{coin.name}</h4>
-            <span className="text-primary font-semibold text-md">
-              {formatCurrency(marketCap)}
-            </span>
-          </div>
-          <div className="  w-full">
-            {coin.description.substring(0, 100)}
-            {"   "}
-            {coin.description.length > 100 && (
-              <span className="font-semibold hover:underline cursor-pointer ">
-                More...
+              <p className="text-gray-500 text-sm">
+                {formatDistanceToNow(
+                  new Date(parseInt(coin.createdAt.toString()) * 1000),
+                  { addSuffix: true },
+                )}
+              </p>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px] w-full">
+            <img
+              src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
+              alt={coin.name}
+              className="w-full h-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          </CardContent>
+          <CardDescription className="px-6 flex flex-col gap-3">
+            <div className="flex items-center justify-between w-full">
+              <h4 className="font-semibold">{coin.name}</h4>
+              <span className="text-primary font-semibold text-md">
+                {formatCurrency(marketCap)}
               </span>
-            )}
-          </div>
-        </CardDescription>
-        <CardFooter className="flex justify-between"></CardFooter>
+            </div>
+            <div className="w-full">
+              {coin.description.substring(0, 100)}
+              {"   "}
+              {coin.description.length > 100 && (
+                <span className="font-semibold hover:underline cursor-pointer">
+                  More...
+                </span>
+              )}
+            </div>
+          </CardDescription>
+          <CardFooter className="flex justify-between" />
+        </div>
       </Card>
     </Link>
   );

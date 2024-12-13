@@ -77,65 +77,96 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen p-6 ">
-      <div className="flex w-full max-w-3xl items-center m-auto h-12 space-x-2">
-        <Input
-          type="text"
-          placeholder="Search meme"
-          className="h-full border"
-        />
-        <Button type="submit" variant="secondary" className="h-full w-52">
-          Search
-        </Button>
+    <div className="min-h-screen p-6 bg-background">
+      <div className="max-w-7xl mx-auto mb-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-6 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+          Discover Trending Memes
+        </h1>
+        <div className="flex w-full max-w-3xl mx-auto h-12 space-x-3 px-4">
+          <Input
+            type="text"
+            placeholder="Search memes..."
+            className="h-full border-border/40 bg-background/50 backdrop-blur focus:ring-primary"
+          />
+          <Button 
+            type="submit" 
+            variant="secondary" 
+            className="h-full px-8 hover:shadow-lg transition-all duration-300"
+          >
+            Search
+          </Button>
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row items-center gap-5  my-8 w-full justify-center">
-        <div
-          className="p-2 rounded-md text-sm text-black"
-          style={{ backgroundColor: component1.bgColor }}
-        >
-          {component1.text}
-        </div>
-        <div
-          className="p-2 rounded-md text-sm text-black"
-          style={{ backgroundColor: component2.bgColor }}
-        >
-          {component2.text}
+      <div className="max-w-7xl mx-auto mb-12">
+        <div className="flex flex-col lg:flex-row items-center gap-5 justify-center backdrop-blur-sm bg-background/50 p-4 rounded-xl border border-border/40">
+          <div
+            className="p-3 rounded-lg text-sm transition-all duration-300 hover:scale-105"
+            style={{ 
+              backgroundColor: component1.bgColor,
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {component1.text}
+          </div>
+          <div
+            className="p-3 rounded-lg text-sm transition-all duration-300 hover:scale-105"
+            style={{ 
+              backgroundColor: component2.bgColor,
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            {component2.text}
+          </div>
         </div>
       </div>
-      <div className="flex justify-between max-w-4xl mx-auto mb-4"></div>
-      <div className="w-full h-auto mb-3 flex justify-between">
-        <Uploady
-          multiple
-          grouped
-          maxGroupSize={2}
-          method="PUT"
-          destination={{
-            url: "https://my-server",
-            headers: { "x-custom": "123" },
-          }}
-        >
-          <MemeForm />
-        </Uploady>
-        <Select defaultValue="date">
-          <SelectTrigger className="w-[180px] ">Sort</SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="date" className="cursor-pointer">
-                Date
-              </SelectItem>
-              <SelectItem value="trade" className="cursor-pointer">
-                Trade
-              </SelectItem>
-              <SelectItem value="marketcap" className="cursor-pointer">
-                Market cap
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+
+      <div className="max-w-7xl mx-auto mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 px-4">
+          <Uploady
+            multiple
+            grouped
+            maxGroupSize={2}
+            method="PUT"
+            destination={{
+              url: "https://my-server",
+              headers: { "x-custom": "123" },
+            }}
+          >
+            <div className="w-full sm:w-auto">
+              <MemeForm />
+            </div>
+          </Uploady>
+
+          <Select defaultValue="date">
+            <SelectTrigger className="w-[180px] border-border/40 bg-background/50 backdrop-blur">
+              Sort By
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="date" className="cursor-pointer">
+                  Latest
+                </SelectItem>
+                <SelectItem value="trade" className="cursor-pointer">
+                  Most Traded
+                </SelectItem>
+                <SelectItem value="marketcap" className="cursor-pointer">
+                  Market Cap
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  place-items-center ">
-        {memecoins && memecoins.map((coin, index) => <TokenCard coin={coin} />)}
+
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 place-items-center">
+          {memecoins && memecoins.map((coin, index) => (
+            <div key={index} className="w-full p-2 transition-transform duration-300 hover:scale-[1.02]">
+              <TokenCard coin={coin} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
