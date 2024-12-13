@@ -66,19 +66,19 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
     <Link to={`coin/${coin.token}`}>
       <Card className="w-[350px] h-[480px] relative group transition-all duration-500 hover:scale-[1.02]">
         {/* Magical dark glow effects */}
-        <div className="absolute -inset-[4px] bg-[#050a30] opacity-0 group-hover:opacity-100 rounded-[24px] blur-[20px] transition-all duration-700" />
-        
-        {/* Multiple layered glows for depth */}
-        <div className="absolute -inset-[2px] bg-gradient-to-r from-[#050a30] via-[#0a1854] to-[#050a30] rounded-[22px] opacity-0 group-hover:opacity-70 blur-xl group-hover:animate-pulse-slow transition-all duration-700" />
-        
+        <div className="absolute -inset-[2px] bg-[#dfe6f7] opacity-0 group-hover:opacity-30 rounded-[24px] blur-sm transition-all duration-1200" />
+
+        {/* Softer layered glows for depth */}
+        <div className="absolute -inset-[1px] bg-gradient-to-r from-[#e6ecfa] via-[#f0f4fc] to-[#e6ecfa] rounded-[22px] opacity-0 group-hover:opacity-20 blur-md transition-all duration-1200" />
+
         {/* Inner glow ring */}
-        <div className="absolute inset-[1px] rounded-[21px] bg-gradient-to-b from-[#050a30]/80 via-transparent to-[#050a30]/80 opacity-0 group-hover:opacity-50 transition-all duration-500" />
+        <div className="absolute inset-[0.5px] rounded-[21px] bg-gradient-to-b from-[#f5f8fd]/40 via-transparent to-[#f5f8fd]/40 opacity-0 group-hover:opacity-15 blur-xs transition-all duration-1000" />
 
         {/* Animated corner glows */}
-        <div className="absolute -inset-[3px] opacity-0 group-hover:opacity-60 transition-all duration-700">
+        {/* <div className="absolute -inset-[3px] opacity-0 group-hover:opacity-60 transition-all duration-700">
           <div className="absolute top-[2px] left-[2px] w-20 h-20 bg-[#050a30] blur-xl rounded-full animate-pulse-slow" />
           <div className="absolute bottom-[2px] right-[2px] w-20 h-20 bg-[#050a30] blur-xl rounded-full animate-pulse-slow delay-300" />
-        </div>
+        </div> */}
 
         {/* Main content container with dark overlay */}
         <div className="relative h-full rounded-xl bg-card/95 overflow-hidden flex flex-col backdrop-blur-sm">
@@ -97,7 +97,7 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
               <time className="text-xs text-muted-foreground font-medium">
                 {formatDistanceToNow(
                   new Date(parseInt(coin.createdAt.toString()) * 1000),
-                  { addSuffix: true }
+                  { addSuffix: true },
                 )}
               </time>
             </CardTitle>
@@ -106,11 +106,20 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
           {/* Image container */}
           <CardContent className="relative p-0 h-[280px] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-transparent to-background/20 z-10" />
-            <img
-              src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
-              alt={coin.name}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-            />
+            {coin.image && (
+              <img
+                src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
+                alt={coin.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            )}
+            {!coin.image && (
+              <img
+                src="/assets/sample.webp"
+                alt={coin.name}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
+            )}
           </CardContent>
 
           {/* Details section */}

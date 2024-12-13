@@ -20,7 +20,7 @@ const App: React.FC = () => {
     };
   }, []);
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
       <Router>
         <QueryClientProvider client={queryClient}>
           <Navbar />
@@ -28,7 +28,10 @@ const App: React.FC = () => {
             <main className="container mx-auto py-6">
               <Routes>
                 <Route path="/" element={<Home />} />
-                <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
+                <Route
+                  path="/coin/:tokenAddress"
+                  element={<CoinDetailPage />}
+                />
               </Routes>
             </main>
           </div>

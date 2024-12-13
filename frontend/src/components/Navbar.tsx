@@ -1,7 +1,7 @@
 import { Button } from "./ui/button";
 import { useTheme } from "./theme-provider";
 import { Moon, Sun } from "lucide-react";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import logo from "../assets/memedlogo2.png";
 
 export function Navbar() {
@@ -12,11 +12,11 @@ export function Navbar() {
       <div className="container flex h-24 items-center justify-between px-4">
         <div className="flex items-center gap-4">
           <a href="/" className="flex items-center gap-2">
-            <img 
-              src={logo} 
-              alt="Memed Logo" 
-              className="h-20 w-auto transition-transform duration-200 hover:scale-110" 
-            />           
+            <img
+              src={logo}
+              alt="Memed Logo"
+              className="h-20 w-auto transition-transform duration-200 hover:scale-110"
+            />
           </a>
         </div>
 
@@ -40,4 +40,4 @@ export function Navbar() {
       </div>
     </nav>
   );
-} 
+}
