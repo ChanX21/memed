@@ -7,7 +7,7 @@ import "./MemedFactory.sol";
 
 contract MemedBattle is Ownable {
     Factory public factory;
-    uint256 public constant BATTLE_DURATION = 24 hours;
+    uint256 public constant BATTLE_DURATION = 10 minutes;
     uint256 public constant MIN_TOKENS_TO_CREATE = 1000 * 10**18;
     uint256 public constant CREATION_FEE = 0.0002 ether;
 
