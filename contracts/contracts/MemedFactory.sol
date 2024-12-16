@@ -15,7 +15,7 @@ contract Factory is Ownable {
     uint256 public constant k = 46875;
     uint256 public constant offset = 18750000000000000000000000000000;
     uint256 public constant SCALING_FACTOR = 10 ** 18;
-    uint256 public graduationAmount = 30 ether;
+    uint256 public graduationAmount = 0.05 ether;
     uint256 public constant creationFee = 0.002 ether;
     uint256 public constant tradeFeePercent = 10;
     uint256 public feesBalance;
@@ -156,7 +156,7 @@ contract Factory is Ownable {
             tokenData[_token].stage == TokenStages.BOUNDING_CURVE,
             "Invalid token stage"
         );
-      MemedToken token = MemedToken(_token);
+        MemedToken token = MemedToken(_token);
         require(
             token.balanceOf(msg.sender) >= _amount,
             "Insufficient token balance"
@@ -204,7 +204,6 @@ contract Factory is Ownable {
         emit TokenGraduated(_token, pool);
     }
 
-
     function getBNBAmount(
         address _token,
         uint256 _amount
@@ -215,7 +214,7 @@ contract Factory is Ownable {
         uint256 f_b = k * newSupply + offset;
         uint256 result = ((_amount * f_b) / SCALING_FACTOR);
         uint256 fee = (result * tradeFeePercent) / 10000;
-        return [result + fee, result, fee];
+        return [result - fee, result, fee];
     }
 
     function getTokens(address _token) external view returns (AllTokenData[] memory) {
