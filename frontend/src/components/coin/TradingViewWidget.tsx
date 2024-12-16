@@ -1,6 +1,8 @@
 // TradingViewWidget.jsx
 import { useEffect, useRef, memo } from "react";
 
+import { createChart } from "lightweight-charts";
+
 function TradingViewWidget() {
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -19,7 +21,7 @@ function TradingViewWidget() {
           "style": "1",
           "locale": "en",
           "enable_publishing": false,
-          "backgroundColor": "rgba(15, 3, 55, 1)",
+          "backgroundColor": "rgba(20, 20, 20, 1)",
           "allow_symbol_change": true,
           "support_host": "https://www.tradingview.com"
         }`;
@@ -38,6 +40,7 @@ function TradingViewWidget() {
     >
       <div
         className="tradingview-widget-container__widget"
+        id="secondContainer"
         style={{ height: "calc(100% - 32px)", width: "100%" }}
       ></div>
       {/* <div className="tradingview-widget-copyright"><a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank"><span className="blue-text">Track all markets on TradingView</span></a></div> */}

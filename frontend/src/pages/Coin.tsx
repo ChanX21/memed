@@ -22,6 +22,13 @@ import { TokenData } from "@/types";
 import { useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import CustomChart from "@/components/coin/CustomChart";
+import { GrTransaction } from "react-icons/gr";
+import { PiSubtractBold } from "react-icons/pi";
+import { GiPayMoney, GiReceiveMoney } from "react-icons/gi";
+import { MdOutlinePriceChange, MdOutlineSavings } from "react-icons/md";
+import { AiOutlineLineChart } from "react-icons/ai";
+import { BattleChart } from "@/components/coin/BattleChart";
 
 const CoinDetailPage: React.FC = () => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -85,10 +92,69 @@ const CoinDetailPage: React.FC = () => {
           <Separator className="my-4 border border-gray-500 w-[96%] m-auto" />
           {/* Chart Section */}
           <div className="p-6 ">
-            <h2 className="text-xl font-bold mb-4">Price Chart</h2>
+            <h2 className="text-xl font-bold mb-4">Statistics</h2>
             <div className="grid grid-cols-7 h-[50vh] gap-10">
-              <div className="bg-gray-200  h-full col-span-7 lg:col-span-5">
-                <TradingViewWidget />
+              <div className="dark:bg-black/50 h-full col-span-7 lg:col-span-5  ">
+                {/* <TradingViewWidget /> */}
+                {/* <CustomChart /> */}
+
+                <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4">
+                  <div className="h-full flex w-full flex-col justify-center ">
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <GrTransaction size={25} className="text-gray-500" />
+                        <p>Total transactions</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <GiReceiveMoney size={25} className="text-gray-500" />
+                        <p> Sells</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <GiPayMoney size={25} className="text-gray-500" />
+                        <p> Buys</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <MdOutlineSavings size={25} className="text-gray-500" />
+                        <p> Collateral</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <MdOutlinePriceChange
+                          size={25}
+                          className="text-gray-500"
+                        />
+                        <p> Price (BNB)</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+                    <div className="flex justify-between py-3 border-b border-gray-500">
+                      <div className="flex items-center gap-3">
+                        <AiOutlineLineChart
+                          size={25}
+                          className="text-gray-500"
+                        />
+                        <p> Battles</p>
+                      </div>
+                      <div className="font-semibold">1000</div>
+                    </div>
+                  </div>
+
+                  <div className="h-full hidden lg:block">
+                    <BattleChart />
+                  </div>
+                </div>
               </div>
               <div className=" h-full hidden lg:block col-span-2 ">
                 <TradeForm />
