@@ -1,42 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useReadContract } from "wagmi";
 import config from "@/config";
-import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Medal, Star, Crown, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2, Trophy } from "lucide-react";
 import { Address } from 'viem';
+import { useBattles } from "@/hooks/useBattles";
+import LeaderboardCard from "@/components/leaderboard/LeaderboardCard";
 
-interface LeaderboardData {
-  tokens: `0x${string}`[];
-  wins: bigint[];
-  totalBattles: bigint[];
-  totalVotes: bigint[];
+interface TokenData {
+  token: `0x${string}`;
+  name: string;
+  ticker: string;
+  description: string;
+  image: string;
+  supply: bigint;
+  owner: `0x${string}`;
+  stage: number;
+  collateral: bigint;
+  createdAt: number;
 }
 
 const Leaderboard: React.FC = () => {
-  const { data: leaderboardData, isLoading } = useReadContract({
-    address: config.battleAddress as Address,
-    abi: config.battleAbi,
-    functionName: 'getLeaderboard',
-    args: [10],
-  }) as { data: LeaderboardData | undefined; isLoading: boolean };
+  const { useLeaderboard } = useBattles();
+  const { data: tokens } = useReadContract({
+    address: config.address as Address,
+    abi: config.abi,
+    functionName: "getTokens",
+    args: ["0x0000000000000000000000000000000000000000"] as const,
+  }) as { data: TokenData[] | undefined };
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  const { data: rawLeaderboardData, isLoading, error } = useLeaderboard(10);
 
-  const getRankIcon = (rank: number) => {
-    switch (rank) {
-      case 0:
-        return <Crown className="w-6 h-6 text-yellow-500" />;
-      case 1:
-        return <Medal className="w-6 h-6 text-gray-400" />;
-      case 2:
-        return <Medal className="w-6 h-6 text-amber-600" />;
-      default:
-        return <Star className="w-6 h-6 text-primary/60" />;
-    }
-  };
+  useEffect(() => {
+    console.log('Raw leaderboard data:', rawLeaderboardData);
+    console.log('Tokens:', tokens);
+    console.log('Loading:', isLoading);
+    console.log('Error:', error);
+  }, [rawLeaderboardData, tokens, isLoading, error]);
 
   if (isLoading) {
     return (
@@ -46,7 +45,8 @@ const Leaderboard: React.FC = () => {
     );
   }
 
-  if (!leaderboardData?.tokens || leaderboardData.tokens.length === 0) {
+  if (!rawLeaderboardData || !rawLeaderboardData[0] || rawLeaderboardData[0].length === 0) {
+    console.log('No leaderboard data available');
     return (
       <div className="min-h-screen p-6 bg-background">
         <div className="max-w-4xl mx-auto text-center">
@@ -59,65 +59,45 @@ const Leaderboard: React.FC = () => {
     );
   }
 
+  const [tokenAddresses, wins, totalBattles, totalVotes] = rawLeaderboardData;
+
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-3">Battle Champions</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-4xl font-bold mb-3 flex items-center justify-center gap-3">
+            <Trophy className="w-8 h-8 text-yellow-500" />
+            Battle Champions
+          </h1>
+          <p className="text-muted-foreground mb-8">
             Top performing meme tokens in the battle arena
           </p>
         </div>
 
         <div className="space-y-4">
-          {leaderboardData.tokens.map((token: string, index: number) => (
-            <Card 
-              key={token} 
-              className={cn(
-                "hover:shadow-lg transition-all duration-300",
-                index === 0 && "bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/20",
-                index === 1 && "bg-gradient-to-r from-gray-400/10 to-transparent",
-                index === 2 && "bg-gradient-to-r from-amber-600/10 to-transparent"
-              )}
-            >
-              <CardContent className="flex items-center p-6">
-                <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-primary/10">
-                  {getRankIcon(index)}
-                </div>
-                
-                <div className="ml-6 flex-grow">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold">{formatAddress(token)}</h3>
-                    {index === 0 && (
-                      <span className="text-xs font-medium text-yellow-500 bg-yellow-500/10 px-2 py-1 rounded-full">
-                        Champion
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-3 gap-8 mt-3">
-                    <div className="text-center p-2 rounded-lg bg-primary/5">
-                      <p className="text-xs text-muted-foreground mb-1">Wins</p>
-                      <p className="font-semibold text-primary">
-                        {leaderboardData?.wins[index].toString() || '0'}
-                      </p>
-                    </div>
-                    <div className="text-center p-2 rounded-lg bg-primary/5">
-                      <p className="text-xs text-muted-foreground mb-1">Battles</p>
-                      <p className="font-semibold text-primary">
-                        {leaderboardData?.totalBattles[index].toString() || '0'}
-                      </p>
-                    </div>
-                    <div className="text-center p-2 rounded-lg bg-primary/5">
-                      <p className="text-xs text-muted-foreground mb-1">Total Votes</p>
-                      <p className="font-semibold text-primary">
-                        {leaderboardData?.totalVotes[index].toString() || '0'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {tokenAddresses.map((token, index) => {
+            console.log('Rendering token:', token, 'at index:', index);
+            console.log('Token data:', tokens?.find(t => t.token === token));
+            console.log('Stats:', {
+              wins: wins[index],
+              totalBattles: totalBattles[index],
+              totalVotes: totalVotes[index],
+            });
+            
+            return (
+              <LeaderboardCard
+                key={token}
+                token={token}
+                tokenData={tokens?.find(t => t.token === token)}
+                rank={index}
+                stats={{
+                  wins: wins[index],
+                  totalBattles: totalBattles[index],
+                  totalVotes: totalVotes[index],
+                }}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

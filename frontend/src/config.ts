@@ -1,14 +1,15 @@
 import battleAbi from "./abi/memedBattle.json";
+import tokenAbi from "./abi/memedToken.json";
 import { Address } from 'viem';
 
 const config = {
-  address: "0x5FbDB2315678afecb367f032d93F642f64180aa3" as Address,
+  address: "0xdb988a31f8685905d1ace4e6cd9c2489e937bdf6" as Address,
   abi: [
     {
       "inputs": [
         {
           "internalType": "address",
-          "name": "owner",
+          "name": "_token",
           "type": "address"
         }
       ],
@@ -25,6 +26,46 @@ const config = {
               "internalType": "string",
               "name": "name",
               "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "ticker",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "image",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            },
+            {
+              "internalType": "enum Factory.TokenStages",
+              "name": "stage",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint256",
+              "name": "collateral",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "supply",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "createdAt",
+              "type": "uint256"
             }
           ],
           "internalType": "struct Factory.AllTokenData[]",
@@ -36,8 +77,9 @@ const config = {
       "type": "function"
     }
   ],
-  battleAddress: "0x0321F3a61a486a18CFF4d451c2a9D34Bf360A5F8" as Address,
+  battleAddress: "0xdbca1683B4E3e11eC0881EF7d732B419F72a4Ee6" as Address,
   battleAbi: battleAbi as any,
+  tokenAbi: tokenAbi as any,
 } as const;
 
 console.log('Config loaded:', {
@@ -45,6 +87,7 @@ console.log('Config loaded:', {
   battleAddress: config.battleAddress,
   hasFactoryAbi: !!config.abi,
   hasBattleAbi: !!config.battleAbi,
+  hasTokenAbi: !!config.tokenAbi,
 });
 
 export default config; 

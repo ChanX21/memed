@@ -99,7 +99,7 @@ contract MemedBattle is Ownable {
         ));
         require(
             lastBattleTimestamp[battlePairHash] == 0 || 
-            block.timestamp >= lastBattleTimestamp[battlePairHash] + 1 days,
+            block.timestamp >= lastBattleTimestamp[battlePairHash] + 10 minutes,
             "Token combination in cooldown"
         );
 
@@ -253,12 +253,21 @@ contract MemedBattle is Ownable {
         battle.winner = winner;
         battle.settled = true;
 
+        // Update tokenScores for both tokens
+        tokenScores[battle.token1].totalBattles++;
+        tokenScores[battle.token2].totalBattles++;
+        tokenScores[battle.token1].totalVotes += battle.token1Votes;
+        tokenScores[battle.token2].totalVotes += battle.token2Votes;
+
         if (winner != address(0)) {
             // Update winner stats
             TokenStats storage winnerStats = tokenStats[winner];
             winnerStats.totalWins++;
             winnerStats.lastWinTime = block.timestamp;
             monthlyWinCount[winner][(block.timestamp / 30 days) % 6]++;
+
+            // Update tokenScores for winner
+            tokenScores[winner].wins++;
 
             // Check for new king (e.g., if won 3 battles in current month)
             if (monthlyWinCount[winner][(block.timestamp / 30 days) % 6] >= 3 && 
