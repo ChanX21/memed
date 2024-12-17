@@ -97,6 +97,7 @@ const Battles: React.FC = () => {
   // Consolidated token data logging
   useEffect(() => {
     if (tokens) {
+      console.log(import.meta.env.VITE_BSC_TESTNET_RPC);
       const graduatedTokens = tokens.filter(t => t.stage === 2);
       console.log('Token data:', {
         raw: tokens,

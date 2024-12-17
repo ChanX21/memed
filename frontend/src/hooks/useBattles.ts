@@ -33,7 +33,7 @@ export function useBattles() {
     try {
       const hash = await writeContractAsync({
         address: config.battleAddress as Address,
-        abi: config.battleAbi,
+        abi: config.battleAbi.abi,
         functionName: 'createBattle',
         args: [token1 as Address, token2 as Address],
         value: options.value
@@ -65,7 +65,7 @@ export function useBattles() {
 
       const hash = await writeContractAsync({
         address: config.battleAddress as Address,
-        abi: config.battleAbi,
+        abi: config.battleAbi.abi,
         functionName: 'vote',
         args: [BigInt(battleId), votingFor as Address],
       });
@@ -95,7 +95,7 @@ export function useBattles() {
     try {
       const hash = await writeContractAsync({
         address: config.battleAddress as Address,
-        abi: config.battleAbi,
+        abi: config.battleAbi.abi,
         functionName: 'settleBattle',
         args: [battleId],
       });
@@ -129,7 +129,7 @@ export function useBattles() {
   const useActiveBattles = () => {
     const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
-      abi: config.battleAbi,
+      abi: config.battleAbi.abi,
       functionName: 'getBattles',
       args: [true], // true for active battles only
     });
@@ -145,7 +145,7 @@ export function useBattles() {
   const useLeaderboard = (limit: number = 10) => {
     const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
-      abi: config.battleAbi,
+      abi: config.battleAbi.abi,
       functionName: 'getLeaderboard',
       args: [limit],
     });
@@ -168,7 +168,7 @@ export function useBattles() {
   const useTokenStats = (tokenAddress: string) => {
     const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
-      abi: config.battleAbi,
+      abi: config.battleAbi.abi,
       functionName: 'getTokenBasicStats',
       args: [tokenAddress as Address],
     });
