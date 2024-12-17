@@ -1,17 +1,25 @@
 import React from "react";
 import { useReadContract } from "wagmi";
-import config from "@/config.json";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import config from "@/config";
+import { Card, CardContent } from "@/components/ui/card";
 import { Trophy, Medal, Star, Crown, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Address } from 'viem';
+
+interface LeaderboardData {
+  tokens: `0x${string}`[];
+  wins: bigint[];
+  totalBattles: bigint[];
+  totalVotes: bigint[];
+}
 
 const Leaderboard: React.FC = () => {
   const { data: leaderboardData, isLoading } = useReadContract({
+    address: config.battleAddress as Address,
     abi: config.battleAbi,
-    address: config.battleAddress as `0x${string}`,
-    functionName: "getLeaderboard",
+    functionName: 'getLeaderboard',
     args: [10],
-  });
+  }) as { data: LeaderboardData | undefined; isLoading: boolean };
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -38,6 +46,19 @@ const Leaderboard: React.FC = () => {
     );
   }
 
+  if (!leaderboardData?.tokens || leaderboardData.tokens.length === 0) {
+    return (
+      <div className="min-h-screen p-6 bg-background">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-4xl font-bold mb-3">Battle Champions</h1>
+          <p className="text-muted-foreground">
+            No battles have been completed yet. Create a battle to get started!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-4xl mx-auto">
@@ -49,7 +70,7 @@ const Leaderboard: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {leaderboardData?.tokens.map((token: string, index: number) => (
+          {leaderboardData.tokens.map((token: string, index: number) => (
             <Card 
               key={token} 
               className={cn(
@@ -77,19 +98,19 @@ const Leaderboard: React.FC = () => {
                     <div className="text-center p-2 rounded-lg bg-primary/5">
                       <p className="text-xs text-muted-foreground mb-1">Wins</p>
                       <p className="font-semibold text-primary">
-                        {leaderboardData.wins[index].toString()}
+                        {leaderboardData?.wins[index].toString() || '0'}
                       </p>
                     </div>
                     <div className="text-center p-2 rounded-lg bg-primary/5">
                       <p className="text-xs text-muted-foreground mb-1">Battles</p>
                       <p className="font-semibold text-primary">
-                        {leaderboardData.totalBattles[index].toString()}
+                        {leaderboardData?.totalBattles[index].toString() || '0'}
                       </p>
                     </div>
                     <div className="text-center p-2 rounded-lg bg-primary/5">
                       <p className="text-xs text-muted-foreground mb-1">Total Votes</p>
                       <p className="font-semibold text-primary">
-                        {leaderboardData.totalVotes[index].toString()}
+                        {leaderboardData?.totalVotes[index].toString() || '0'}
                       </p>
                     </div>
                   </div>
