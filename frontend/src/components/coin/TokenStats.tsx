@@ -235,7 +235,7 @@ const TokenStats: React.FC = () => {
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4">
-      <div className="h-full flex w-full flex-col justify-center ">
+      <div className="h-full flex w-full flex-col lg:justify-center ">
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GrTransaction size={25} className="text-gray-500" />
