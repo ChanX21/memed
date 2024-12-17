@@ -86,7 +86,57 @@ const Battles: React.FC = () => {
 
   const { battles, isError: isBattlesError, error: battlesError, isLoading: isBattlesLoading } = useAllBattles();
 
-  // Show loading state
+  // Consolidated token error handling and logging
+  useEffect(() => {
+    if (isTokenError && tokenError) {
+      console.error('Token fetch error:', tokenError);
+      toast.error('Failed to load tokens. Please check your network connection.');
+    }
+  }, [isTokenError, tokenError]);
+
+  // Consolidated token data logging
+  useEffect(() => {
+    if (tokens) {
+      const graduatedTokens = tokens.filter(t => t.stage === 2);
+      console.log('Token data:', {
+        raw: tokens,
+        graduated: graduatedTokens,
+        count: tokens.length,
+        graduatedCount: graduatedTokens.length
+      });
+      
+      if (graduatedTokens.length === 0) {
+        toast.warning('No graduated tokens available for battle');
+      }
+    }
+  }, [tokens]);
+
+  // Battle data logging
+  useEffect(() => {
+    if (battles) {
+      const parsedBattles = parseBattles(battles);
+      console.log('Battle data:', {
+        raw: battles,
+        parsed: parsedBattles,
+        active: getActiveBattles(),
+        ended: getEndedBattles()
+      });
+    }
+  }, [battles]);
+
+  // Selection logging
+  useEffect(() => {
+    if (selectedToken1 || selectedToken2) {
+      console.log('Token selection:', {
+        token1: selectedToken1,
+        token2: selectedToken2,
+        token1Data: tokens?.find(t => t.token === selectedToken1),
+        token2Data: tokens?.find(t => t.token === selectedToken2)
+      });
+    }
+  }, [selectedToken1, selectedToken2, tokens]);
+
+  // Loading state
   if (isTokensLoading || isBattlesLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -95,7 +145,7 @@ const Battles: React.FC = () => {
     );
   }
 
-  // Show error state
+  // Error state
   if (isTokenError || isBattlesError) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
@@ -111,91 +161,6 @@ const Battles: React.FC = () => {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (isTokenError && tokenError) {
-      console.error('Token fetch error:', tokenError);
-      toast.error('Failed to load tokens. Please check your network connection.');
-    }
-  }, [isTokenError, tokenError]);
-
-  useEffect(() => {
-    if (tokens) {
-      console.log('Raw token data:', tokens);
-      console.log('Graduated tokens:', tokens.filter(t => t.stage === 2));
-    }
-    if (isTokenError && tokenError) {
-      console.error('Token fetch error:', tokenError);
-    }
-  }, [tokens, isTokenError, tokenError]);
-
-  useEffect(() => {
-    if (isTokenError) {
-      console.error('Error fetching tokens');
-      toast.error('Failed to load tokens');
-    }
-  }, [isTokenError]);
-
-  useEffect(() => {
-    if (tokens) {
-      const graduatedTokens = tokens.filter(t => t.stage === 2);
-      console.log('Graduated tokens:', graduatedTokens);
-      
-      if (graduatedTokens.length === 0) {
-        toast.warning('No graduated tokens available for battle');
-      }
-    }
-  }, [tokens]);
-
-  useEffect(() => {
-    console.log('Selected tokens:', {
-      token1: selectedToken1,
-      token2: selectedToken2,
-      token1Data: tokens?.find(t => t.token === selectedToken1),
-      token2Data: tokens?.find(t => t.token === selectedToken2)
-    });
-  }, [selectedToken1, selectedToken2, tokens]);
-
-  useEffect(() => {
-    if (battles) {
-      const parsed = parseBattles(battles);
-      console.log('Raw battle data:', battles);
-      console.log('Parsed battles:', parsed);
-      console.log('Active battles:', getActiveBattles());
-      console.log('Ended battles:', getEndedBattles());
-    }
-  }, [battles]);
-
-  console.log('Data states:', { 
-    tokens: tokens?.length || 0,
-    battles: battles ? {
-      count: battles.length || 0
-    } : null
-  });
-
-  useEffect(() => {
-    console.log('Token query state:', {
-      isLoading: isTokensLoading,
-      isError: isTokenError,
-      error: tokenError?.message,
-      tokenCount: tokens?.length,
-      tokens
-    });
-  }, [tokens, isTokenError, tokenError, isTokensLoading]);
-
-  useEffect(() => {
-    console.log('Factory contract:', {
-      address: config.address,
-      hasTokens: !!tokens,
-      tokenCount: tokens?.length,
-      error: tokenError?.message,
-      tokens: tokens?.map(t => ({
-        name: t.name,
-        stage: t.stage,
-        supply: t.supply.toString()
-      }))
-    });
-  }, [tokens, tokenError]);
 
   const validateTokens = (token1: TokenData, token2: TokenData) => {
     const MIN_TOKENS = BigInt("1000000000000000000000"); // 1000 * 10^18
