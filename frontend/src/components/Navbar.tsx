@@ -3,6 +3,7 @@ import { useTheme } from "./theme-provider";
 import { Moon, Sun } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import logo from "../assets/memedlogo2.png";
+import { Link } from "react-router-dom";
 
 export function Navbar() {
   const { theme, setTheme } = useTheme();
@@ -11,13 +12,16 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300">
       <div className="container flex h-24 items-center justify-between px-4">
         <div className="flex items-center gap-4">
-          <a href="/" className="flex items-center gap-2">
+          <Link
+            to="/"
+            className="flex items-center gap-2 animate-levitate-slow"
+          >
             <img
               src={logo}
               alt="Memed Logo"
               className="h-20 w-auto transition-transform duration-200 hover:scale-110"
             />
-          </a>
+          </Link>
         </div>
 
         <div className="flex items-center gap-4">

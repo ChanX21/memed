@@ -45,18 +45,48 @@ export function MemeForm() {
   return (
     <FormWrapper open={open} onOpenChange={setOpen}>
       <FormTrigger asChild>
-        <Button variant="default">Create Meme</Button>
+        <Button
+          variant="default"
+          className="relative group overflow-hidden bg-primary/90 hover:bg-primary/95
+                     text-primary-foreground font-medium px-6 h-12
+                     shadow-[0_2px_10px_rgba(0,0,0,0.1)]
+                     transition-all duration-300 hover:scale-105
+                     hover:shadow-[0_0_20px_rgba(5,10,48,0.35)]
+                     active:scale-100"
+        >
+          <span className="relative z-10 flex items-center gap-2">
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Create Meme
+          </span>
+          <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary/80 via-primary to-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        </Button>
       </FormTrigger>
-      <FormContent className="sm:max-w-[425px]">
-        <FormHeader>
+      <FormContent className="sm:max-w-[425px] max-h-[90vh] flex flex-col">
+        <FormHeader className="flex-none">
           <FormTitle>Create Meme</FormTitle>
           <FormDescription>
             Provide information to create your meme.
           </FormDescription>
         </FormHeader>
-        <ProfileForm />
+        
+        <div className="flex-1 overflow-y-auto px-4 py-2">
+          <ProfileForm />
+        </div>
+        
         {!isDesktop && (
-          <DrawerFooter>
+          <DrawerFooter className="flex-none">
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
             </DrawerClose>
@@ -172,73 +202,148 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
   };
 
   return (
-    <form className={cn("grid items-start gap-4", className)} onSubmit={mint}>
+    <form 
+      className={cn("grid items-start gap-6 pb-6", className)} 
+      onSubmit={mint}
+    >
+      {/* Name Field */}
       <div className="grid gap-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name" className="text-sm font-semibold text-foreground/90">
+          Name
+        </Label>
         <Input
           type="text"
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="border"
+          className="h-11 bg-background/50 border-border/40 rounded-lg
+                    text-foreground placeholder:text-muted-foreground/60
+                    focus:ring-2 focus:ring-primary/20 focus:border-primary/30
+                    hover:bg-background/70 hover:border-primary/50
+                    transition-all duration-300"
+          placeholder="Enter meme name..."
         />
       </div>
+
+      {/* Ticker Field */}
       <div className="grid gap-2">
-        <Label htmlFor="ticker">Ticker</Label>
+        <Label htmlFor="ticker" className="text-sm font-semibold text-foreground/90">
+          Ticker
+        </Label>
         <Input
           type="text"
           id="ticker"
           value={ticker}
           onChange={(e) => setTicker(e.target.value)}
-          className="border"
+          className="h-11 bg-background/50 border-border/40 rounded-lg
+                    text-foreground placeholder:text-muted-foreground/60
+                    focus:ring-2 focus:ring-primary/20 focus:border-primary/30
+                    hover:bg-background/70 hover:border-primary/50
+                    transition-all duration-300"
+          placeholder="Enter token ticker..."
         />
       </div>
+
+      {/* Description Field */}
       <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description" className="text-sm font-semibold text-foreground/90">
+          Description
+        </Label>
         <Textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          className="min-h-[100px] bg-background/50 border-border/40 rounded-lg
+                    text-foreground placeholder:text-muted-foreground/60
+                    focus:ring-2 focus:ring-primary/20 focus:border-primary/30
+                    hover:bg-background/70 hover:border-primary/50
+                    transition-all duration-300 resize-none"
+          placeholder="Tell us about your meme..."
         />
-        <p className="text-sm text-muted-foreground">
-          Short description about your meme.
+        <p className="text-sm text-muted-foreground/80 italic">
+          Provide a short description about your meme token
         </p>
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor="image">Upload Image</Label>
-        <Input
-          type="file"
-          id="image"
-          accept="image/*"
-          onChange={handleImageChange}
-        />
-        {imageUrl.length == 0 && (
+
+      {/* Image Upload Field */}
+      <div className="grid gap-3">
+        <Label htmlFor="image" className="text-sm font-semibold text-foreground/90">
+          Meme Image
+        </Label>
+        
+        <div className="relative group">
+          <Input
+            type="file"
+            id="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="h-11 bg-background/50 border-border/40 rounded-lg
+                      text-foreground placeholder:text-muted-foreground/60
+                      focus:ring-2 focus:ring-primary/20 focus:border-primary/30
+                      hover:bg-background/70 hover:border-primary/50
+                      file:mr-4 file:py-2 file:px-4 file:rounded-md
+                      file:border-0 file:text-sm file:font-medium
+                      file:bg-primary/10 file:text-primary
+                      hover:file:bg-primary/20
+                      transition-all duration-300"
+          />
+        </div>
+
+        {imageUrl.length === 0 && (
           <Button
             type="button"
             variant="outline"
             onClick={uploadImage}
             disabled={isUploading}
+            className="w-full h-11 bg-background/50 border-border/40
+                      hover:bg-primary/5 hover:border-primary/50
+                      hover:shadow-[0_0_10px_rgba(5,10,48,0.25)]
+                      transition-all duration-300"
           >
-            {isUploading ? "Uploading..." : "Upload"}
+            {isUploading ? (
+              <div className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span>Uploading...</span>
+              </div>
+            ) : (
+              "Upload Image"
+            )}
           </Button>
         )}
-        <p className="text-sm text-muted-foreground">
-          Select an image for your meme.
-        </p>
+
         {imageUrl && (
-          <img
-            src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + imageUrl}
-            alt="Uploaded Meme"
-            className="w-32 h-32 object-cover"
-          />
+          <div className="relative rounded-lg overflow-hidden border border-border/40">
+            <img
+              src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + imageUrl}
+              alt="Uploaded Meme"
+              className="w-full h-48 object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          </div>
         )}
       </div>
-      <div className="text-gray-400 flex items-center gap-2 justify-between">
-        <p>Cost:</p>
-        <p>{formatEther(bnbCost?.toString() || "0")} BNB</p>
+
+      {/* Cost Display */}
+      <div className="flex items-center justify-between p-4 rounded-lg bg-primary/5 border border-primary/20">
+        <p className="text-sm font-medium text-foreground/80">Creation Cost:</p>
+        <p className="text-sm font-mono font-semibold text-primary">
+          {formatEther(bnbCost?.toString() || "0")} BNB
+        </p>
       </div>
-      <Button type="submit" disabled={isUploading || !imageUrl}>
-        Create
+
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        disabled={isUploading || !imageUrl}
+        className="w-full h-12 bg-primary text-primary-foreground
+                  hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(5,10,48,0.5)]
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                  transition-all duration-300"
+      >
+        Create Meme Token
       </Button>
     </form>
   );

@@ -62,6 +62,9 @@ export default {
         'shimmer': 'shimmer 2s linear infinite',
         'grid': 'grid 20s linear infinite',
         'fade-in': 'fadeIn 0.5s ease-out',
+        'levitate': 'levitate 3s ease-in-out infinite',
+        'levitate-slow': 'levitate-slow 4s ease-in-out infinite',
+        'levitate-subtle': 'levitate-subtle 5s ease-in-out infinite',
       },
       keyframes: {
         spin: {
@@ -88,6 +91,18 @@ export default {
         fadeIn: {
           '0%': { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        levitate: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        'levitate-slow': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
+        },
+        'levitate-subtle': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-3px)' },
         },
       },
     },
