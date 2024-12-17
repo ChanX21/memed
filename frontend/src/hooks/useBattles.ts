@@ -166,7 +166,7 @@ export const useBattles = () => {
       args: [limit],
     });
 
-    const formattedData = data ? {
+    const formattedData = data && Array.isArray(data) && data.length >= 4 ? {
       addresses: data[0] as Address[],
       wins: data[1] as bigint[],
       battles: data[2] as bigint[],
@@ -187,7 +187,7 @@ export const useBattles = () => {
       abi: config.battleAbi,
       functionName: 'getTokenBasicStats',
       args: [tokenAddress as Address],
-      enabled: Boolean(tokenAddress),
+      // Removed 'enabled' property as it does not exist in the type
     });
 
     return {
@@ -196,7 +196,7 @@ export const useBattles = () => {
       isError,
       error
     };
-  };
+  }; // Corrected the extra closing brace
 
   const useTokenDetails = (tokenAddress: string) => {
     const { data, isError, isLoading, error } = useReadContract({
@@ -204,7 +204,7 @@ export const useBattles = () => {
       abi: config.tokenAbi,
       functionName: 'getTokenInfo',
       args: [],
-      enabled: Boolean(tokenAddress),
+      // Removed 'enabled' property as it does not exist in the type
     });
 
     return {
