@@ -21,25 +21,9 @@ export type LeaderboardEntry = {
   votes: bigint;
 };
 
-export const useBattles = () => {
+export function useBattles() {
   const { writeContractAsync } = useWriteContract();
   const publicClient = usePublicClient();
-
-  // const checkTokenBalance = async (tokenAddress: string, userAddress: string) => {
-  //   try {
-  //     const data = await readContract<Address, typeof config.tokenAbi, 'balanceOf', [Address]>({
-  //       address: tokenAddress as Address,
-  //       abi: config.tokenAbi,
-  //       functionName: 'balanceOf',
-  //       args: [userAddress as Address],
-  //     }) as bigint;
-      
-  //     return data > 0n;
-  //   } catch (error) {
-  //     console.error('Error checking token balance:', error);
-  //     return false;
-  //   }
-  // };
 
   const createBattle = async (
     token1: string, 
@@ -187,7 +171,6 @@ export const useBattles = () => {
       abi: config.battleAbi,
       functionName: 'getTokenBasicStats',
       args: [tokenAddress as Address],
-      // Removed 'enabled' property as it does not exist in the type
     });
 
     return {
@@ -196,7 +179,7 @@ export const useBattles = () => {
       isError,
       error
     };
-  }; // Corrected the extra closing brace
+  };
 
   const useTokenDetails = (tokenAddress: string) => {
     const { data, isError, isLoading, error } = useReadContract({
@@ -204,7 +187,6 @@ export const useBattles = () => {
       abi: config.tokenAbi,
       functionName: 'getTokenInfo',
       args: [],
-      // Removed 'enabled' property as it does not exist in the type
     });
 
     return {
@@ -225,4 +207,4 @@ export const useBattles = () => {
     useTokenStats,
     useTokenDetails,
   };
-}; 
+} 
