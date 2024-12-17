@@ -100,7 +100,7 @@ export function Navbar() {
 
           <div className="fixed top-28 right-2 bg-background">
             <DropdownMenu>
-              <DropdownMenuTrigger className="border p-1 rounded-md">
+              <DropdownMenuTrigger className="border p-1 rounded-md  outline-none">
                 <IoMdMenu size={30} />
               </DropdownMenuTrigger>
 
