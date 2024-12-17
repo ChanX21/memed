@@ -1,4 +1,5 @@
 import battleAbi from "./abi/memedBattle.json";
+import tokenAbi from "./abi/memedToken.json";
 import { Address } from 'viem';
 
 const config = {
@@ -78,6 +79,7 @@ const config = {
   ],
   battleAddress: "0xdbca1683B4E3e11eC0881EF7d732B419F72a4Ee6" as Address,
   battleAbi: battleAbi as any,
+  tokenAbi: tokenAbi as any,
 } as const;
 
 console.log('Config loaded:', {
@@ -85,6 +87,7 @@ console.log('Config loaded:', {
   battleAddress: config.battleAddress,
   hasFactoryAbi: !!config.abi,
   hasBattleAbi: !!config.battleAbi,
+  hasTokenAbi: !!config.tokenAbi,
 });
 
 export default config; 
