@@ -36,41 +36,65 @@ const Home: React.FC = () => {
     args: ["0x0000000000000000000000000000000000000000"],
   });
 
-  useEffect(() => {
-    refetch();
-  }, [blockNumber]);
-
-  const [component1, setComponent1] = useState<DynamicComponent>({
-    bgColor: "bg-gray-200",
-    text: "[Address] bought BNB amount of [Token]",
-  });
-
-  const [component2, setComponent2] = useState<DynamicComponent>({
-    bgColor: "bg-gray-200",
-    text: "[Address] created [Token] on [Date]",
-  });
-
   const getRandomColor = (): string =>
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
-  const randomAddress = (): string =>
-    `0x${Math.random().toString(36).substring(2, 10)}`;
-  const randomToken = (): string => `Token-${Math.floor(Math.random() * 100)}`;
-  const randomAmount = (): string => (Math.random() * 10).toFixed(2);
+  const randomAddress = (): string => {
+    const addresses = [
+      "0x7Ef2...3A4d",
+      "0x8Dc4...5B2e",
+      "0x9Fa1...2C8f",
+      "0x6Bb8...9D1a",
+      "0x5Ae3...4F7b"
+    ];
+    return addresses[Math.floor(Math.random() * addresses.length)];
+  };
+
+  const randomToken = (): string => {
+    const tokens = [
+      "PEPE",
+      "DOGE",
+      "WOJAK",
+      "MOON",
+      "FROG",
+      "CAT",
+      "MEME"
+    ];
+    return tokens[Math.floor(Math.random() * tokens.length)];
+  };
+
+  const randomAmount = (): string => {
+    return (Math.random() * 2.5 + 0.01).toFixed(3);
+  };
+
   const randomDate = (): string =>
     new Date(
       Date.now() - Math.floor(Math.random() * 10000000000),
     ).toLocaleDateString();
 
+  const [component1, setComponent1] = useState<DynamicComponent>({
+    bgColor: "bg-gray-200",
+    text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`
+  });
+
+  const [component2, setComponent2] = useState<DynamicComponent>({
+    bgColor: "bg-gray-200",
+    text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`
+  });
+
+  useEffect(() => {
+    refetch();
+  }, [blockNumber]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setComponent1({
         bgColor: getRandomColor(),
-        text: `${randomAddress()} bought ${randomAmount()} BNB of ${randomToken()}`,
+        text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`
       });
       setComponent2({
         bgColor: getRandomColor(),
-        text: `${randomAddress()} created ${randomToken()} on ${randomDate()}`,
+        text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`
       });
     }, 3000);
 
@@ -179,15 +203,15 @@ const Home: React.FC = () => {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component1.text.match(/0x[a-z0-9]+/)?.[0] || ""}
+                      {component1.text.split(' ')[0]}
                     </span>
                     <span className="mx-1">bought</span>
                     <span className="font-semibold text-primary">
-                      {component1.text.match(/\d+\.?\d*/)?.[0] || ""} BNB
+                      {component1.text.split(' ')[2]}
                     </span>
                     <span className="mx-1">of</span>
                     <span className="font-medium text-primary">
-                      {component1.text.match(/Token-\d+/)?.[0] || ""}
+                      {component1.text.split(' ')[4]}
                     </span>
                   </p>
                 </div>
@@ -227,15 +251,15 @@ const Home: React.FC = () => {
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component2.text.split(" ")[0]}
+                      {component2.text.split(' ')[0]}
                     </span>
                     <span className="mx-1">created</span>
                     <span className="font-medium text-primary">
-                      {component2.text.split(" ")[2]}
+                      {component2.text.split(' ')[2]}
                     </span>
                     <span className="mx-1">on</span>
                     <span className="font-medium">
-                      {component2.text.split(" ")[4]}
+                      {component2.text.split(' ')[4]}
                     </span>
                   </p>
                 </div>
