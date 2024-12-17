@@ -98,7 +98,7 @@ export function Navbar() {
             )}
           </Button>
 
-          <div className="fixed top-28 right-2 bg-background">
+          <div className="fixed top-28 right-2 bg-background lg:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger className="border p-1 rounded-md  outline-none">
                 <IoMdMenu size={30} />
