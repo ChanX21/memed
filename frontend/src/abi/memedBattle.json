@@ -364,6 +364,65 @@
     {
       "inputs": [
         {
+          "internalType": "bool",
+          "name": "activeOnly",
+          "type": "bool"
+        }
+      ],
+      "name": "getBattles",
+      "outputs": [
+        {
+          "internalType": "uint256[]",
+          "name": "battleIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "token1Addresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "token2Addresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "token1Votes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "token2Votes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "startTimes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "endTimes",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bool[]",
+          "name": "settled",
+          "type": "bool[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "winners",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "uint256",
           "name": "limit",
           "type": "uint256"
@@ -413,6 +472,11 @@
         {
           "internalType": "uint256",
           "name": "totalWins",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalLosses",
           "type": "uint256"
         },
         {
@@ -477,6 +541,25 @@
           "internalType": "bool",
           "name": "",
           "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "lastBattleTimestamp",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -615,6 +698,11 @@
         {
           "internalType": "uint256",
           "name": "totalWins",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "totalLosses",
           "type": "uint256"
         },
         {
