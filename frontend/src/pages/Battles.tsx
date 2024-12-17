@@ -72,40 +72,62 @@ const Battles: React.FC = () => {
   const [selectedToken2, setSelectedToken2] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
   const [isVoting, setIsVoting] = useState<bigint | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSettling, setIsSettling] = useState<bigint | null>(null);
 
   const { createBattle, voteBattle, settleBattle, useAllBattles } = useBattles();
   const { address } = useAccount();
 
-  const { data: tokens, isError: isTokenError, error, isLoading: isTokensLoading } = useReadContract({
+  const { data: tokens, isError: isTokenError, error: tokenError, isLoading: isTokensLoading } = useReadContract({
     address: config.address as Address,
     abi: config.abi,
     functionName: "getTokens",
     args: ["0x0000000000000000000000000000000000000000"] as const,
   }) as { data: TokenData[] | undefined; isError: boolean; error: Error | null; isLoading: boolean };
 
+  const { battles, isError: isBattlesError, error: battlesError, isLoading: isBattlesLoading } = useAllBattles();
+
+  // Show loading state
+  if (isTokensLoading || isBattlesLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (isTokenError || isBattlesError) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Error Loading Data</h2>
+          <p className="text-muted-foreground mb-4">
+            {tokenError?.message || battlesError?.message || "Failed to load battle data. Please try again."}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
-    if (isTokenError) {
-      console.error('Token fetch error:', error);
+    if (isTokenError && tokenError) {
+      console.error('Token fetch error:', tokenError);
       toast.error('Failed to load tokens. Please check your network connection.');
     }
-  }, [isTokenError, error]);
-
-  const { data: battles, isLoading: isBattlesLoading } = useAllBattles() as {
-    data: BattleData | undefined;
-    isLoading: boolean;
-  };
+  }, [isTokenError, tokenError]);
 
   useEffect(() => {
     if (tokens) {
       console.log('Raw token data:', tokens);
       console.log('Graduated tokens:', tokens.filter(t => t.stage === 2));
     }
-    if (isTokenError) {
-      console.error('Token fetch error:', error);
+    if (isTokenError && tokenError) {
+      console.error('Token fetch error:', tokenError);
     }
-  }, [tokens, isTokenError, error]);
+  }, [tokens, isTokenError, tokenError]);
 
   useEffect(() => {
     if (isTokenError) {
@@ -147,10 +169,33 @@ const Battles: React.FC = () => {
   console.log('Data states:', { 
     tokens: tokens?.length || 0,
     battles: battles ? {
-      battleIds: battles?.battleIds?.length || 0,
-      token1Addresses: battles?.token1Addresses?.length || 0
+      count: battles.length || 0
     } : null
   });
+
+  useEffect(() => {
+    console.log('Token query state:', {
+      isLoading: isTokensLoading,
+      isError: isTokenError,
+      error: tokenError?.message,
+      tokenCount: tokens?.length,
+      tokens
+    });
+  }, [tokens, isTokenError, tokenError, isTokensLoading]);
+
+  useEffect(() => {
+    console.log('Factory contract:', {
+      address: config.address,
+      hasTokens: !!tokens,
+      tokenCount: tokens?.length,
+      error: tokenError?.message,
+      tokens: tokens?.map(t => ({
+        name: t.name,
+        stage: t.stage,
+        supply: t.supply.toString()
+      }))
+    });
+  }, [tokens, tokenError]);
 
   const validateTokens = (token1: TokenData, token2: TokenData) => {
     const MIN_TOKENS = BigInt("1000000000000000000000"); // 1000 * 10^18
@@ -328,16 +373,6 @@ const Battles: React.FC = () => {
   console.log('Active battles:', activeBattles);
   console.log('Ended battles:', endedBattles);
 
-  useEffect(() => {
-    console.log('Token query state:', {
-      isLoading: isTokensLoading,
-      isError: isTokenError,
-      error,
-      tokenCount: tokens?.length,
-      tokens
-    });
-  }, [tokens, isTokenError, error, isTokensLoading]);
-
   const isGraduated = (token: TokenData) => {
     console.log('Checking graduation for token:', {
       name: token.name,
@@ -346,31 +381,6 @@ const Battles: React.FC = () => {
     });
     return token.stage === 2;
   };
-
-  useEffect(() => {
-    console.log('Factory contract:', {
-      address: config.address,
-      hasTokens: !!tokens,
-      tokenCount: tokens?.length,
-      error: error?.message,
-      tokens: tokens?.map(t => ({
-        name: t.name,
-        stage: t.stage,
-        supply: t.supply.toString()
-      }))
-    });
-  }, [tokens, error]);
-
-  useEffect(() => {
-    if (tokens) {
-      console.log('Token data:', tokens.map(token => ({
-        name: token.name,
-        stage: token.stage,
-        supply: token.supply.toString(),
-        isGraduated: token.stage === 2
-      })));
-    }
-  }, [tokens]);
 
   return (
     <div className="min-h-screen p-6 bg-background">

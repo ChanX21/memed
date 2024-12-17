@@ -4,6 +4,23 @@ import config from '@/config';
 import { toast } from 'sonner';
 import { Address } from 'viem';
 
+export type Battle = {
+  token1: Address;
+  token2: Address;
+  votes1: bigint;
+  votes2: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  settled: boolean;
+};
+
+export type LeaderboardEntry = {
+  address: Address;
+  wins: bigint;
+  battles: bigint;
+  votes: bigint;
+};
+
 export const useBattles = () => {
   const { writeContractAsync } = useWriteContract();
   const publicClient = usePublicClient();
@@ -110,52 +127,92 @@ export const useBattles = () => {
   };
 
   const useAllBattles = () => {
-    return useReadContract({
+    const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
       abi: config.battleAbi,
       functionName: 'getBattles',
       args: [false], // false to get all battles
     });
+
+    return {
+      battles: data as Battle[] | undefined,
+      isLoading,
+      isError,
+      error
+    };
   };
 
   const useActiveBattles = () => {
-    return useReadContract({
+    const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
       abi: config.battleAbi,
       functionName: 'getBattles',
       args: [true], // true for active battles only
     });
+
+    return {
+      battles: data as Battle[] | undefined,
+      isLoading,
+      isError,
+      error
+    };
   };
 
   const useLeaderboard = (limit: number = 10) => {
-    return useReadContract({
+    const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
       abi: config.battleAbi,
       functionName: 'getLeaderboard',
       args: [limit],
-    }) as {
-      data: [`0x${string}`[], bigint[], bigint[], bigint[]] | undefined;
-      isLoading: boolean;
-      error: Error | null;
+    });
+
+    const formattedData = data && Array.isArray(data) && data.length >= 4 ? {
+      addresses: data[0] as Address[],
+      wins: data[1] as bigint[],
+      battles: data[2] as bigint[],
+      votes: data[3] as bigint[]
+    } : undefined;
+
+    return {
+      leaderboard: formattedData,
+      isLoading,
+      isError,
+      error
     };
   };
 
   const useTokenStats = (tokenAddress: string) => {
-    return useReadContract({
+    const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
       abi: config.battleAbi,
       functionName: 'getTokenBasicStats',
       args: [tokenAddress as Address],
+      // Removed 'enabled' property as it does not exist in the type
     });
-  };
+
+    return {
+      stats: data as { wins: bigint; battles: bigint; votes: bigint } | undefined,
+      isLoading,
+      isError,
+      error
+    };
+  }; // Corrected the extra closing brace
 
   const useTokenDetails = (tokenAddress: string) => {
-    return useReadContract({
+    const { data, isError, isLoading, error } = useReadContract({
       address: tokenAddress as Address,
       abi: config.tokenAbi,
       functionName: 'getTokenInfo',
       args: [],
+      // Removed 'enabled' property as it does not exist in the type
     });
+
+    return {
+      details: data as { name: string; symbol: string; totalSupply: bigint } | undefined,
+      isLoading,
+      isError,
+      error
+    };
   };
 
   return {

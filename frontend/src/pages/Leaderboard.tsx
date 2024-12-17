@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useReadContract } from "wagmi";
 import config from "@/config";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2, Trophy, AlertCircle } from "lucide-react";
 import { Address } from 'viem';
 import { useBattles } from "@/hooks/useBattles";
 import LeaderboardCard from "@/components/leaderboard/LeaderboardCard";
+import { Button } from "@/components/ui/button";
 
 interface TokenData {
   token: `0x${string}`;
@@ -21,23 +22,17 @@ interface TokenData {
 
 const Leaderboard: React.FC = () => {
   const { useLeaderboard } = useBattles();
-  const { data: tokens } = useReadContract({
+  const { data: tokens, isError: isTokenError, error: tokenError, isLoading: isTokenLoading } = useReadContract({
     address: config.address as Address,
     abi: config.abi,
     functionName: "getTokens",
     args: ["0x0000000000000000000000000000000000000000"] as const,
-  }) as { data: TokenData[] | undefined };
+  }) as { data: TokenData[] | undefined; isError: boolean; error: Error | null; isLoading: boolean };
 
-  const { data: rawLeaderboardData, isLoading, error } = useLeaderboard(10);
+  const { leaderboard, isError: isLeaderboardError, error: leaderboardError, isLoading: isLeaderboardLoading } = useLeaderboard(10);
 
-  useEffect(() => {
-    console.log('Raw leaderboard data:', rawLeaderboardData);
-    console.log('Tokens:', tokens);
-    console.log('Loading:', isLoading);
-    console.log('Error:', error);
-  }, [rawLeaderboardData, tokens, isLoading, error]);
-
-  if (isLoading) {
+  // Show loading state
+  if (isTokenLoading || isLeaderboardLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -45,11 +40,30 @@ const Leaderboard: React.FC = () => {
     );
   }
 
-  if (!rawLeaderboardData || !rawLeaderboardData[0] || rawLeaderboardData[0].length === 0) {
-    console.log('No leaderboard data available');
+  // Show error state
+  if (isTokenError || isLeaderboardError) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-4">Error Loading Leaderboard</h2>
+          <p className="text-muted-foreground mb-4">
+            {tokenError?.message || leaderboardError?.message || "Failed to load leaderboard data. Please try again."}
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (!leaderboard || !leaderboard.addresses || leaderboard.addresses.length === 0) {
     return (
       <div className="min-h-screen p-6 bg-background">
         <div className="max-w-4xl mx-auto text-center">
+          <Trophy className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
           <h1 className="text-4xl font-bold mb-3">Battle Champions</h1>
           <p className="text-muted-foreground">
             No battles have been completed yet. Create a battle to get started!
@@ -58,8 +72,6 @@ const Leaderboard: React.FC = () => {
       </div>
     );
   }
-
-  const [tokenAddresses, wins, totalBattles, totalVotes] = rawLeaderboardData;
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -75,29 +87,19 @@ const Leaderboard: React.FC = () => {
         </div>
 
         <div className="space-y-4">
-          {tokenAddresses.map((token, index) => {
-            console.log('Rendering token:', token, 'at index:', index);
-            console.log('Token data:', tokens?.find(t => t.token === token));
-            console.log('Stats:', {
-              wins: wins[index],
-              totalBattles: totalBattles[index],
-              totalVotes: totalVotes[index],
-            });
-            
-            return (
-              <LeaderboardCard
-                key={token}
-                token={token}
-                tokenData={tokens?.find(t => t.token === token)}
-                rank={index}
-                stats={{
-                  wins: wins[index],
-                  totalBattles: totalBattles[index],
-                  totalVotes: totalVotes[index],
-                }}
-              />
-            );
-          })}
+          {leaderboard.addresses.map((token, index) => (
+            <LeaderboardCard
+              key={token}
+              token={token}
+              tokenData={tokens?.find(t => t.token === token)}
+              rank={index}
+              stats={{
+                wins: leaderboard.wins[index],
+                totalBattles: leaderboard.battles[index],
+                totalVotes: leaderboard.votes[index],
+              }}
+            />
+          ))}
         </div>
       </div>
     </div>
