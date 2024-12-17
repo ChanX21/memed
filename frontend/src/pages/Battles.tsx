@@ -491,13 +491,12 @@ const Battles: React.FC = () => {
 
         {/* Active Battles Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-bold mb-6">Active Battles</h2>
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Timer className="w-6 h-6 text-primary" />
+            Active Battles
+          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isBattlesLoading ? (
-              <div className="col-span-full flex justify-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            ) : activeBattles.length > 0 ? (
+            {activeBattles.length > 0 ? (
               activeBattles.map((battle) => (
                 <BattleCard
                   key={battle.id.toString()}
@@ -519,11 +518,14 @@ const Battles: React.FC = () => {
         </div>
 
         {/* Ended Battles Section */}
-        {endedBattles.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-bold mb-6">Ended Battles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {endedBattles.map((battle) => (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+            Ended Battles
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {endedBattles.length > 0 ? (
+              endedBattles.map((battle) => (
                 <BattleCard
                   key={battle.id.toString()}
                   battle={battle}
@@ -533,10 +535,15 @@ const Battles: React.FC = () => {
                   isVoting={isVoting}
                   isSettling={isSettling}
                 />
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-8">
+                <p className="text-muted-foreground">No ended battles yet</p>
+                <p className="text-sm mt-2">Active battles will appear here once they end</p>
+              </div>
+            )}
           </div>
-        )}       
+        </div>
       </div>
     </div>
   );
