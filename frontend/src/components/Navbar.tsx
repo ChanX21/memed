@@ -5,6 +5,20 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import logo from "../assets/memedlogo2.png";
 import { Link, useLocation } from "react-router-dom";
 
+const BNBBranding = () => (
+  <div className="hidden md:flex items-center gap-1.5 text-muted-foreground">
+    <span className="text-sm">Powered by</span>
+    <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#F3BA2F]/10 hover:bg-[#F3BA2F]/20 transition-colors">
+      <img 
+        src="https://cryptologos.cc/logos/bnb-bnb-logo.png" 
+        alt="BNB Chain" 
+        className="w-5 h-5"
+      />
+      <span className="text-[#F3BA2F] font-medium">BNB</span>
+    </div>
+  </div>
+);
+
 export function Navbar() {
   const { theme, setTheme } = useTheme();
   const location = useLocation();
@@ -52,6 +66,9 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Add BNB Chain branding here */}
+          <BNBBranding />
+          
           <div className="transition-transform duration-200 hover:scale-105">
             <ConnectButton 
               accountStatus="address"

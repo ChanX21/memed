@@ -36,6 +36,11 @@ const Home: React.FC = () => {
     args: ["0x0000000000000000000000000000000000000000"],
   });
 
+  const sortedMemecoins = React.useMemo(() => {
+    if (!memecoins) return [];
+    return [...memecoins].sort((a, b) => Number(b.createdAt) - Number(a.createdAt));
+  }, [memecoins]);
+
   const getRandomColor = (): string =>
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
@@ -309,8 +314,8 @@ const Home: React.FC = () => {
 
       <div className=" mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6 place-items-center">
-          {memecoins &&
-            memecoins.map((coin, index) => (
+          {sortedMemecoins &&
+            sortedMemecoins.map((coin, index) => (
               <div
                 key={index}
                 className="w-full p-3 transition-transform duration-300 hover:scale-[1.02]"
