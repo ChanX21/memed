@@ -113,7 +113,7 @@ export function useBattles() {
   const useAllBattles = () => {
     const { data, isError, isLoading, error } = useReadContract({
       address: config.battleAddress as Address,
-      abi: config.battleAbi,
+      abi: config.battleAbi.abi,
       functionName: 'getBattles',
       args: [false], // false to get all battles
     });
