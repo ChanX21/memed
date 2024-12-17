@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
+import { useReadContract, useWriteContract, useAccount } from "wagmi";
 import config from "@/config";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,10 +9,22 @@ import { Loader2, Swords, Timer, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useBattles } from '@/hooks/useBattles';
 import { Address } from 'viem';
+import { parseEther } from "viem";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { BattleCard } from '@/components/BattleCard';
+import { formatAddress, formatTokenAmount } from '@/lib/utils';
 
 interface TokenData {
   token: `0x${string}`;
   name: string;
+  ticker: string;
+  description: string;
+  image: string;
+  owner: `0x${string}`;
+  stage: number;
+  collateral: bigint;
+  supply: bigint;
+  createdAt: number;
 }
 
 interface BattleData {
@@ -39,47 +51,138 @@ interface Battle {
   winner?: `0x${string}`;
 }
 
+const calculateProgressValue = (token1Votes: bigint, token2Votes: bigint): number => {
+  try {
+    if (token1Votes === BigInt(0) && token2Votes === BigInt(0)) {
+      return 50;
+    }
+    const total = token1Votes + token2Votes;
+    if (total === BigInt(0)) {
+      return 50;
+    }
+    return Number((token1Votes * BigInt(100)).toString()) / Number(total.toString());
+  } catch (error) {
+    console.error('Error calculating progress:', error);
+    return 50;
+  }
+};
+
 const Battles: React.FC = () => {
   const [selectedToken1, setSelectedToken1] = useState<string>("");
   const [selectedToken2, setSelectedToken2] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
   const [isVoting, setIsVoting] = useState<bigint | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSettling, setIsSettling] = useState<bigint | null>(null);
 
-  const { createBattle, voteBattle, useActiveBattles } = useBattles();
+  const { createBattle, voteBattle, settleBattle, useAllBattles } = useBattles();
+  const { address } = useAccount();
 
-  const { data: tokens } = useReadContract({
+  const { data: tokens, isError: isTokenError, error, isLoading: isTokensLoading } = useReadContract({
     address: config.address as Address,
     abi: config.abi,
     functionName: "getTokens",
-    args: ["0x0000000000000000000000000000000000000000"],
-  }) as { data: TokenData[] | undefined };
+    args: ["0x0000000000000000000000000000000000000000"] as const,
+  }) as { data: TokenData[] | undefined; isError: boolean; error: Error | null; isLoading: boolean };
 
-  const { data: battles } = useReadContract({
-    address: config.battleAddress as Address,
-    abi: config.battleAbi,
-    functionName: 'getBattles',
-    args: [true],
-  }) as { data: BattleData | undefined };
+  useEffect(() => {
+    if (isTokenError) {
+      console.error('Token fetch error:', error);
+      toast.error('Failed to load tokens. Please check your network connection.');
+    }
+  }, [isTokenError, error]);
+
+  const { data: battles, isLoading: isBattlesLoading } = useAllBattles() as {
+    data: BattleData | undefined;
+    isLoading: boolean;
+  };
 
   useEffect(() => {
     if (tokens) {
-      console.log('Token data loaded:', tokens);
+      console.log('Raw token data:', tokens);
+      console.log('Graduated tokens:', tokens.filter(t => t.stage === 2));
+    }
+    if (isTokenError) {
+      console.error('Token fetch error:', error);
+    }
+  }, [tokens, isTokenError, error]);
+
+  useEffect(() => {
+    if (isTokenError) {
+      console.error('Error fetching tokens');
+      toast.error('Failed to load tokens');
+    }
+  }, [isTokenError]);
+
+  useEffect(() => {
+    if (tokens) {
+      const graduatedTokens = tokens.filter(t => t.stage === 2);
+      console.log('Graduated tokens:', graduatedTokens);
+      
+      if (graduatedTokens.length === 0) {
+        toast.warning('No graduated tokens available for battle');
+      }
     }
   }, [tokens]);
 
   useEffect(() => {
+    console.log('Selected tokens:', {
+      token1: selectedToken1,
+      token2: selectedToken2,
+      token1Data: tokens?.find(t => t.token === selectedToken1),
+      token2Data: tokens?.find(t => t.token === selectedToken2)
+    });
+  }, [selectedToken1, selectedToken2, tokens]);
+
+  useEffect(() => {
     if (battles) {
-      console.log('Battle data loaded:', battles);
+      const parsed = parseBattles(battles);
+      console.log('Raw battle data:', battles);
+      console.log('Parsed battles:', parsed);
+      console.log('Active battles:', getActiveBattles());
+      console.log('Ended battles:', getEndedBattles());
     }
   }, [battles]);
 
   console.log('Data states:', { 
     tokens: tokens?.length || 0,
     battles: battles ? {
-      battleIds: battles.battleIds?.length || 0,
-      token1Addresses: battles.token1Addresses?.length || 0
+      battleIds: battles?.battleIds?.length || 0,
+      token1Addresses: battles?.token1Addresses?.length || 0
     } : null
   });
+
+  const validateTokens = (token1: TokenData, token2: TokenData) => {
+    const MIN_TOKENS = BigInt("1000000000000000000000"); // 1000 * 10^18
+
+    if (token1.token === token2.token) {
+      toast.error("Cannot battle the same token");
+      return false;
+    }
+
+    if (token1.stage !== 2 || token2.stage !== 2) {
+      toast.error("Only graduated tokens can battle");
+      return false;
+    }
+
+    try {
+      if (token1.supply < MIN_TOKENS || token2.supply < MIN_TOKENS) {
+        toast.error("Both tokens must have minimum supply of 1000 tokens");
+        return false;
+      }
+    } catch (error) {
+      console.error('Error comparing token supplies:', error);
+      toast.error("Error validating token supplies");
+      return false;
+    }
+
+    return true;
+  };
+
+  const isBattleSettleable = (battle: Battle) => {
+    const now = BigInt(Math.floor(Date.now() / 1000));
+    return !battle.settled && battle.endTime <= now;
+  };
 
   const handleCreateBattle = async () => {
     if (!selectedToken1 || !selectedToken2) {
@@ -87,31 +190,65 @@ const Battles: React.FC = () => {
       return;
     }
 
+    const token1Data = tokens?.find(t => t.token === selectedToken1);
+    const token2Data = tokens?.find(t => t.token === selectedToken2);
+
+    if (!token1Data || !token2Data) {
+      toast.error("Invalid token selection");
+      return;
+    }
+
+    if (!validateTokens(token1Data, token2Data)) {
+      return;
+    }
+
     setIsCreating(true);
     try {
-      await createBattle(selectedToken1, selectedToken2);
+      await createBattle(selectedToken1, selectedToken2, {
+        value: parseEther("0.0002")
+      });
+      
+      toast.success("Battle created successfully!");
       setSelectedToken1("");
       setSelectedToken2("");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      toast.error(error.message || "Failed to create battle");
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleVote = async (battleId: bigint, votingFor: string) => {
+    if (!address) {
+      toast.error('Please connect your wallet to vote');
+      return;
+    }
+    
     setIsVoting(battleId);
     try {
-      await voteBattle(Number(battleId), votingFor);
-    } catch (error) {
+      await voteBattle(Number(battleId), votingFor, address);
+    } catch (error: any) {
       console.error(error);
+      if (error.message.includes('must hold')) {
+        toast.error('You must hold one of the battle tokens to vote');
+      } else {
+        toast.error(error.message || 'Failed to vote');
+      }
     } finally {
       setIsVoting(null);
     }
   };
 
-  const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  const handleSettleBattle = async (battleId: bigint) => {
+    setIsSettling(battleId);
+    try {
+      await settleBattle(battleId);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSettling(null);
+    }
   };
 
   const calculateTimeLeft = (endTime: bigint) => {
@@ -123,27 +260,42 @@ const Battles: React.FC = () => {
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
-  const parseBattles = (data: BattleData | undefined): Battle[] => {
-    if (!data || !data.battleIds) return [];
+  const parseBattles = (data: any): Battle[] => {
+    if (!data || !data[0]) return [];
     
-    return data.battleIds.map((id, index) => ({
-      id,
-      token1: data.token1Addresses[index],
-      token2: data.token2Addresses[index],
-      token1Votes: data.token1Votes[index],
-      token2Votes: data.token2Votes[index],
-      startTime: data.startTimes[index],
-      endTime: data.endTimes[index],
-      settled: data.settled[index],
-      winner: data.winners[index] === "0x0000000000000000000000000000000000000000" 
-        ? undefined 
-        : data.winners[index]
-    }));
+    const battles: Battle[] = [];
+    const battleIds = data[0];
+    const token1Addresses = data[1];
+    const token2Addresses = data[2];
+    const token1Votes = data[3];
+    const token2Votes = data[4];
+    const startTimes = data[5];
+    const endTimes = data[6];
+    const settled = data[7];
+    const winners = data[8];
+
+    for (let i = 0; i < battleIds.length; i++) {
+      battles.push({
+        id: BigInt(battleIds[i]),
+        token1: token1Addresses[i],
+        token2: token2Addresses[i],
+        token1Votes: BigInt(token1Votes[i]),
+        token2Votes: BigInt(token2Votes[i]),
+        startTime: BigInt(startTimes[i]),
+        endTime: BigInt(endTimes[i]),
+        settled: settled[i],
+        winner: winners[i] === "0x0000000000000000000000000000000000000000" 
+          ? undefined 
+          : winners[i]
+      });
+    }
+
+    return battles;
   };
 
   const getActiveBattles = (): Battle[] => {
     if (!battles) {
-      console.log('No battles data available');
+      console.log('No battles data');
       return [];
     }
 
@@ -151,36 +303,21 @@ const Battles: React.FC = () => {
     console.log('Parsed battles:', allBattles);
 
     const now = BigInt(Math.floor(Date.now() / 1000));
-    console.log('Current timestamp:', now.toString());
-    
-    const filtered = allBattles.filter(battle => {
-      const isNotSettled = !battle.settled;
-      const isNotEnded = battle.endTime > now;
-      
-      console.log('Battle filtering:', {
-        id: battle.id.toString(),
-        endTime: battle.endTime.toString(),
-        settled: battle.settled,
-        isNotSettled,
-        isNotEnded,
-        shouldInclude: isNotSettled && isNotEnded
-      });
-      
-      return isNotSettled && isNotEnded;
+    return allBattles.filter(battle => {
+      const isActive = !battle.settled && battle.endTime > now;
+      return isActive;
     });
-    
-    console.log('Filtered active battles:', filtered);
-    return filtered;
   };
 
   const getEndedBattles = (): Battle[] => {
+    if (!battles) return [];
+
     const allBattles = parseBattles(battles);
     const now = BigInt(Math.floor(Date.now() / 1000));
     
     return allBattles.filter(battle => 
-      battle.settled || 
-      battle.endTime <= now
-    );
+      battle.settled || battle.endTime <= now
+    ).sort((a, b) => Number(b.endTime - a.endTime));
   };
 
   const tokenList = tokens || [];
@@ -190,6 +327,50 @@ const Battles: React.FC = () => {
   console.log('Raw battles data:', battles);
   console.log('Active battles:', activeBattles);
   console.log('Ended battles:', endedBattles);
+
+  useEffect(() => {
+    console.log('Token query state:', {
+      isLoading: isTokensLoading,
+      isError: isTokenError,
+      error,
+      tokenCount: tokens?.length,
+      tokens
+    });
+  }, [tokens, isTokenError, error, isTokensLoading]);
+
+  const isGraduated = (token: TokenData) => {
+    console.log('Checking graduation for token:', {
+      name: token.name,
+      stage: token.stage,
+      isGraduated: token.stage === 2
+    });
+    return token.stage === 2;
+  };
+
+  useEffect(() => {
+    console.log('Factory contract:', {
+      address: config.address,
+      hasTokens: !!tokens,
+      tokenCount: tokens?.length,
+      error: error?.message,
+      tokens: tokens?.map(t => ({
+        name: t.name,
+        stage: t.stage,
+        supply: t.supply.toString()
+      }))
+    });
+  }, [tokens, error]);
+
+  useEffect(() => {
+    if (tokens) {
+      console.log('Token data:', tokens.map(token => ({
+        name: token.name,
+        stage: token.stage,
+        supply: token.supply.toString(),
+        isGraduated: token.stage === 2
+      })));
+    }
+  }, [tokens]);
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -217,20 +398,44 @@ const Battles: React.FC = () => {
               <div className="w-full md:w-1/3">
                 <Select 
                   value={selectedToken1}
-                  onValueChange={(value) => setSelectedToken1(value)}
+                  onValueChange={(value: string) => {
+                    console.log('Selected token 1:', value);
+                    setSelectedToken1(value);
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select First Token" />
+                  <SelectTrigger className="w-full" disabled={isTokensLoading}>
+                    <SelectValue placeholder={isTokensLoading ? "Loading tokens..." : "Select First Token"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {tokenList.map((token: any) => (
-                      <SelectItem 
-                        key={token.token} 
-                        value={token.token}
-                      >
-                        {token.name || formatAddress(token.token)}
-                      </SelectItem>
-                    ))}
+                    {isTokensLoading ? (
+                      <SelectItem value="loading" disabled>Loading tokens...</SelectItem>
+                    ) : tokens && tokens.length > 0 ? (
+                      tokens.filter(token => 
+                        isGraduated(token) && token.token !== selectedToken2
+                      ).map((token) => (
+                        <SelectItem 
+                          key={token.token} 
+                          value={token.token}
+                        >
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                          <div className="flex justify-between items-center gap-2">
+                            <span>{token.name || formatAddress(token.token)}</span>
+                            <span className="text-xs text-primary">(Graduated)</span>
+                          </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Supply: {formatTokenAmount(token.supply)} tokens</p>
+                                <p>Created: {new Date(Number(token.createdAt) * 1000).toLocaleDateString()}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>No tokens available</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -244,18 +449,44 @@ const Battles: React.FC = () => {
               <div className="w-full md:w-1/3">
                 <Select
                   value={selectedToken2}
-                  onValueChange={(value) => setSelectedToken2(value)}
+                  onValueChange={(value: string) => {
+                    console.log('Selected token 2:', value);
+                    setSelectedToken2(value);
+                  }}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Second Token" />
+                  <SelectTrigger className="w-full" disabled={isTokensLoading}>
+                    <SelectValue placeholder={isTokensLoading ? "Loading tokens..." : "Select Second Token"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {tokenList.map((token: any) => (
+                    {tokens?.filter(token => {
+                      const graduated = isGraduated(token);
+                      const notSelected = token.token !== selectedToken1;
+                      console.log('Filtering token:', {
+                        name: token.name,
+                        graduated,
+                        notSelected,
+                        willShow: graduated && notSelected
+                      });
+                      return graduated && notSelected;
+                    }).map((token) => (
                       <SelectItem 
                         key={token.token} 
                         value={token.token}
                       >
-                        {token.name || formatAddress(token.token)}
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                        <div className="flex justify-between items-center gap-2">
+                                <span>{token.name || formatAddress(token.token)}</span>
+                          <span className="text-xs text-primary">(Graduated)</span>
+                        </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Supply: {formatTokenAmount(token.supply)} tokens</p>
+                              <p>Created: {new Date(Number(token.createdAt) * 1000).toLocaleDateString()}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -287,76 +518,21 @@ const Battles: React.FC = () => {
         <div className="mb-12">
           <h2 className="text-2xl font-bold mb-6">Active Battles</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeBattles.length > 0 ? (
+            {isBattlesLoading ? (
+              <div className="col-span-full flex justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : activeBattles.length > 0 ? (
               activeBattles.map((battle) => (
-                <Card key={battle.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-primary" />
-                        Battle {battle.id.toString()}
-                      </CardTitle>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Timer className="w-4 h-4" />
-                        {calculateTimeLeft(battle.endTime)}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm">
-                          <p className="font-medium">{formatAddress(battle.token1)}</p>
-                          <p className="text-muted-foreground">
-                            {battle.token1Votes.toString()} votes
-                          </p>
-                        </div>
-                        <div className="text-sm text-right">
-                          <p className="font-medium">{formatAddress(battle.token2)}</p>
-                          <p className="text-muted-foreground">
-                            {battle.token2Votes.toString()} votes
-                          </p>
-                        </div>
-                      </div>
-
-                      <Progress 
-                        value={
-                          (Number(battle.token1Votes) /
-                            (Number(battle.token1Votes) + Number(battle.token2Votes))) *
-                          100 || 50
-                        } 
-                        className="h-2"
-                      />
-
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={() => handleVote(battle.id, battle.token1)}
-                          className="flex-1"
-                          disabled={isVoting === battle.id}
-                          variant="outline"
-                        >
-                          {isVoting === battle.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            `Vote ${formatAddress(battle.token1)}`
-                          )}
-                        </Button>
-                        <Button 
-                          onClick={() => handleVote(battle.id, battle.token2)}
-                          className="flex-1"
-                          disabled={isVoting === battle.id}
-                          variant="outline"
-                        >
-                          {isVoting === battle.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            `Vote ${formatAddress(battle.token2)}`
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <BattleCard
+                  key={battle.id.toString()}
+                  battle={battle}
+                  tokens={tokens || []}
+                  onVote={handleVote}
+                  onSettle={handleSettleBattle}
+                  isVoting={isVoting}
+                  isSettling={isSettling}
+                />
               ))
             ) : (
               <div className="col-span-full text-center py-8">
@@ -373,58 +549,19 @@ const Battles: React.FC = () => {
             <h2 className="text-2xl font-bold mb-6">Ended Battles</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {endedBattles.map((battle) => (
-                <Card key={battle.id} className="hover:shadow-lg transition-shadow opacity-75">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="flex items-center gap-2">
-                        <Trophy className="w-5 h-5 text-primary" />
-                        Battle {battle.id.toString()}
-                      </CardTitle>
-                      <div className="text-sm font-medium text-primary">
-                        {battle.settled ? 'Settled' : 'Ended'}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <div className="text-sm">
-                          <p className="font-medium">{formatAddress(battle.token1)}</p>
-                          <p className="text-muted-foreground">
-                            {battle.token1Votes.toString()} votes
-                          </p>
-                        </div>
-                        <div className="text-sm text-right">
-                          <p className="font-medium">{formatAddress(battle.token2)}</p>
-                          <p className="text-muted-foreground">
-                            {battle.token2Votes.toString()} votes
-                          </p>
-                        </div>
-                      </div>
-
-                      <Progress 
-                        value={
-                          (Number(battle.token1Votes) /
-                            (Number(battle.token1Votes) + Number(battle.token2Votes))) *
-                          100 || 50
-                        } 
-                        className="h-2"
-                      />
-
-                      {battle.settled && battle.winner && (
-                        <div className="text-center">
-                          <span className="text-sm font-medium text-primary">
-                            Winner: {formatAddress(battle.winner)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <BattleCard
+                  key={battle.id.toString()}
+                  battle={battle}
+                  tokens={tokens || []}
+                  onVote={handleVote}
+                  onSettle={handleSettleBattle}
+                  isVoting={isVoting}
+                  isSettling={isSettling}
+                />
               ))}
             </div>
           </div>
-        )}
+        )}       
       </div>
     </div>
   );
