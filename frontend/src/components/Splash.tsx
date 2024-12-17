@@ -54,7 +54,7 @@ const Splash: React.FC = () => {
             <div className="relative w-56 h-56 rounded-full flex items-center justify-center bg-background/70 backdrop-blur-md shadow-2xl">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/10 to-transparent"></div>
               <img
-                src="./src/assets/Logo_Paid_trsnnt.png"
+                src="./src/assets/logotrnspt.png"
                 alt="Memed Logo"
                 className="w-48 h-48 object-contain transform hover:scale-105 transition-all duration-500 drop-shadow-2xl"
               />

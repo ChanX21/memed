@@ -17,6 +17,7 @@ import Uploady from "@rpldy/uploady";
 import { useBlockNumber, useReadContract } from "wagmi";
 import config from "@/config.json";
 import TokenCard from "@/components/home/TokenCard";
+import TypewriterText from "@/components/ui/TypewriterText";
 
 interface DynamicComponent {
   bgColor: string;
@@ -76,12 +77,32 @@ const Home: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const pitchTexts = [
+    "Welcome to the future of memes... 🌟",
+    "Create your own token in seconds... 🚀",
+    "Battle for meme supremacy... ⚔️",
+    "Vote and earn rewards... 💎",
+    "Join our meme community... 🤝",
+    "Build your meme empire... 👑",
+    "Where memes meet DeFi... 💫",
+    "Your meme journey starts here... ✨",
+  ];
+
   return (
     <div className="min-h-screen p-6 bg-background">
       <div className="max-w-7xl mx-auto mb-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-8 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
           Discover Trending Memes
         </h1>
+
+        <div className="max-w-2xl mx-auto mb-8">
+          <TypewriterText 
+            texts={pitchTexts}
+            typingSpeed={80}
+            deletingSpeed={40}
+            pauseTime={1500}
+          />
+        </div>
 
         <div className="relative max-w-3xl mx-auto px-4">
           <div className="absolute inset-0 -top-4 -bottom-4 bg-gradient-to-r from-primary/10 via-background to-primary/10 blur-xl" />
@@ -94,14 +115,16 @@ const Home: React.FC = () => {
                        text-foreground placeholder:text-muted-foreground
                        focus:ring-2 focus:ring-primary/20 focus:border-primary/30
                        hover:bg-background/80 hover:border-primary/50
+                       hover:shadow-[0_0_15px_rgba(5,10,48,0.25)]
                        transition-all duration-300"
             />
             <Button
               type="submit"
               variant="secondary"
-              className="h-12 px-8 bg-primary text-primary-foreground hover:bg-primary/90
-                       shadow-md hover:shadow-lg transition-all duration-300
-                       hover:scale-105 active:scale-95"
+              className="h-12 px-8 bg-primary text-primary-foreground 
+                         hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(5,10,48,0.5)]
+                         shadow-md transition-all duration-300
+                         hover:scale-105 active:scale-95"
             >
               <span className="mr-2">Search</span>
               <svg

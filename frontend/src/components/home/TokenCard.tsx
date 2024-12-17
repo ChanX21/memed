@@ -21,6 +21,8 @@ interface Props {
   coin: any;
 }
 
+const DEFAULT_LOGO = "/src/assets/logotrnspt.png"; // Assuming your logo is stored in the public folder as logo.png
+
 const TokenCard: React.FC<Props> = ({ coin }) => {
   const [marketCap, setMarketCap] = useState<number>(0);
 
@@ -106,20 +108,19 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
           {/* Image container */}
           <CardContent className="relative p-0 h-[280px] overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-b from-background/5 via-transparent to-background/20 z-10" />
-            {coin.image && (
-              <img
-                src={import.meta.env.VITE_REACT_APP_IPFS_GATEWAY + coin.image}
-                alt={coin.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            )}
-            {!coin.image && (
-              <img
-                src="/assets/sample.webp"
-                alt={coin.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
-            )}
+            <img
+              src={
+                coin.image
+                  ? `${import.meta.env.VITE_REACT_APP_IPFS_GATEWAY}${coin.image}`
+                  : DEFAULT_LOGO
+              }
+              alt={coin.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = DEFAULT_LOGO;
+              }}
+            />
           </CardContent>
 
           {/* Details section */}
