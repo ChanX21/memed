@@ -37,6 +37,6 @@ export const config = createConfig({
 
   // https://wagmi.sh/react/api/transports
   transports: {
-    [bscTestnet.id]: http(import.meta.env.VITE_RPC_URL),
+    [bscTestnet.id]: http(import.meta.env.VITE_BSC_TESTNET_RPC),
   },
 });
