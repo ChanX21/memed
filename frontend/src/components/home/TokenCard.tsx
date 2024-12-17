@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { BigNumberish, formatEther, parseEther } from "ethers";
+import { BigNumberish, formatEther } from "ethers";
 import { useReadContract } from "wagmi";
 import { Link } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -18,54 +16,92 @@ import priceFeedAbi from "@/abi/priceFeed.json";
 import { formatCurrency } from "@/utils";
 
 interface Props {
-  coin: any;
+  coin: {
+    token: string;
+    name: string;
+    ticker: string;
+    description: string;
+    image: string;
+    owner: string;
+    createdAt: number;
+    supply: bigint;
+    collateral: bigint;
+    stage: number;
+  };
 }
 
 const DEFAULT_LOGO = "/assets/logotrnspt.png";
 
 const TokenCard: React.FC<Props> = ({ coin }) => {
-  const [marketCap, setMarketCap] = useState<number>(0);
+  const [tokenPrice, setTokenPrice] = useState<string>("0");
 
-  // Using the useReadContract hook to get the total supply of a token
-  const { data: totalSupply }: { data: BigNumberish | undefined } =
-    useReadContract({
-      abi: tokenAbi, // The ABI of the token contract
-      address: coin.token as `0x${string}`, // The token's contract address
-      functionName: "totalSupply", // The function to get the total supply of the token
-    });
+  // Get price for 1 token from factory
+  const { data: priceData } = useReadContract({
+    address: config.address as `0x${string}`,
+    abi: config.abi,
+    functionName: "getBNBAmount",
+    args: [coin.token, 1], // Amount for 1 token (18 decimals)
+  }) as { data: bigint[] } ;
 
-  // Using the useReadContract hook to get the latest BNB price from the price feed
-  const { data: bnbFeed }: { data: BigNumberish[] | undefined } =
-    useReadContract({
-      abi: priceFeedAbi, // The ABI of the price feed contract
-      address: import.meta.env.VITE_BNB_FEED as `0x${string}`, // BNB price feed contract address from environment variable
-      functionName: "latestRoundData", // Function to get the latest round data from the price feed
-    });
-
-  // Using the useReadContract hook to get the BNB cost based on token supply and price feed data
-  const { data: bnbCost }: { data: BigNumberish[] | undefined } =
-    useReadContract({
-      abi: config.abi, // The ABI of the contract that handles BNB cost calculations
-      address: config.address as `0x${string}`, // The contract address of the BNB cost calculation contract
-      functionName: "getBNBAmount", // Function to get the BNB cost based on the total supply of the token
-      args: [coin.token, totalSupply], // Arguments: token address and its total supply
-    });
-
-  // useEffect hook to calculate and update the market cap when dependencies change (bnbFeed, totalSupply, bnbCost)
+  // Format token price in BNB
   useEffect(() => {
-    // If bnbFeed data exists, calculate the BNB/USD exchange rate (assuming bnbFeed[1] is the rate)
-    const usdRate = bnbFeed && Number(bnbFeed[1]) / Math.pow(10, 8); // BNB price in USD (with precision adjustment)
+    try {
+      if (priceData) {
+        const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
+        const formattedPrice = Number(priceInBnb);
+        
+        // Format based on price magnitude
+        let displayPrice;
+        if (formattedPrice < 0.000001) { 
+          displayPrice = formattedPrice.toExponential(2);
+        } else if (formattedPrice < 0.001) {
+          displayPrice = formattedPrice.toFixed(6);
+        } else if (formattedPrice < 1) {
+          displayPrice = formattedPrice.toFixed(4);
+        } else {
+          displayPrice = formattedPrice.toFixed(2);
+        }
+        setTokenPrice(displayPrice);
+      }
+    } catch (error) {
+      console.error("Error calculating token price:", error);
+      setTokenPrice("0");
+    }
+  }, [priceData]);
 
-    // If bnbCost and usdRate are available, calculate the market cap by multiplying the token's BNB cost with the USD rate
-    const result =
-      bnbCost && usdRate && Number(formatEther(bnbCost[0])) * usdRate; // Convert bnbCost to ether and calculate market cap
+  // Format addresses to always show 0x prefix
+  const formattedOwnerAddress = coin.owner.startsWith('0x') ? coin.owner : `0x${coin.owner}`;
+  const formattedTokenAddress = coin.token.startsWith('0x') ? coin.token : `0x${coin.token}`;
 
-    // Update the market cap state with the calculated value
-    setMarketCap(result as number); // Set the market cap state with the result
-  }, [bnbFeed, totalSupply, bnbCost]); // Re-run the effect when any of these dependencies change
+  // Format creation time safely
+  const formattedTime = React.useMemo(() => {
+    try {
+      return formatDistanceToNow(new Date(Number(coin.createdAt) * 1000), {
+        addSuffix: true,
+      });
+    } catch (error) {
+      console.error("Error formatting time:", error);
+      return "recently";
+    }
+  }, [coin.createdAt]);
+
+  // Format supply to be more readable
+  const formattedSupply = React.useMemo(() => {
+    try {
+      const supplyInEther = Number(formatEther(coin.supply.toString()));
+      if (supplyInEther >= 1_000_000) {
+        return `${(supplyInEther / 1_000_000).toFixed(2)}M`;
+      } else if (supplyInEther >= 1_000) {
+        return `${(supplyInEther / 1_000).toFixed(2)}K`;
+      }
+      return supplyInEther.toFixed(2);
+    } catch (error) {
+      return "0";
+    }
+  }, [coin.supply]);
 
   return (
-    <Link to={`coin/${coin.token}`}>
+    <Link to={`coin/${formattedTokenAddress}`}>
       <Card className="w-[350px] h-[480px] relative group transition-all duration-500 hover:scale-[1.02]">
         {/* Magical dark glow effects */}
         <div className="absolute -inset-[2px] bg-[#dfe6f7] opacity-0 group-hover:opacity-30 rounded-[24px] blur-sm transition-all duration-1200" />
@@ -76,31 +112,37 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
         {/* Inner glow ring */}
         <div className="absolute inset-[0.5px] rounded-[21px] bg-gradient-to-b from-[#f5f8fd]/40 via-transparent to-[#f5f8fd]/40 opacity-0 group-hover:opacity-15 blur-xs transition-all duration-1000" />
 
-        {/* Animated corner glows */}
-        {/* <div className="absolute -inset-[3px] opacity-0 group-hover:opacity-60 transition-all duration-700">
-          <div className="absolute top-[2px] left-[2px] w-20 h-20 bg-[#050a30] blur-xl rounded-full animate-pulse-slow" />
-          <div className="absolute bottom-[2px] right-[2px] w-20 h-20 bg-[#050a30] blur-xl rounded-full animate-pulse-slow delay-300" />
-        </div> */}
-
         {/* Main content container with dark overlay */}
         <div className="relative h-full rounded-xl bg-card/95 overflow-hidden flex flex-col backdrop-blur-sm">
           {/* Header section */}
           <CardHeader className="p-4">
-            <CardTitle className="flex justify-between items-center text-sm">
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 backdrop-blur">
-                  <span className="w-2 h-2 rounded-full bg-primary/60 animate-pulse" />
-                  <p className="font-mono text-xs text-primary/90">
-                    {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}
-                  </p>
+            <CardTitle className="flex justify-between items-start text-sm">
+              <div className="flex flex-col gap-2">
+                {/* Owner Address */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 backdrop-blur">
+                    <span className="text-xs text-muted-foreground">creator</span>
+                    <span className="w-1 h-1 rounded-full bg-primary/60" />
+                    <p className="font-mono text-xs text-primary/90">
+                      {`${formattedOwnerAddress.slice(0, 6)}...${formattedOwnerAddress.slice(-4)}`}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Token Address - only shown on hover */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <div className="flex items-center gap-1.5 px-2 py-0.5">
+                    <span className="text-xs text-muted-foreground">Token Address</span>
+                    <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                    <p className="font-mono text-xs text-muted-foreground/70">
+                      {`${formattedTokenAddress.slice(0, 6)}...${formattedTokenAddress.slice(-4)}`}
+                    </p>
+                  </div>
                 </div>
               </div>
 
               <time className="text-xs text-muted-foreground font-medium">
-                {formatDistanceToNow(
-                  new Date(parseInt(coin.createdAt.toString()) * 1000),
-                  { addSuffix: true },
-                )}
+                {formattedTime}
               </time>
             </CardTitle>
           </CardHeader>
@@ -126,12 +168,23 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
           {/* Details section */}
           <div className="flex-1 flex flex-col p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display text-lg font-semibold tracking-tight text-foreground/90">
-                {coin.name}
-              </h3>
+              <div>
+                <h3 className="font-display text-lg font-semibold tracking-tight text-foreground/90">
+                  {coin.name}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-muted-foreground font-mono">
+                    ${coin.ticker}
+                  </p>
+                  <span className="text-xs text-muted-foreground/70">•</span>
+                  <p className="text-xs text-muted-foreground/70">
+                    Supply: {formattedSupply}
+                  </p>
+                </div>
+              </div>
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10">
                 <span className="font-mono text-sm font-medium text-primary">
-                  {formatCurrency(marketCap)}
+                  {tokenPrice} BNB
                 </span>
               </div>
             </div>
