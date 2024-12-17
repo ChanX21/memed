@@ -7,6 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Splash from "@/components/Splash";
+import Battles from "@/pages/Battles";
+import Leaderboard from "@/pages/Leaderboard";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,8 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/coin/:tokenAddress" element={<CoinDetailPage />} />
+                <Route path="/battles" element={<Battles />} />
+                <Route path="/leaderboard" element={<Leaderboard />} />
               </Routes>
             </main>
           </div>

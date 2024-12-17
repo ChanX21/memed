@@ -42,11 +42,12 @@
     "react-router-dom": "^7.0.1",
     "recharts": "^2.15.0",
     "siwe": "^2.3.2",
+    "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "util": "^0.12.5",
     "vaul": "^1.1.1",
-    "viem": "^2.21.53",
+    "viem": "^2.21.55",
     "wagmi": "^2.13.3",
     "zod": "^3.23.8"
   },
