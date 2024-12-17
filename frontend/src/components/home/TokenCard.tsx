@@ -21,7 +21,7 @@ interface Props {
   coin: any;
 }
 
-const DEFAULT_LOGO = "/src/assets/logotrnspt.png"; // Assuming your logo is stored in the public folder as logo.png
+const DEFAULT_LOGO = "/assets/logotrnspt.png";
 
 const TokenCard: React.FC<Props> = ({ coin }) => {
   const [marketCap, setMarketCap] = useState<number>(0);
