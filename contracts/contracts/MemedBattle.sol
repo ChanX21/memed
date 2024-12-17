@@ -33,6 +33,7 @@ contract MemedBattle is Ownable {
         uint256 totalBattlesInitiated;
         uint256 totalBattlesParticipated;
         uint256 totalWins;
+        uint256 totalLosses;
         uint256 totalVotes;
         uint256 lastBattleTime;
         uint256 lastWinTime;
@@ -58,6 +59,9 @@ contract MemedBattle is Ownable {
     uint256 public battleCount;
     uint256 public feesBalance;
     address public currentKing;
+
+    // Add mapping to track token battle combinations
+    mapping(bytes32 => uint256) public lastBattleTimestamp;
 
     event BattleCreated(
         uint256 indexed battleId,
@@ -87,6 +91,17 @@ contract MemedBattle is Ownable {
     function createBattle(address _token1, address _token2) external payable {
         require(msg.value >= CREATION_FEE, "Insufficient creation fee");
         require(_token1 != _token2, "Cannot battle same token");
+        
+        // Check if this token combination has battled recently
+        bytes32 battlePairHash = keccak256(abi.encodePacked(
+            _token1 < _token2 ? _token1 : _token2,
+            _token1 < _token2 ? _token2 : _token1
+        ));
+        require(
+            lastBattleTimestamp[battlePairHash] == 0 || 
+            block.timestamp >= lastBattleTimestamp[battlePairHash] + 1 days,
+            "Token combination in cooldown"
+        );
 
         // Get token data and check stage
         (,,,,,Factory.TokenStages stage1,,) = factory.tokenData(_token1);
@@ -127,6 +142,9 @@ contract MemedBattle is Ownable {
 
         feesBalance += CREATION_FEE;
 
+        // Update the last battle timestamp for this combination
+        lastBattleTimestamp[battlePairHash] = block.timestamp;
+
         emit BattleCreated(battleId, _token1, _token2, startTime, endTime);
     }
 
@@ -148,6 +166,7 @@ contract MemedBattle is Ownable {
     function getTokenBasicStats(address token) external view returns (
         uint256 totalBattles,
         uint256 totalWins,
+        uint256 totalLosses,
         uint256 totalVotes,
         bool isCurrentKing,
         uint256 kingTime
@@ -156,6 +175,7 @@ contract MemedBattle is Ownable {
         return (
             stats.totalBattlesParticipated,
             stats.totalWins,
+            stats.totalLosses,
             stats.totalVotes,
             currentKing == token,
             stats.kingCrownedTime
@@ -216,11 +236,18 @@ contract MemedBattle is Ownable {
         address winner;
         if (battle.token1Votes > battle.token2Votes) {
             winner = battle.token1;
+            tokenStats[battle.token2].totalLosses++;
         } else if (battle.token2Votes > battle.token1Votes) {
             winner = battle.token2;
+            tokenStats[battle.token1].totalLosses++;
         } else {
             winner = battle.token1Votes == 0 ? address(0) : 
                     block.timestamp % 2 == 0 ? battle.token1 : battle.token2;
+            if (winner != address(0)) {
+                // In case of a tie with votes, the loser still gets a loss
+                address loser = winner == battle.token1 ? battle.token2 : battle.token1;
+                tokenStats[loser].totalLosses++;
+            }
         }
 
         battle.winner = winner;
@@ -338,5 +365,57 @@ contract MemedBattle is Ownable {
         uint256 amount = feesBalance;
         feesBalance = 0;
         payable(owner()).transfer(amount);
+    }
+
+    // Add function to get active and all battles
+    function getBattles(bool activeOnly) external view returns (
+        uint256[] memory battleIds,
+        address[] memory token1Addresses,
+        address[] memory token2Addresses,
+        uint256[] memory token1Votes,
+        uint256[] memory token2Votes,
+        uint256[] memory startTimes,
+        uint256[] memory endTimes,
+        bool[] memory settled,
+        address[] memory winners
+    ) {
+        uint256 count = 0;
+        
+        // First pass to count battles that match criteria
+        for (uint256 i = 0; i < battleCount; i++) {
+            Battle storage battle = battles[i];
+            if (!activeOnly || (!battle.settled && block.timestamp < battle.endTime)) {
+                count++;
+            }
+        }
+        
+        // Initialize arrays with correct size
+        battleIds = new uint256[](count);
+        token1Addresses = new address[](count);
+        token2Addresses = new address[](count);
+        token1Votes = new uint256[](count);
+        token2Votes = new uint256[](count);
+        startTimes = new uint256[](count);
+        endTimes = new uint256[](count);
+        settled = new bool[](count);
+        winners = new address[](count);
+        
+        // Second pass to fill arrays
+        uint256 index = 0;
+        for (uint256 i = 0; i < battleCount; i++) {
+            Battle storage battle = battles[i];
+            if (!activeOnly || (!battle.settled && block.timestamp < battle.endTime)) {
+                battleIds[index] = i;
+                token1Addresses[index] = battle.token1;
+                token2Addresses[index] = battle.token2;
+                token1Votes[index] = battle.token1Votes;
+                token2Votes[index] = battle.token2Votes;
+                startTimes[index] = battle.startTime;
+                endTimes[index] = battle.endTime;
+                settled[index] = battle.settled;
+                winners[index] = battle.winner;
+                index++;
+            }
+        }
     }
 } 
