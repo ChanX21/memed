@@ -36,6 +36,13 @@ const Home: React.FC = () => {
     args: ["0x0000000000000000000000000000000000000000"],
   });
 
+  const sortedMemecoins = React.useMemo(() => {
+    if (!memecoins) return [];
+    return [...memecoins].sort(
+      (a, b) => Number(b.createdAt) - Number(a.createdAt),
+    );
+  }, [memecoins]);
+
   const getRandomColor = (): string =>
     `#${Math.floor(Math.random() * 16777215).toString(16)}`;
 
@@ -45,21 +52,13 @@ const Home: React.FC = () => {
       "0x8Dc4...5B2e",
       "0x9Fa1...2C8f",
       "0x6Bb8...9D1a",
-      "0x5Ae3...4F7b"
+      "0x5Ae3...4F7b",
     ];
     return addresses[Math.floor(Math.random() * addresses.length)];
   };
 
   const randomToken = (): string => {
-    const tokens = [
-      "PEPE",
-      "DOGE",
-      "WOJAK",
-      "MOON",
-      "FROG",
-      "CAT",
-      "MEME"
-    ];
+    const tokens = ["PEPE", "DOGE", "WOJAK", "MOON", "FROG", "CAT", "MEME"];
     return tokens[Math.floor(Math.random() * tokens.length)];
   };
 
@@ -74,12 +73,12 @@ const Home: React.FC = () => {
 
   const [component1, setComponent1] = useState<DynamicComponent>({
     bgColor: "bg-gray-200",
-    text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`
+    text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`,
   });
 
   const [component2, setComponent2] = useState<DynamicComponent>({
     bgColor: "bg-gray-200",
-    text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`
+    text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`,
   });
 
   useEffect(() => {
@@ -90,11 +89,11 @@ const Home: React.FC = () => {
     const interval = setInterval(() => {
       setComponent1({
         bgColor: getRandomColor(),
-        text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`
+        text: `${randomAddress()} bought ${randomAmount()} of $${randomToken()}`,
       });
       setComponent2({
         bgColor: getRandomColor(),
-        text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`
+        text: `${randomAddress()} created $${randomToken()} on ${randomDate()}`,
       });
     }, 3000);
 
@@ -120,7 +119,7 @@ const Home: React.FC = () => {
         </h1>
 
         <div className="max-w-2xl mx-auto mb-8">
-          <TypewriterText 
+          <TypewriterText
             texts={pitchTexts}
             typingSpeed={80}
             deletingSpeed={40}
@@ -145,7 +144,7 @@ const Home: React.FC = () => {
             <Button
               type="submit"
               variant="secondary"
-              className="h-12 px-8 bg-primary text-primary-foreground 
+              className="h-12 px-8 bg-primary text-primary-foreground
                          hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(5,10,48,0.5)]
                          shadow-md transition-all duration-300
                          hover:scale-105 active:scale-95"
@@ -200,18 +199,18 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Transaction Text */}
-                <div className="flex-1">
+                <div className="flex-1 overflow-x-hidden">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component1.text.split(' ')[0]}
+                      {component1.text.split(" ")[0]}
                     </span>
                     <span className="mx-1">bought</span>
                     <span className="font-semibold text-primary">
-                      {component1.text.split(' ')[2]}
+                      {component1.text.split(" ")[2]}
                     </span>
                     <span className="mx-1">of</span>
                     <span className="font-medium text-primary">
-                      {component1.text.split(' ')[4]}
+                      {component1.text.split(" ")[4]}
                     </span>
                   </p>
                 </div>
@@ -248,18 +247,18 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Creation Text */}
-                <div className="flex-1">
+                <div className="flex-1 overflow-x-hidden">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component2.text.split(' ')[0]}
+                      {component2.text.split(" ")[0]}
                     </span>
                     <span className="mx-1">created</span>
                     <span className="font-medium text-primary">
-                      {component2.text.split(' ')[2]}
+                      {component2.text.split(" ")[2]}
                     </span>
                     <span className="mx-1">on</span>
                     <span className="font-medium">
-                      {component2.text.split(' ')[4]}
+                      {component2.text.split(" ")[4]}
                     </span>
                   </p>
                 </div>

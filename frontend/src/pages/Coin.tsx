@@ -19,13 +19,17 @@ import { TradeForm } from "@/components/coin/forms/tradeForm";
 import { useBlockNumber, useReadContract } from "wagmi";
 import config from "@/config.json";
 import { TokenData } from "@/types";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { SiBinance } from "react-icons/si";
 
 import TokenStats from "@/components/coin/TokenStats";
+import { formatEther } from "ethers";
+import { truncateWalletAddress } from "@/utils";
 
 const CoinDetailPage: React.FC = () => {
+  const [tokenPrice, setTokenPrice] = useState<string>("0");
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const { toast } = useToast();
   const {
@@ -37,6 +41,14 @@ const CoinDetailPage: React.FC = () => {
     functionName: "getTokens",
     args: [tokenAddress],
   });
+  // Get price for 1 token from factory
+  const { data: priceData } = useReadContract({
+    address: config.address as `0x${string}`,
+    abi: config.abi,
+    functionName: "getBNBAmount",
+    args: [tokenAddress, 1], // Amount for 1 token (18 decimals)
+  }) as { data: bigint[] };
+
   const { data: blockNumber } = useBlockNumber({ watch: true });
   useEffect(() => {
     refetch();
@@ -65,6 +77,32 @@ const CoinDetailPage: React.FC = () => {
     }
   };
 
+  // Format token price in BNB
+  useEffect(() => {
+    try {
+      if (priceData) {
+        const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
+        const formattedPrice = Number(priceInBnb);
+
+        // Format based on price magnitude
+        let displayPrice;
+        if (formattedPrice < 0.000001) {
+          displayPrice = formattedPrice.toExponential(2);
+        } else if (formattedPrice < 0.001) {
+          displayPrice = formattedPrice.toFixed(6);
+        } else if (formattedPrice < 1) {
+          displayPrice = formattedPrice.toFixed(4);
+        } else {
+          displayPrice = formattedPrice.toFixed(2);
+        }
+        setTokenPrice(displayPrice);
+      }
+    } catch (error) {
+      console.error("Error calculating token price:", error);
+      setTokenPrice("0");
+    }
+  }, [priceData]);
+
   return (
     coin && (
       <div className="min-h-screen  relative">
@@ -74,12 +112,22 @@ const CoinDetailPage: React.FC = () => {
         <div className="  rounded-lg shadow-md overflow-hidden">
           {/* Header */}
           <div className="p-6 ">
+            <Link
+              to={`https://testnet.bscscan.com/address/${tokenAddress}`}
+              target="_blank"
+              className=" flex items-center gap-3 hover:underline"
+            >
+              <SiBinance size={20} />
+              <span>
+                {tokenAddress ? truncateWalletAddress(tokenAddress) : ""}
+              </span>
+            </Link>
             <h1 className="text-3xl font-bold mb-2">
               {coin.name} ({coin.ticker})
             </h1>
             <div className="flex items-center mt-4">
               <span className="text-lg font-bold text-green-500 mr-4">
-                $0.50
+                {tokenPrice} BNB
               </span>
               <span className="text-sm text-gray-500">+2.5% (24h)</span>
             </div>
