@@ -39,7 +39,7 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-lg transition-all duration-300">
-      <div className="container flex h-24 items-center justify-between px-4">
+      <div className=" flex h-24 items-center justify-between px-4  w-full">
         <div className="flex items-center gap-8">
           {/* Logo as home button */}
           <Link
@@ -74,7 +74,7 @@ export function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ">
           {/* Add BNB Chain branding here */}
           <BNBBranding />
 
