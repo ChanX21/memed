@@ -2,8 +2,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { prisma } from '../clients/prisma.js';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-// The URL should start with 'https://' and be properly formatted
-const MINI_APP_URL = 'https://memed.fun'; // Replace with your actual web app URL
+const MINI_APP_URL = 'https://memed.fun'; 
 
 export class TelegramBotService {
   private bot: TelegramBot;
