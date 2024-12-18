@@ -81,6 +81,7 @@ const TokenStats: React.FC = () => {
     functionName: "tokenStats",
     args: [tokenAddress],
   });
+
   const { data: tokenData }: { data: TokenData | undefined } = useReadContract({
     abi: config.abi,
     address: config.address as `0x${string}`,
@@ -154,28 +155,52 @@ const TokenStats: React.FC = () => {
   });
 
   //fetch buy logs
+  const deploymentBlock = 46596979n; // Deployment block number
+
   const fetchBuyLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokensBought as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-        args: {
-          token: tokenAddress, // Filter by indexed argument
-        },
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
 
-      const decodedLogs = logs?.map((log) =>
+      for (
+        let startBlock = deploymentBlock;
+        //@ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          //@ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
+
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokensBought as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+          args: {
+            token: tokenAddress,
+          },
+        });
+        //@ts-ignore
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
-          abi: [eventsAbi.tokensBought], // Pass the ABI array
+          abi: [eventsAbi.tokensBought],
           data: log.data,
           topics: log.topics,
         }),
       );
 
+      // Calculate the total price
       const totalPrice =
-        decodedLogs?.reduce(
+        decodedLogs.reduce(
           //@ts-ignore
           (accumulator: number, currentItem: DecodedLog) => {
             const priceInEth = parseFloat(
@@ -185,35 +210,59 @@ const TokenStats: React.FC = () => {
           },
           0,
         ) || 0;
-      setBuys(totalPrice as number);
+      //@ts-ignore
+      setBuys(totalPrice as number); // Update the state with the total price
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching buy logs:", error);
     }
   };
 
   //fetch sell logs
+
   const fetchSellLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokensSold as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-        args: {
-          token: tokenAddress, // Filter by indexed argument
-        },
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
 
-      const decodedLogs = logs?.map((log) =>
+      for (
+        let startBlock = deploymentBlock;
+        //@ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          //@ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
+
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokensSold as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+          args: {
+            token: tokenAddress,
+          },
+        });
+        //@ts-ignore
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
-          abi: [eventsAbi.tokensSold], // Pass the ABI array
+          abi: [eventsAbi.tokensSold],
           data: log.data,
           topics: log.topics,
         }),
       );
 
+      // Calculate the total price
       const totalPrice =
-        decodedLogs?.reduce(
+        decodedLogs.reduce(
           //@ts-ignore
           (accumulator: number, currentItem: DecodedLog) => {
             const priceInEth = parseFloat(
@@ -223,9 +272,10 @@ const TokenStats: React.FC = () => {
           },
           0,
         ) || 0;
-      setSells(totalPrice as number);
+      //@ts-ignore
+      setSells(totalPrice as number); // Update the state with the total price
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching sell logs:", error);
     }
   };
 
@@ -264,9 +314,7 @@ const TokenStats: React.FC = () => {
             <p> Collateral</p>
           </div>
           <div className="font-semibold">
-            {tokenData
-              ? Number(formatEther(tokenData[6])).toFixed(4)
-              : "Loading..."}
+            {tokenData ? Number(formatEther(tokenData[6])).toFixed(4) : 0}
           </div>
         </div>
 
@@ -291,7 +339,7 @@ const TokenStats: React.FC = () => {
             <MdFingerprint size={25} className="text-gray-500" />
             <p> Votes</p>
           </div>
-          <div className="font-semibold">{data ? Number(data[3]) : 0}</div>
+          <div className="font-semibold">{data ? Number(data[4]) : 0}</div>
         </div>
       </div>
 
