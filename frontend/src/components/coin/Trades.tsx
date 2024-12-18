@@ -64,56 +64,100 @@ const Trades = () => {
   const [trades, setTrades] = useState<DecodedLog[]>([]);
 
   //fetch buy logs
+  const deploymentBlock = 46596979n; // Deployment block number
+
   const fetchBuyLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokensBought as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-        args: {
-          token: tokenAddress, // Filter by indexed argument
-        },
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
+      for (
+        let startBlock = deploymentBlock;
+        //@ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          //@ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
 
-      const decodedLogs = logs?.map((log) =>
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokensBought as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+          args: {
+            token: tokenAddress,
+          },
+        });
+        // @ts-ignore
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
-          abi: [eventsAbi.tokensBought], // Pass the ABI array
+          abi: [eventsAbi.tokensBought],
           data: log.data,
           topics: log.topics,
         }),
       );
       //@ts-ignore
-      setBuyLogs(decodedLogs);
+      setBuyLogs(decodedLogs); // Update the state with the decoded logs
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching buy logs:", error);
     }
   };
 
   //fetch buy logs
+
   const fetchSellLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokensSold as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-        args: {
-          token: tokenAddress, // Filter by indexed argument
-        },
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
 
-      const decodedLogs = logs?.map((log) =>
+      for (
+        let startBlock = deploymentBlock;
+        // @ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          // @ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
+
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokensSold as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+          args: {
+            token: tokenAddress,
+          },
+        });
+
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
-          abi: [eventsAbi.tokensSold], // Pass the ABI array
+          abi: [eventsAbi.tokensSold],
           data: log.data,
           topics: log.topics,
         }),
       );
-      //@ts-ignore
-      setSellLogs(decodedLogs);
+      // @ts-ignore
+      setSellLogs(decodedLogs); // Update the state with the decoded logs
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching sell logs:", error);
     }
   };
 
@@ -135,7 +179,7 @@ const Trades = () => {
           mergedArray[i],
         ];
       }
-      console.log(mergedArray);
+
       setTrades(mergedArray);
     }
     mergeAndShuffle(sellLogs, buyLogs);

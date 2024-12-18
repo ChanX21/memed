@@ -173,30 +173,55 @@ const Home: React.FC = () => {
   });
 
   //fetch buy logs
+  const deploymentBlock = 46596979n; // Deployment block number
+
   const fetchBuyLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokensBought as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-        args: {
-          token: log?.args.token, // Filter by indexed argument
-        },
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
 
-      const decodedLogs = logs?.map((log) =>
+      for (
+        let startBlock = deploymentBlock;
+        // @ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          // @ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
+
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokensBought as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+          args: {
+            token: log?.args.token, // Filter by indexed argument
+          },
+        });
+        // @ts-ignore
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
-          abi: [eventsAbi.tokensBought], // Pass the ABI array
+          abi: [eventsAbi.tokensBought],
           data: log.data,
           topics: log.topics,
         }),
       );
 
-      //@ts-ignore
-      setLog(decodedLogs[0]);
+      if (decodedLogs.length > 0) {
+        //@ts-ignore
+        setLog(decodedLogs[0]); // Set the first decoded log
+      }
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching buy logs:", error);
     }
   };
 
@@ -213,16 +238,38 @@ const Home: React.FC = () => {
   });
 
   //fetch token creation logs
+
   const fetchTokenCreationLogs = async () => {
     try {
-      const logs = await publicClient?.getLogs({
-        address: config.address as `0x${string}`,
-        event: eventsAbi.tokenCreated as AbiEvent,
-        fromBlock: 0n, // Start block
-        toBlock: "latest", // End block
-      });
+      const batchSize = 50000n; // Define the maximum block range
+      const latestBlock = await publicClient?.getBlockNumber(); // Fetch the latest block number
+      const logs: any[] = [];
 
-      const decodedLogs = logs?.map((log) =>
+      for (
+        let startBlock = deploymentBlock;
+        // @ts-ignore
+        startBlock <= latestBlock;
+        startBlock += batchSize
+      ) {
+        const endBlock =
+          // @ts-ignore
+          startBlock + batchSize - 1n > latestBlock
+            ? latestBlock
+            : startBlock + batchSize - 1n;
+
+        // Fetch logs in batches
+        const batchLogs = await publicClient?.getLogs({
+          address: config.address as `0x${string}`,
+          event: eventsAbi.tokenCreated as AbiEvent,
+          fromBlock: startBlock,
+          toBlock: endBlock,
+        });
+
+        logs.push(...batchLogs); // Add batch logs to the result
+      }
+
+      // Decode logs
+      const decodedLogs = logs.map((log) =>
         decodeEventLog({
           abi: [eventsAbi.tokenCreated], // Pass the ABI array
           data: log.data,
@@ -230,10 +277,12 @@ const Home: React.FC = () => {
         }),
       );
 
-      //@ts-ignore
-      setTokenLog(decodedLogs[0]);
+      if (decodedLogs.length > 0) {
+        //@ts-ignore
+        setTokenLog(decodedLogs[0]); // Set the first decoded log
+      }
     } catch (error) {
-      console.error("Error fetching logs:", error);
+      console.error("Error fetching token creation logs:", error);
     }
   };
 

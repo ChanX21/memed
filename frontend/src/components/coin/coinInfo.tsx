@@ -9,10 +9,15 @@ import {
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import { Progress } from "../ui/progress";
 import { BigNumberish, formatEther } from "ethers";
-import { useReadContract } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import { useParams } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
 import { Crown, Rocket, TrendingUp, Users } from "lucide-react";
+import config from "@/config.json";
+import priceFeedAbi from "@/abi/priceFeed.json";
+import { formatCurrency } from "@/utils";
+
+import memedBattle from "@/abi/memedBattle.json";
 
 interface Props {
   supply: bigint;
@@ -30,19 +35,20 @@ interface StatCardProps {
   value: string | number;
 }
 
+type BattlePositionArray = [string[], number[], number[], number[]];
+
 const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [percCompleted, setPercCompleted] = useState<number>(0);
+  const [tokenPrice, setTokenPrice] = useState<string>("0");
 
-  // const { isPending, error, data, refetch } = useQuery({
-  //   queryKey: ["tokenHoldersList"],
-  //   queryFn: () =>
-  //     fetch(
-  //       `https://api.etherscan.io/api?module=token&action=tokenholderlist&contractaddress=${tokenAddress}&page=1&offset=10&apikey=${import.meta.env.VITE_ETHERSCAN_API_KEY}`,
-  //     ).then((res) => res.json()),
-  //   refetchInterval: 500,
-  //   refetchOnWindowFocus: true,
-  // });
+  // Get price for 1 token from factory
+  const { data: priceData } = useReadContract({
+    address: config.address as `0x${string}`,
+    abi: config.abi,
+    functionName: "getBNBAmount",
+    args: [tokenAddress, 1], // Amount for 1 token (18 decimals)
+  }) as { data: bigint[] };
 
   // Using the useReadContract hook to fetch the total supply of the token
   const { data: totalSupply }: { data: BigNumberish | undefined } =
@@ -51,6 +57,76 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
       address: tokenAddress as `0x${string}`, // The token contract address
       functionName: "totalSupply", // The function to get the total supply of the token
     });
+
+  const {
+    data: bnbFeed,
+    isFetching,
+    isLoading,
+  } = useReadContract({
+    abi: priceFeedAbi,
+    address: import.meta.env.VITE_BNB_FEED as `0x${string}`,
+    functionName: "latestRoundData",
+  });
+
+  const { data: kingData }: { data: BattlePositionArray | undefined } =
+    useReadContract({
+      abi: memedBattle.abi,
+      address: memedBattle.address as `0x${string}`,
+      functionName: "getLeaderboard",
+      args: [10],
+    });
+  function findAndDivide(array: string[], element: string) {
+    // Find the position of the element in the array (starting from 1)
+    const position = array.indexOf(element);
+
+    // If the element is not found, return "0%"
+    if (position === -1) {
+      return 0;
+    }
+
+    // Divide the position by 10, convert to percentage, and return
+    return ((10 - position) / 10) * 100;
+  }
+
+  // Format token price in BNB
+  useEffect(() => {
+    function handleFeed() {
+      try {
+        if (priceData) {
+          const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
+
+          // Define the initial supply of the token (for comparison purposes)
+          const initialSupply = 200000000;
+
+          // Convert the total supply (in wei) to ether and calculate the current supply
+          const currentSupply = Number(formatEther(totalSupply || 0n));
+          const actualSupply = currentSupply - initialSupply;
+          const actualSupplyPrice = actualSupply * Number(priceInBnb);
+          // @ts-ignore
+          const usdPrice = Number(bnbFeed[1]) / Math.pow(10, 8);
+          const formattedPrice = actualSupplyPrice * usdPrice;
+          // console.log(formattedPrice, usdPrice, actualSupply, currentSupply);
+          // Format based on price magnitude
+          // let displayPrice;
+          // if (formattedPrice < 0.000001) {
+          //   displayPrice = formattedPrice.toExponential(2);
+          // } else if (formattedPrice < 0.001) {
+          //   displayPrice = formattedPrice.toFixed(6);
+          // } else if (formattedPrice < 1) {
+          //   displayPrice = formattedPrice.toFixed(4);
+          // } else {
+          //   displayPrice = formattedPrice.toFixed(2);
+          // }
+          setTokenPrice(formattedPrice.toString());
+        }
+      } catch (error) {
+        console.error("Error calculating token price:", error);
+        setTokenPrice("0");
+      }
+    }
+
+    handleFeed();
+  }, [bnbFeed, priceData, totalSupply]);
 
   // useEffect hook to calculate the percentage of the supply that has been minted/used
   useEffect(() => {
@@ -96,13 +172,13 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
               <StatCard
                 icon={<TrendingUp className="w-4 h-4" />}
                 label="Market Cap"
-                value="$21,000"
+                value={"USD " + tokenPrice}
               />
-              <StatCard
+              {/* <StatCard
                 icon={<Users className="w-4 h-4" />}
                 label="Holders"
                 value="1,234"
-              />
+              /> */}
               {/* Add more stat cards as needed */}
             </div>
           </div>
@@ -135,13 +211,18 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] p-4 bg-card/95 backdrop-blur-xl border-border/50">
                     <p className="text-sm text-muted-foreground">
-                      When the market cap reaches $21,000 (~30 BNB), all the
+                      When the market cap reaches max threhold, all the
                       liquidity in the bonding curve will be deposited to
                       PancakeSwap and burned.
                     </p>
                     <div className="mt-2 p-2 rounded-lg bg-primary/5 border border-primary/10">
                       <p className="text-xs font-mono text-primary">
-                        Available tokens: {(1_000_000_000n - supply).toString()}
+                        Available tokens:{" "}
+                        {totalSupply
+                          ? (
+                              Number(formatEther(totalSupply)) - 200000000
+                            ).toString()
+                          : "0"}
                       </p>
                     </div>
                   </TooltipContent>
@@ -158,14 +239,14 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                   className="h-4"
                 />
                 {/* Milestone markers */}
-                <div className="absolute -top-1 left-[30%] h-6 w-[2px] bg-primary/30" />
-                <div className="absolute -top-1 left-[60%] h-6 w-[2px] bg-primary/30" />
+                {/* <div className="absolute -top-1 left-[30%] h-6 w-[2px] bg-primary/30" />
+                <div className="absolute -top-1 left-[60%] h-6 w-[2px] bg-primary/30" /> */}
               </div>
 
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Start</span>
+
                 <span>PancakeSwap Launch</span>
-                <span>Complete</span>
               </div>
             </div>
           </div>
@@ -183,7 +264,12 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                 </div>
                 <div>
                   <h3 className="font-semibold">King of the Hill</h3>
-                  <p className="text-sm text-muted-foreground">33% Progress</p>
+                  <p className="text-sm text-muted-foreground">
+                    {kingData
+                      ? findAndDivide(kingData[0], tokenAddress as string)
+                      : 0}
+                    % Progress
+                  </p>
                 </div>
               </div>
               <TooltipProvider>
@@ -193,8 +279,10 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] p-4 bg-card/95 backdrop-blur-xl border-border/50">
                     <p className="text-sm text-muted-foreground">
-                      When the market cap reaches $46,094, this coin will be
-                      pinned to the top of the feed until dethroned!
+                      The most victorious and celebrated coins rise above all
+                      others, claiming the ultimate title as the undisputed King
+                      of the Hills, reigning supreme at the peak of triumph and
+                      dominance.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -202,20 +290,24 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
             </div>
 
             <Progress
-              value={33}
+              value={
+                kingData
+                  ? findAndDivide(kingData[0], tokenAddress as string)
+                  : 0
+              }
               parentBg="bg-yellow-500/20"
               childBg="bg-gradient-to-r from-yellow-500 to-yellow-300"
               className="h-4"
             />
 
-            <div className="flex items-center justify-between p-3 rounded-lg bg-card/50">
+            {/* <div className="flex items-center justify-between p-3 rounded-lg bg-card/50">
               <div className="flex items-center gap-2">
                 <Crown className="w-4 h-4 text-yellow-500" />
                 <span className="text-sm">
                   Crowned king on 12/3/2024, 11:38:09 AM
                 </span>
               </div>
-            </div>
+            </div> */}
           </div>
         </Card>
       </div>
