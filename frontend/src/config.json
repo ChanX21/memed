@@ -1,5 +1,5 @@
 {
-    "address": "0xDb988a31F8685905D1aCe4e6CD9c2489e937bDF6",
+    "address": "0x492AE6961945Dc45AaA21d96F7cB062A90b6352f",
     "abi": [
       {
         "inputs": [],
@@ -113,31 +113,6 @@
           }
         ],
         "name": "TokenGraduated",
-        "type": "event"
-      },
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "token",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "recipient",
-            "type": "address"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "amount",
-            "type": "uint256"
-          }
-        ],
-        "name": "TokenWithdrawn",
         "type": "event"
       },
       {

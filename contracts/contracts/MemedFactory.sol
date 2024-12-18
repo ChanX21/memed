@@ -7,23 +7,39 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 
 contract Factory is Ownable {
+    // Uniswap factory and router addresses (update for your network if necessary)
     IUniswapV2Factory pancakeFactory =
         IUniswapV2Factory(address(0xB7926C0430Afb07AA7DEfDE6DA862aE0Bde767bc));
     IUniswapV2Router01 router =
         IUniswapV2Router01(address(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3));
+
     uint256 public constant maxSupply = (10 ** 9) * 10 ** 18;
     uint256 public constant k = 46875;
     uint256 public constant offset = 18750000000000000000000000000000;
     uint256 public constant SCALING_FACTOR = 10 ** 18;
-    uint256 public graduationAmount = 0.05 ether;
+    uint256 public graduationAmount = 0.05 ether; // Updated graduation amount
     uint256 public constant creationFee = 0.002 ether;
     uint256 public constant tradeFeePercent = 10;
     uint256 public feesBalance;
 
+    // Structs and mappings for token management
     enum TokenStages {
         NOT_CREATED,
         BOUNDING_CURVE,
         GRADUATED
+    }
+
+ struct AllTokenData {
+        address token;
+        string name;
+        string ticker;
+        string description;
+        string image;
+        address owner;
+        TokenStages stage;
+        uint256 collateral;
+        uint supply;
+        uint createdAt;
     }
 
     struct TokenData {
@@ -37,22 +53,10 @@ contract Factory is Ownable {
         uint createdAt;
     }
 
-    struct AllTokenData {
-        address token;
-        string name;
-        string ticker;
-        string description;
-        string image;
-        address owner;
-        TokenStages stage;
-        uint256 collateral;
-        uint supply;
-        uint createdAt;
-    }
-
     mapping(address => TokenData) public tokenData;
     address[] public tokens;
 
+    // Events
     event TokenCreated(
         address indexed token,
         address indexed owner,
@@ -75,16 +79,25 @@ contract Factory is Ownable {
         uint256 totalPrice
     );
     event TokenGraduated(address indexed token, address indexed pool);
-    event TokenWithdrawn(
-        address indexed token,
-        address indexed recipient,
-        uint256 amount
-    );
 
     constructor() Ownable(msg.sender) {}
 
     function setGraduationAmount(uint256 _amount) public onlyOwner {
         graduationAmount = _amount;
+    }
+
+   function getBNBAmount(
+        address _token,
+        uint256 _amount
+    ) public view returns (uint256[3] memory) {
+        MemedToken token = MemedToken(_token);
+        uint256 currentSupply = token.totalSupply();
+        uint256 newSupply = currentSupply + _amount;
+        uint256 f_b = k * newSupply + offset;
+        uint256 result = ((_amount * f_b) / SCALING_FACTOR);
+
+        uint256 fee = (result * tradeFeePercent) / 10000;
+        return [result - fee, result, fee];
     }
 
     function createMeme(
@@ -125,11 +138,6 @@ contract Factory is Ownable {
             "Invalid token"
         );
         MemedToken token = MemedToken(_token);
-        require(
-            _amount <=
-                (maxSupply - ((maxSupply * 20) / 100) - token.totalSupply()),
-            "Not enough available tokens"
-        );
 
         uint256[3] memory bnbRequired = getBNBAmount(_token, _amount);
 
@@ -163,7 +171,7 @@ contract Factory is Ownable {
         );
 
         uint256[3] memory bnb = getBNBAmount(_token, _amount);
-        uint256 netBnb = bnb[0] - bnb[1];
+        uint256 netBnb = bnb[0];
 
         require(
             address(this).balance >= netBnb,
@@ -202,20 +210,7 @@ contract Factory is Ownable {
         payable(tokenData[_token].owner).transfer((graduationAmount * 2) / 100);
         tokenData[_token].stage = TokenStages.GRADUATED;
         emit TokenGraduated(_token, pool);
-    }
-
-    function getBNBAmount(
-        address _token,
-        uint256 _amount
-    ) public view returns (uint256[3] memory) {
-        MemedToken token = MemedToken(_token);
-        uint256 currentSupply = token.totalSupply();
-        uint256 newSupply = currentSupply + _amount;
-        uint256 f_b = k * newSupply + offset;
-        uint256 result = ((_amount * f_b) / SCALING_FACTOR);
-        uint256 fee = (result * tradeFeePercent) / 10000;
-        return [result - fee, result, fee];
-    }
+    } 
 
     function getTokens(address _token) external view returns (AllTokenData[] memory) {
         uint length = _token != address(0) ? 1 : tokens.length;
@@ -238,6 +233,8 @@ contract Factory is Ownable {
         }
         return allTokens;
     }
+
+
 
     receive() external payable {}
 }

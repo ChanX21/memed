@@ -5,7 +5,7 @@ import "@nomicfoundation/hardhat-ignition";
 const config: HardhatUserConfig = {
   networks: {
     bscTestnet: {
-      url: `https://bsc-testnet.blockpi.network/v1/rpc/public`,
+      url: `https://bsc-testnet.infura.io/v3/cd763583ae724e4fb5620a8f0bc5876f`,
       accounts: [vars.get('PRIVATE_KEY')],
     },
   },
