@@ -70,15 +70,17 @@ contract Factory is Ownable {
         address indexed token,
         address indexed buyer,
         uint256 amount,
-        uint256 totalPrice
+        uint256 totalPrice,
+        uint timestamp
     );
     event TokensSold(
         address indexed token,
         address indexed seller,
         uint256 amount,
-        uint256 totalPrice
+        uint256 totalPrice,
+        uint timestamp
     );
-    event TokenGraduated(address indexed token, address indexed pool);
+    event TokenGraduated(address indexed token, address indexed pool, uint timestamp);
 
     constructor() Ownable(msg.sender) {}
 
@@ -156,7 +158,7 @@ contract Factory is Ownable {
             graduateToken(_token);
         }
 
-        emit TokensBought(_token, msg.sender, _amount, bnbRequired[1]);
+        emit TokensBought(_token, msg.sender, _amount, bnbRequired[1], block.timestamp);
     }
 
     function sell(address _token, uint256 _amount) public {
@@ -184,7 +186,7 @@ contract Factory is Ownable {
 
         payable(msg.sender).transfer(netBnb);
 
-        emit TokensSold(_token, msg.sender, _amount, netBnb);
+        emit TokensSold(_token, msg.sender, _amount, netBnb, block.timestamp);
     }
 
     function graduateToken(address _token) internal {
@@ -209,7 +211,7 @@ contract Factory is Ownable {
         );
         payable(tokenData[_token].owner).transfer((graduationAmount * 2) / 100);
         tokenData[_token].stage = TokenStages.GRADUATED;
-        emit TokenGraduated(_token, pool);
+        emit TokenGraduated(_token, pool, block.timestamp);
     } 
 
     function getTokens(address _token) external view returns (AllTokenData[] memory) {

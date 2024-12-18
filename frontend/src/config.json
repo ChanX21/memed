@@ -1,5 +1,5 @@
 {
-    "address": "0x492AE6961945Dc45AaA21d96F7cB062A90b6352f",
+    "address": "0x2f766a04e25D07465877D8084bfBd5a1d7B58ec9",
     "abi": [
       {
         "inputs": [],
@@ -110,6 +110,12 @@
             "internalType": "address",
             "name": "pool",
             "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
           }
         ],
         "name": "TokenGraduated",
@@ -141,6 +147,12 @@
             "internalType": "uint256",
             "name": "totalPrice",
             "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
           }
         ],
         "name": "TokensBought",
@@ -171,6 +183,12 @@
             "indexed": false,
             "internalType": "uint256",
             "name": "totalPrice",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
             "type": "uint256"
           }
         ],
