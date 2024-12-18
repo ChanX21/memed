@@ -14,6 +14,9 @@ Memed is a decentralized finance (DeFi) platform built on the Binance Smart Chai
 - **Meme Battles**: Participate in exciting battles between tokens, where users can vote for their favorites.
 - **Trending Tokens**: Discover and interact with trending meme tokens in the community.
 
+![image](https://github.com/user-attachments/assets/f1c9055d-fe65-40be-80c6-8df8a488406c)
+
+
 ## Getting Started
 
 ### Prerequisites
