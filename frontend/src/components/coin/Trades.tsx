@@ -1,24 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useReadContract, usePublicClient, useWatchContractEvent } from "wagmi";
+import { usePublicClient } from "wagmi";
 import { useParams } from "react-router-dom";
-import { BattleChart } from "./BattleChart";
-import { GrTransaction } from "react-icons/gr";
-import { GiPayMoney, GiReceiveMoney } from "react-icons/gi";
-import {
-  MdFingerprint,
-  MdOutlinePriceChange,
-  MdOutlineSavings,
-} from "react-icons/md";
-import { AiOutlineLineChart } from "react-icons/ai";
-import memedBattle from "@/abi/memedBattle.json";
 import config from "@/config.json";
 import { BigNumberish, formatEther } from "ethers";
-import tokenAbi from "@/abi/erc20.json";
 import eventsAbi from "@/abi/events.json";
 import { AbiEvent } from "viem";
 import { decodeEventLog } from "viem";
-import { watchContractEvent } from "viem/actions";
-import { config as wagmiConfig } from "@/wagmi";
 import { truncateWalletAddress } from "@/utils";
 
 interface Props {
@@ -69,7 +56,7 @@ interface DecodedLog {
   };
 }
 
-const Trades: React.FC<Props> = () => {
+const Trades = () => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const publicClient = usePublicClient();
   const [buyLogs, setBuyLogs] = useState([]);
@@ -96,7 +83,7 @@ const Trades: React.FC<Props> = () => {
           topics: log.topics,
         }),
       );
-
+      //@ts-ignore
       setBuyLogs(decodedLogs);
     } catch (error) {
       console.error("Error fetching logs:", error);
@@ -123,7 +110,7 @@ const Trades: React.FC<Props> = () => {
           topics: log.topics,
         }),
       );
-
+      //@ts-ignore
       setSellLogs(decodedLogs);
     } catch (error) {
       console.error("Error fetching logs:", error);
