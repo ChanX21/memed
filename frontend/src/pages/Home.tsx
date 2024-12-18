@@ -14,18 +14,54 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MemeForm } from "@/components/home/MemeForm";
 import Uploady from "@rpldy/uploady";
-import { useBlockNumber, useReadContract } from "wagmi";
+import {
+  useBlockNumber,
+  usePublicClient,
+  useReadContract,
+  useWatchContractEvent,
+} from "wagmi";
 import config from "@/config.json";
 import TokenCard from "@/components/home/TokenCard";
 import TypewriterText from "@/components/ui/TypewriterText";
+import { BigNumberish, formatEther } from "ethers";
+import { truncateWalletAddress } from "@/utils";
+import tokenAbi from "@/abi/erc20.json";
+import eventsAbi from "@/abi/events.json";
+import { AbiEvent, decodeEventLog } from "viem";
 
 interface DynamicComponent {
   bgColor: string;
   text: string;
 }
 
+interface DecodedLog {
+  args: {
+    amount: BigNumberish;
+    buyer: string;
+    token: string;
+    totalPrice: BigNumberish;
+    timestamp: number;
+  };
+}
+
+interface TokenCreatedLog {
+  args: {
+    owner: string;
+    token: string;
+    name: string;
+    ticker: string;
+    image: string;
+    description: string;
+    totalPrice: BigNumberish;
+    createdAt: number;
+  };
+}
+
 const Home: React.FC = () => {
+  const [log, setLog] = useState<DecodedLog | null>(null);
+  const [tokenLog, setTokenLog] = useState<TokenCreatedLog | null>(null);
   const { data: blockNumber } = useBlockNumber({ watch: true });
+  const publicClient = usePublicClient();
   const {
     data: memecoins,
     refetch,
@@ -110,6 +146,109 @@ const Home: React.FC = () => {
     "Where memes meet DeFi... 💫",
     "Your meme journey starts here... ✨",
   ];
+
+  // Fetch token name for the specified address
+  const { data: tokenName } = useReadContract({
+    abi: tokenAbi, // Token contract ABI typed as Abi
+    address: log?.args.token as `0x${string}`, // Token contract address
+    functionName: "name", // Function to get the token name
+  });
+  // Fetch token name for the specified address
+  const { data: createdTokenName } = useReadContract({
+    abi: tokenAbi, // Token contract ABI typed as Abi
+    address: tokenLog?.args.token as `0x${string}`, // Token contract address
+    functionName: "name", // Function to get the token name
+  });
+
+  //watch buy event
+  useWatchContractEvent({
+    address: config.address as `0x${string}`,
+    abi: config.abi,
+    eventName: "TokensBought",
+    onLogs(logs) {
+      console.log("New logs!", logs);
+      //@ts-ignore
+      setLog(logs[0]);
+    },
+  });
+
+  //fetch buy logs
+  const fetchBuyLogs = async () => {
+    try {
+      const logs = await publicClient?.getLogs({
+        address: config.address as `0x${string}`,
+        event: eventsAbi.tokensBought as AbiEvent,
+        fromBlock: 0n, // Start block
+        toBlock: "latest", // End block
+        args: {
+          token: log?.args.token, // Filter by indexed argument
+        },
+      });
+
+      const decodedLogs = logs?.map((log) =>
+        decodeEventLog({
+          abi: [eventsAbi.tokensBought], // Pass the ABI array
+          data: log.data,
+          topics: log.topics,
+        }),
+      );
+
+      //@ts-ignore
+      setLog(decodedLogs[0]);
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
+
+  //watch token creation event
+  useWatchContractEvent({
+    address: config.address as `0x${string}`,
+    abi: config.abi,
+    eventName: "TokenCreated",
+    onLogs(logs) {
+      console.log("New logs!", logs);
+      //@ts-ignore
+      setTokenLog(logs[0]);
+    },
+  });
+
+  //fetch token creation logs
+  const fetchTokenCreationLogs = async () => {
+    try {
+      const logs = await publicClient?.getLogs({
+        address: config.address as `0x${string}`,
+        event: eventsAbi.tokenCreated as AbiEvent,
+        fromBlock: 0n, // Start block
+        toBlock: "latest", // End block
+      });
+
+      const decodedLogs = logs?.map((log) =>
+        decodeEventLog({
+          abi: [eventsAbi.tokenCreated], // Pass the ABI array
+          data: log.data,
+          topics: log.topics,
+        }),
+      );
+
+      //@ts-ignore
+      setTokenLog(decodedLogs[0]);
+    } catch (error) {
+      console.error("Error fetching logs:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchBuyLogs();
+    fetchTokenCreationLogs();
+  }, [publicClient]);
+
+  function formatTimestamp(timestamp: number) {
+    const date = new Date(timestamp * 1000); // Convert seconds to milliseconds
+    const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+    const day = String(date.getDate()).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+  }
 
   return (
     <div className="min-h-screen p-6 bg-background">
@@ -199,18 +338,19 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Transaction Text */}
-                <div className="flex-1 overflow-x-hidden">
+                <div className="flex-1 overflow-x-auto">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component1.text.split(" ")[0]}
+                      {truncateWalletAddress(log?.args.buyer || "")}
                     </span>
                     <span className="mx-1">bought</span>
                     <span className="font-semibold text-primary">
-                      {component1.text.split(" ")[2]}
+                      {formatEther(log?.args.amount || 0n)}
                     </span>
                     <span className="mx-1">of</span>
-                    <span className="font-medium text-primary">
-                      {component1.text.split(" ")[4]}
+                    <span className="font-medium text-primary whitespace-nowrap">
+                      {/* @ts-ignore */}
+                      {tokenName}
                     </span>
                   </p>
                 </div>
@@ -247,18 +387,19 @@ const Home: React.FC = () => {
                 </div>
 
                 {/* Creation Text */}
-                <div className="flex-1 overflow-x-hidden">
+                <div className="flex-1 overflow-x-auto">
                   <p className="text-sm font-medium text-foreground">
                     <span className="font-mono text-primary">
-                      {component2.text.split(" ")[0]}
+                      {truncateWalletAddress(tokenLog?.args.owner || "")}
                     </span>
                     <span className="mx-1">created</span>
                     <span className="font-medium text-primary">
-                      {component2.text.split(" ")[2]}
+                      {/* @ts-ignore */}
+                      {createdTokenName}
                     </span>
                     <span className="mx-1">on</span>
                     <span className="font-medium">
-                      {component2.text.split(" ")[4]}
+                      {formatTimestamp(Number(tokenLog?.args.createdAt || 0))}
                     </span>
                   </p>
                 </div>
