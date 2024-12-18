@@ -239,23 +239,23 @@ const TokenStats: React.FC = () => {
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GrTransaction size={25} className="text-gray-500" />
-            <p>Total transactions</p>
+            <p>Total volume</p>
           </div>
-          <div className="font-semibold">{sells + buys}</div>
+          <div className="font-semibold">{Number(sells + buys).toFixed(4)}</div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GiReceiveMoney size={25} className="text-gray-500" />
             <p> Sells</p>
           </div>
-          <div className="font-semibold">{sells}</div>
+          <div className="font-semibold">{Number(sells).toFixed(4)}</div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GiPayMoney size={25} className="text-gray-500" />
             <p> Buys</p>
           </div>
-          <div className="font-semibold">{buys}</div>
+          <div className="font-semibold">{Number(buys).toFixed(4)}</div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
@@ -263,7 +263,9 @@ const TokenStats: React.FC = () => {
             <p> Collateral</p>
           </div>
           <div className="font-semibold">
-            {tokenData ? formatEther(tokenData[6]) : "Loading..."}
+            {tokenData
+              ? Number(formatEther(tokenData[6])).toFixed(4)
+              : "Loading..."}
           </div>
         </div>
 

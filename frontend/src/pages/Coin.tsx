@@ -27,6 +27,7 @@ import { SiBinance } from "react-icons/si";
 import TokenStats from "@/components/coin/TokenStats";
 import { formatEther } from "ethers";
 import { truncateWalletAddress } from "@/utils";
+import Trades from "@/components/coin/Trades";
 
 const CoinDetailPage: React.FC = () => {
   const [tokenPrice, setTokenPrice] = useState<string>("0");
@@ -188,32 +189,7 @@ const CoinDetailPage: React.FC = () => {
                 </Card>
               </TabsContent>
               <TabsContent value="trades">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-2xl">{coin.name}</CardTitle>
-                    <CardDescription className="flex gap-3">
-                      <p>
-                        <span>By: </span>
-                        <span>
-                          {`${coin.owner.slice(0, 4)}...${coin.owner.slice(-4)}`}{" "}
-                        </span>
-                      </p>
-                      <p>
-                        {formatDistanceToNow(
-                          new Date(parseInt(coin.createdAt.toString()) * 1000),
-                          { addSuffix: true },
-                        )}
-                      </p>
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <CoinInfo
-                      description={coin.description}
-                      image={coin.image}
-                      supply={coin.supply}
-                    />
-                  </CardContent>
-                </Card>
+                <Trades />
               </TabsContent>
               <TabsContent value="thread">
                 <Thread />
