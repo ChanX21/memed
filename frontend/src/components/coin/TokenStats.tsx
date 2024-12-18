@@ -64,6 +64,7 @@ interface DecodedLog {
     buyer: string;
     token: string;
     totalPrice: BigNumberish;
+    timestamp: number;
   };
 }
 
@@ -190,7 +191,7 @@ const TokenStats: React.FC = () => {
     }
   };
 
-  //fetch buy logs
+  //fetch sell logs
   const fetchSellLogs = async () => {
     try {
       const logs = await publicClient?.getLogs({
