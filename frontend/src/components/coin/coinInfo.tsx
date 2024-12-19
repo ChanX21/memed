@@ -23,6 +23,7 @@ interface Props {
   supply: bigint;
   description: string;
   image: string;
+  marketCapUSD: string;
 }
 interface Holder {
   address: string;
@@ -37,7 +38,7 @@ interface StatCardProps {
 
 type BattlePositionArray = [string[], number[], number[], number[]];
 
-const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
+const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD }) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [percCompleted, setPercCompleted] = useState<number>(0);
   const [tokenPrice, setTokenPrice] = useState<string>("0");
@@ -172,7 +173,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
               <StatCard
                 icon={<TrendingUp className="w-4 h-4" />}
                 label="Market Cap"
-                value={"USD " + tokenPrice}
+                value={"$ " + marketCapUSD}
               />
               {/* <StatCard
                 icon={<Users className="w-4 h-4" />}
