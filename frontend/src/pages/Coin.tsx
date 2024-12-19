@@ -28,9 +28,13 @@ import TokenStats from "@/components/coin/TokenStats";
 import { formatEther } from "ethers";
 import { truncateWalletAddress } from "@/utils";
 import Trades from "@/components/coin/Trades";
+import tokenAbi from "@/abi/erc20.json"; // Import the token ABI
+import priceFeedAbi from "@/abi/priceFeed.json"; // Import the price feed ABI
 
 const CoinDetailPage: React.FC = () => {
   const [tokenPrice, setTokenPrice] = useState<string>("0");
+  const [marketCap, setMarketCap] = useState<string>("0");
+  const [marketCapUSD, setMarketCapUSD] = useState<string>("0"); // State for market cap in USD
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const { toast } = useToast();
   const {
@@ -47,8 +51,22 @@ const CoinDetailPage: React.FC = () => {
     address: config.address as `0x${string}`,
     abi: config.abi,
     functionName: "getBNBAmount",
-    args: [tokenAddress, 1], // Amount for 1 token (18 decimals)
+    args: [tokenAddress, 1], // Amount for 1 token (1 wei)
   }) as { data: bigint[] };
+
+  // Fetch total supply for the token
+  const { data: totalSupply } = useReadContract({
+    abi: tokenAbi,
+    address: tokenAddress as `0x${string}`,
+    functionName: "totalSupply",
+  });
+
+  // Fetch BNB price in USD
+  const { data: bnbFeed } = useReadContract({
+    abi: priceFeedAbi,
+    address: import.meta.env.VITE_BNB_FEED as `0x${string}`,
+    functionName: "latestRoundData",
+  });
 
   const { data: blockNumber } = useBlockNumber({ watch: true });
   useEffect(() => {
@@ -83,26 +101,30 @@ const CoinDetailPage: React.FC = () => {
     try {
       if (priceData) {
         const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
-        const formattedPrice = Number(priceInBnb);
+        const formattedPrice = Number(priceInBnb).toFixed(6); // Format to 6 decimal places
+        setTokenPrice(formattedPrice);
 
-        // Format based on price magnitude
-        let displayPrice;
-        if (formattedPrice < 0.000001) {
-          displayPrice = formattedPrice.toExponential(2);
-        } else if (formattedPrice < 0.001) {
-          displayPrice = formattedPrice.toFixed(6);
-        } else if (formattedPrice < 1) {
-          displayPrice = formattedPrice.toFixed(4);
-        } else {
-          displayPrice = formattedPrice.toFixed(2);
+        // Calculate market cap
+        if (totalSupply && typeof totalSupply === 'bigint') {
+          const totalSupplyInBnb = Number(formatEther(totalSupply)); // Convert total supply to BNB
+          const calculatedMarketCap = totalSupplyInBnb * Number(formattedPrice); // Market cap calculation
+          setMarketCap(calculatedMarketCap.toFixed(2)); // Format to 2 decimal places
+
+          // Calculate market cap in USD
+          if (bnbFeed && Array.isArray(bnbFeed) && bnbFeed.length > 1) {
+            const bnbPriceUSD = Number(bnbFeed[1]) / Math.pow(10, 8); // Assuming bnbFeed[1] is in 8 decimal places
+            const marketCapInUSD = calculatedMarketCap * bnbPriceUSD; // Market cap in USD
+            setMarketCapUSD(marketCapInUSD.toFixed(2)); // Format to 2 decimal places
+          }
         }
-        setTokenPrice(displayPrice);
       }
     } catch (error) {
       console.error("Error calculating token price:", error);
       setTokenPrice("0");
+      setMarketCap("0");
+      setMarketCapUSD("0");
     }
-  }, [priceData]);
+  }, [priceData, totalSupply, bnbFeed]);
 
   return (
     coin && (
@@ -129,6 +151,9 @@ const CoinDetailPage: React.FC = () => {
             <div className="flex items-center mt-4">
               <span className="text-lg font-bold text-green-500 mr-4">
                 {tokenPrice} BNB
+              </span>
+              <span className="text-lg font-bold text-green-500 mr-4">
+                Market Cap: {marketCap} BNB ({marketCapUSD} USD)
               </span>
               <span className="text-sm text-gray-500">+2.5% (24h)</span>
             </div>
@@ -184,6 +209,7 @@ const CoinDetailPage: React.FC = () => {
                       description={coin.description}
                       image={coin.image}
                       supply={coin.supply}
+                      marketCapUSD={marketCapUSD}
                     />
                   </CardContent>
                 </Card>

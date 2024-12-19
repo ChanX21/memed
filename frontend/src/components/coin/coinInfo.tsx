@@ -23,6 +23,7 @@ interface Props {
   supply: bigint;
   description: string;
   image: string;
+  marketCapUSD: string;
 }
 interface Holder {
   address: string;
@@ -37,7 +38,7 @@ interface StatCardProps {
 
 type BattlePositionArray = [string[], number[], number[], number[]];
 
-const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
+const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD }) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [percCompleted, setPercCompleted] = useState<number>(0);
   const [tokenPrice, setTokenPrice] = useState<string>("0");
@@ -58,6 +59,22 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
       functionName: "totalSupply", // The function to get the total supply of the token
     });
 
+  // Fetch token data including collateral from the Factory contract
+  const { data: tokenData, error: tokenDataError } = useReadContract({
+    abi: config.abi, // Use the Factory ABI
+    address: config.address as `0x${string}`, // Factory contract address
+    functionName: "tokenData", // Function to get token data
+    args: [tokenAddress], // Pass the token address as an argument
+  });
+
+  // Log tokenData and any errors
+  useEffect(() => {
+    console.log("Token Data:", tokenData);
+    if (tokenDataError) {
+      console.error("Error fetching token data:", tokenDataError);
+    }
+  }, [tokenData, tokenDataError]);
+
   const {
     data: bnbFeed,
     isFetching,
@@ -75,6 +92,30 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
       functionName: "getLeaderboard",
       args: [10],
     });
+
+  // Fetch graduation amount from the Factory contract
+  const { data: factoryData, error: factoryDataError } = useReadContract({
+    abi: config.abi, // Use the Factory ABI
+    address: config.address as `0x${string}`, // Factory contract address
+    functionName: "graduationAmount", // Function to get graduation amount
+  });
+
+  // Log factoryData and any errors
+  useEffect(() => {
+    console.log("Factory Data:", factoryData);
+    if (factoryDataError) {
+      console.error("Error fetching factory data:", factoryDataError);
+    }
+  }, [factoryData, factoryDataError]);
+
+  // Calculate progress based on collateral and graduation amount
+  const collateral = tokenData && Array.isArray(tokenData) ? tokenData[6] : 0n; // Access collateral from tokenData
+  const graduationAmount = factoryData && typeof factoryData === 'bigint' ? factoryData : 1n; // Ensure factoryData is a bigint
+  const progress = graduationAmount > 0n ? (collateral * 100n) / graduationAmount : 0n; // Avoid division by zero
+
+  // Ensure progress does not exceed 100%
+  const finalProgress = progress > 100n ? 100n : progress;
+
   function findAndDivide(array: string[], element: string) {
     // Find the position of the element in the array (starting from 1)
     const position = array.indexOf(element);
@@ -172,7 +213,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
               <StatCard
                 icon={<TrendingUp className="w-4 h-4" />}
                 label="Market Cap"
-                value={"USD " + tokenPrice}
+                value={"$ " + marketCapUSD}
               />
               {/* <StatCard
                 icon={<Users className="w-4 h-4" />}
@@ -180,7 +221,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                 value="1,234"
               /> */}
               {/* Add more stat cards as needed */}
-            </div>
+            </div>         
           </div>
         </div>
       </Card>
@@ -200,7 +241,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                 <div>
                   <h3 className="font-semibold">Bonding Curve Progress</h3>
                   <p className="text-sm text-muted-foreground">
-                    {percCompleted.toFixed(1)}% Complete
+                    {finalProgress.toString()}% Complete
                   </p>
                 </div>
               </div>
@@ -211,7 +252,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px] p-4 bg-card/95 backdrop-blur-xl border-border/50">
                     <p className="text-sm text-muted-foreground">
-                      When the market cap reaches max threhold, all the
+                      When the market cap reaches max threshold, all the
                       liquidity in the bonding curve will be deposited to
                       PancakeSwap and burned.
                     </p>
@@ -233,20 +274,19 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image }) => {
             <div className="space-y-3">
               <div className="relative">
                 <Progress
-                  value={percCompleted}
+                  value={Number(finalProgress)}
                   parentBg="bg-[#050a30]/10"
                   childBg="bg-gradient-to-r from-[#050a30] to-primary"
                   className="h-4"
                 />
-                {/* Milestone markers */}
-                {/* <div className="absolute -top-1 left-[30%] h-6 w-[2px] bg-primary/30" />
-                <div className="absolute -top-1 left-[60%] h-6 w-[2px] bg-primary/30" /> */}
               </div>
 
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Start</span>
-
-                <span>PancakeSwap Launch</span>
+                <span className="flex items-center">
+                  <img src="https://s2.coinmarketcap.com/static/img/coins/200x200/7186.png" alt="PancakeSwap" className="w-5 h-5 mr-1" />
+                  PancakeSwap Launch
+                </span>
               </div>
             </div>
           </div>

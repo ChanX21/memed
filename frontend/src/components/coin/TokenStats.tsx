@@ -292,21 +292,30 @@ const TokenStats: React.FC = () => {
             <GrTransaction size={25} className="text-gray-500" />
             <p>Total volume</p>
           </div>
-          <div className="font-semibold">{Number(sells + buys).toFixed(4)}</div>
+          <div className="font-semibold">
+            {Number(sells + buys).toFixed(4)} 
+            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+          </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GiReceiveMoney size={25} className="text-gray-500" />
             <p> Sells</p>
           </div>
-          <div className="font-semibold">{Number(sells).toFixed(4)}</div>
+          <div className="font-semibold">
+            {Number(sells).toFixed(4)} 
+            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+          </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
             <GiPayMoney size={25} className="text-gray-500" />
             <p> Buys</p>
           </div>
-          <div className="font-semibold">{Number(buys).toFixed(4)}</div>
+          <div className="font-semibold">
+            {Number(buys).toFixed(4)} 
+            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+          </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
@@ -314,7 +323,8 @@ const TokenStats: React.FC = () => {
             <p> Collateral</p>
           </div>
           <div className="font-semibold">
-            {tokenData ? Number(formatEther(tokenData[6])).toFixed(4) : 0}
+            {tokenData ? Number(formatEther(tokenData[6])).toFixed(4) : 0} 
+            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
           </div>
         </div>
 

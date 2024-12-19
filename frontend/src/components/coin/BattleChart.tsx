@@ -104,7 +104,7 @@ export function BattleChart({
       const losses = Number(data[3]);
       const calculatedTotal = wins + losses;
 
-      // Update state with computed values
+      // Update state with computed value
       setChartData([{ month: "January", wins, losses }]);
       setTotalBattles(calculatedTotal);
     }
