@@ -35,39 +35,39 @@ const DEFAULT_LOGO = "/assets/logotrnspt.png";
 const TokenCard: React.FC<Props> = ({ coin }) => {
   const [tokenPrice, setTokenPrice] = useState<string>("0");
 
-  // Get price for 1 token from factory
+  // Get price for 1 token from factory in wei
   const { data: priceData } = useReadContract({
     address: config.address as `0x${string}`,
     abi: config.abi,
     functionName: "getBNBAmount",
-    args: [coin.token, 1], // Amount for 1 token (18 decimals)
-  }) as { data: bigint[] } ;
+    args: [coin.token, 1], // Amount for 1 token (1 wei)
+  }) as { data: bigint[] };
 
-  // Format token price in BNB
+  // Fetch token decimals for the specified address
+  const { data: tokenDecimals } = useReadContract({
+    abi: tokenAbi,
+    address: coin.token as `0x${string}`,
+    functionName: "decimals",
+  });
+
+  // Format token price in wei
   useEffect(() => {
     try {
-      if (priceData) {
-        const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
-        const formattedPrice = Number(priceInBnb);
-        
-        // Format based on price magnitude
-        let displayPrice;
-        if (formattedPrice < 0.000001) { 
-          displayPrice = formattedPrice.toExponential(2);
-        } else if (formattedPrice < 0.001) {
-          displayPrice = formattedPrice.toFixed(6);
-        } else if (formattedPrice < 1) {
-          displayPrice = formattedPrice.toFixed(4);
-        } else {
-          displayPrice = formattedPrice.toFixed(2);
-        }
-        setTokenPrice(displayPrice);
+      if (priceData && tokenDecimals) {
+        const priceInWei = priceData[0]; // Price in wei
+        const priceInBnb = formatEther(priceInWei); // Convert wei to BNB
+        const adjustedPrice = Number(priceInBnb); // Adjust for decimals if necessary
+
+        // Format the price to 6 decimal places
+        const formattedPrice = adjustedPrice.toFixed(6); // 6 decimal places
+
+        setTokenPrice(formattedPrice);
       }
     } catch (error) {
       console.error("Error calculating token price:", error);
       setTokenPrice("0");
     }
-  }, [priceData]);
+  }, [priceData, tokenDecimals]);
 
   // Format addresses to always show 0x prefix
   const formattedOwnerAddress = coin.owner.startsWith('0x') ? coin.owner : `0x${coin.owner}`;

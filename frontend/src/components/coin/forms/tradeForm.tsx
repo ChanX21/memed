@@ -72,7 +72,7 @@ export function TradeForm() {
       abi: config.abi, // Contract ABI
       address: config.address as `0x${string}`, // Contract address
       functionName: "getBNBAmount", // Function to get BNB cost
-      args: [tokenAddress, parseEther(buyAmount || "0")], // Token address and buy amount
+      args: [tokenAddress, buyAmount ? BigInt(buyAmount) : 0], // Token address and buy amount in wei
     });
 
   // Fetch BNB cost for the given token amount when selling
@@ -81,7 +81,7 @@ export function TradeForm() {
       abi: config.abi, // Contract ABI
       address: config.address as `0x${string}`, // Contract address
       functionName: "getBNBAmount", // Function to get BNB cost
-      args: [tokenAddress, parseEther(sellAmount || "0")], // Token address and sell amount
+      args: [tokenAddress, sellAmount ? BigInt(sellAmount) : 0], // Token address and sell amount in wei
     });
 
   const buy = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -94,7 +94,7 @@ export function TradeForm() {
         abi: config.abi, // Contract ABI
         address: config.address as `0x${string}`, // Contract address
         functionName: "buy", // Function to call on contract
-        args: [tokenAddress, parseEther(buyAmount || "0")], // Arguments: token address and amount
+        args: [tokenAddress, buyAmount ? BigInt(buyAmount) : 0], // Arguments: token address and amount in wei
         value: BigInt(bnbCost[0]?.toString() || "0"), // Payment value in BNB
       });
 
@@ -127,7 +127,7 @@ export function TradeForm() {
         abi: tokenAbi,
         address: tokenAddress as `0x${string}`,
         functionName: "approve",
-        args: [config.address, parseEther(sellAmount || "0")],
+        args: [config.address, sellAmount ? BigInt(sellAmount) : 0],
       });
 
       // Execute the sale transaction
@@ -135,7 +135,7 @@ export function TradeForm() {
         abi: config.abi,
         address: config.address as `0x${string}`,
         functionName: "sell",
-        args: [tokenAddress, parseEther(sellAmount || "0")],
+        args: [tokenAddress, sellAmount ? BigInt(sellAmount) : 0],
       });
 
       // Show success toast
@@ -220,7 +220,7 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount ({tokenName as string})
+                  Amount (in wei)
                 </Label>
                 <Input
                   id="amount"
@@ -228,7 +228,7 @@ export function TradeForm() {
                   min={0}
                   onChange={(e) => setBuyAmount(e.target.value)}
                   value={buyAmount || ""}
-                  placeholder="0.00"
+                  placeholder="0"
                   className="h-[70%] text-3xl "
                 />
               </div>
@@ -307,11 +307,11 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount ( {tokenName as string} )
+                  Amount (in wei)
                 </Label>
                 <Input
                   id="amount"
-                  placeholder="0.00"
+                  placeholder="0"
                   type="number"
                   min={0}
                   onChange={(e) => setSellAmount(e.target.value)}
