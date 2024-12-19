@@ -109,8 +109,8 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
   }, [factoryData, factoryDataError]);
 
   // Calculate progress based on collateral and graduation amount
-  const collateral = tokenData ? tokenData[6] : 0n; // Access collateral from tokenData
-  const graduationAmount = factoryData ? factoryData : 1n; // Use factory data directly
+  const collateral = tokenData && Array.isArray(tokenData) ? tokenData[6] : 0n; // Access collateral from tokenData
+  const graduationAmount = factoryData && typeof factoryData === 'bigint' ? factoryData : 1n; // Ensure factoryData is a bigint
   const progress = graduationAmount > 0n ? (collateral * 100n) / graduationAmount : 0n; // Avoid division by zero
 
   // Ensure progress does not exceed 100%

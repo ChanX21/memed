@@ -105,14 +105,14 @@ const CoinDetailPage: React.FC = () => {
         setTokenPrice(formattedPrice);
 
         // Calculate market cap
-        if (totalSupply) {
+        if (totalSupply && typeof totalSupply === 'bigint') {
           const totalSupplyInBnb = Number(formatEther(totalSupply)); // Convert total supply to BNB
           const calculatedMarketCap = totalSupplyInBnb * Number(formattedPrice); // Market cap calculation
           setMarketCap(calculatedMarketCap.toFixed(2)); // Format to 2 decimal places
 
           // Calculate market cap in USD
-          if (bnbFeed) {
-            const bnbPriceUSD = bnbFeed && bnbFeed[1] ? Number(bnbFeed[1]) / Math.pow(10, 8) : 0; // Assuming bnbFeed[1] is in 8 decimal places
+          if (bnbFeed && Array.isArray(bnbFeed) && bnbFeed.length > 1) {
+            const bnbPriceUSD = Number(bnbFeed[1]) / Math.pow(10, 8); // Assuming bnbFeed[1] is in 8 decimal places
             const marketCapInUSD = calculatedMarketCap * bnbPriceUSD; // Market cap in USD
             setMarketCapUSD(marketCapInUSD.toFixed(2)); // Format to 2 decimal places
           }
