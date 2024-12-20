@@ -158,7 +158,7 @@ export function TradeForm() {
   };
 
   return (
-    <Tabs defaultValue="buy" className="w-full h-full ">
+    <Tabs defaultValue="buy" className="w-full h-full flex flex-col justify-start">
       <TabsList className="grid w-full grid-cols-2 h-[10%]">
         <TabsTrigger value="buy" className="h-full">
           Buy
@@ -167,7 +167,7 @@ export function TradeForm() {
           Sell
         </TabsTrigger>
       </TabsList>
-      <TabsContent value="buy" className="h-[90%]">
+      <TabsContent value="buy" className="h-[90%] flex flex-col">
         <Card className="h-full">
           <CardHeader className="h-[30%]">
             <CardTitle>Buy</CardTitle>
@@ -210,7 +210,7 @@ export function TradeForm() {
             </div>
           </CardHeader>
           <form onSubmit={buy}>
-            <CardContent className="space-y-2 px-5 h-[50%] ">
+            <CardContent className="space-y-2 px-5 h-[50%]">
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
                 <p> {balance && balance.formatted} BNB </p>
@@ -251,7 +251,7 @@ export function TradeForm() {
           </form>
         </Card>
       </TabsContent>
-      <TabsContent value="sell" className="h-[90%]">
+      <TabsContent value="sell" className="h-[90%] flex flex-col">
         <Card className="h-full">
           <CardHeader className="h-[30%]">
             <CardTitle>Sell</CardTitle>
@@ -294,7 +294,7 @@ export function TradeForm() {
             </div>
           </CardHeader>
           <form onSubmit={sell}>
-            <CardContent className="space-y-2 px-5 h-[50%] ">
+            <CardContent className="space-y-2 px-5 h-[50%]">
               <div className="text-gray-400 flex items-center gap-2 h-[20%] justify-between">
                 <p> Balance: </p>
                 <p>
