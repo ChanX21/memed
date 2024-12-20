@@ -220,7 +220,7 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount (in ethers)
+                  Amount of {tokenSymbol as string}
                 </Label>
                 <Input
                   id="amount"
@@ -307,7 +307,7 @@ export function TradeForm() {
                   htmlFor="amount"
                   className=" h-[30%] text-gray-800 flex items-center p-3"
                 >
-                  Amount (in ethers)
+                  Amount of {tokenSymbol as string}
                 </Label>
                 <Input
                   id="amount"
