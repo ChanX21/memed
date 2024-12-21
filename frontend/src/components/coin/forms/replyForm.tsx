@@ -105,7 +105,7 @@ export function ReplyForm({
               <FormControl>
                 <Textarea
                   placeholder="Write your reply..."
-                  className="resize-none border border-primary"
+                  className="resize-none bg-gray-300 dark:bg-gray-700 border-none"
                   {...field}
                 />
               </FormControl>

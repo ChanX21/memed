@@ -102,10 +102,11 @@ const CoinDetailPage: React.FC = () => {
       if (priceData) {
         const priceInBnb = formatEther(priceData[0]); // Convert wei to BNB
         const formattedPrice = Number(priceInBnb).toFixed(6); // Format to 6 decimal places
-        setTokenPrice(formattedPrice);
+
+        setTokenPrice(priceInBnb);
 
         // Calculate market cap
-        if (totalSupply && typeof totalSupply === 'bigint') {
+        if (totalSupply && typeof totalSupply === "bigint") {
           const totalSupplyInBnb = Number(formatEther(totalSupply)); // Convert total supply to BNB
           const calculatedMarketCap = totalSupplyInBnb * Number(formattedPrice); // Market cap calculation
           setMarketCap(calculatedMarketCap.toFixed(2)); // Format to 2 decimal places
@@ -125,6 +126,10 @@ const CoinDetailPage: React.FC = () => {
       setMarketCapUSD("0");
     }
   }, [priceData, totalSupply, bnbFeed]);
+
+  const formatDisplayAmount = (amt: number): string | number => {
+    return amt == 0 ? 0 : amt < 0.00001 ? "less than 0.00001" : amt.toFixed(4);
+  };
 
   return (
     coin && (
@@ -150,7 +155,7 @@ const CoinDetailPage: React.FC = () => {
             </h1>
             <div className="flex items-center mt-4">
               <span className="text-lg font-bold text-green-500 mr-4">
-                {tokenPrice} BNB
+                {formatDisplayAmount(Number(tokenPrice))} BNB
               </span>
               <span className="text-lg font-bold text-green-500 mr-4">
                 Market Cap: {marketCap} BNB ({marketCapUSD} USD)
@@ -162,7 +167,7 @@ const CoinDetailPage: React.FC = () => {
           {/* Chart Section */}
           <div className="p-6 ">
             <h2 className="text-xl font-bold mb-4">Statistics</h2>
-            <div className="grid grid-cols-7 h-[50vh] gap-10">
+            <div className="grid grid-cols-7 min-h-[50vh] gap-10">
               <div className="dark:bg-black/50 h-full col-span-7 lg:col-span-5  ">
                 {/* <TradingViewWidget /> */}
                 {/* <CustomChart /> */}
@@ -186,7 +191,7 @@ const CoinDetailPage: React.FC = () => {
                 <TabsTrigger value="thread">Thread</TabsTrigger>
               </TabsList>
               <TabsContent value="about">
-                <Card>
+                <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <CardTitle className="text-2xl">{coin.name}</CardTitle>
                     <CardDescription className="flex gap-3">

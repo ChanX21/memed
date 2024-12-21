@@ -70,7 +70,6 @@ interface DecodedLog {
 
 const TokenStats: React.FC = () => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
-  const [percCompleted, setPercCompleted] = useState<number>(0);
   const [sells, setSells] = useState<number>(0);
   const [buys, setBuys] = useState<number>(0);
   const publicClient = usePublicClient();
@@ -285,7 +284,7 @@ const TokenStats: React.FC = () => {
   }, [publicClient]);
 
   return (
-    <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4">
+    <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4 shadow">
       <div className="h-full flex w-full flex-col lg:justify-center ">
         <div className="flex justify-between py-3 border-b border-gray-500">
           <div className="flex items-center gap-3">
@@ -293,8 +292,12 @@ const TokenStats: React.FC = () => {
             <p>Total volume</p>
           </div>
           <div className="font-semibold">
-            {Number(sells + buys).toFixed(4)} 
-            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+            {Number(sells + buys).toFixed(4)}
+            <img
+              src="https://cryptologos.cc/logos/bnb-bnb-logo.png"
+              alt="BNB"
+              className="inline-block w-4 h-4 ml-1"
+            />
           </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
@@ -303,8 +306,12 @@ const TokenStats: React.FC = () => {
             <p> Sells</p>
           </div>
           <div className="font-semibold">
-            {Number(sells).toFixed(4)} 
-            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+            {Number(sells).toFixed(4)}
+            <img
+              src="https://cryptologos.cc/logos/bnb-bnb-logo.png"
+              alt="BNB"
+              className="inline-block w-4 h-4 ml-1"
+            />
           </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
@@ -313,8 +320,12 @@ const TokenStats: React.FC = () => {
             <p> Buys</p>
           </div>
           <div className="font-semibold">
-            {Number(buys).toFixed(4)} 
-            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+            {Number(buys).toFixed(4)}
+            <img
+              src="https://cryptologos.cc/logos/bnb-bnb-logo.png"
+              alt="BNB"
+              className="inline-block w-4 h-4 ml-1"
+            />
           </div>
         </div>
         <div className="flex justify-between py-3 border-b border-gray-500">
@@ -323,8 +334,12 @@ const TokenStats: React.FC = () => {
             <p> Collateral</p>
           </div>
           <div className="font-semibold">
-            {tokenData ? Number(formatEther(tokenData[6])).toFixed(4) : 0} 
-            <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png" alt="BNB" className="inline-block w-4 h-4 ml-1" />
+            {tokenData ? Number(formatEther(tokenData[6])).toFixed(4) : 0}
+            <img
+              src="https://cryptologos.cc/logos/bnb-bnb-logo.png"
+              alt="BNB"
+              className="inline-block w-4 h-4 ml-1"
+            />
           </div>
         </div>
 

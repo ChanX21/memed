@@ -87,7 +87,7 @@ export function ThreadForm({ refetch }: { refetch: () => any }) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full space-y-6 mb-10"
+        className="w-full space-y-6 mb-10 "
       >
         <FormField
           control={form.control}
@@ -98,7 +98,7 @@ export function ThreadForm({ refetch }: { refetch: () => any }) {
               <FormControl>
                 <Textarea
                   placeholder="Make a comment..."
-                  className="resize-none"
+                  className="resize-none border-none bg-gray-300 dark:bg-gray-700"
                   {...field}
                 />
               </FormControl>

@@ -20,7 +20,7 @@ export function MobileForm() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>
-        <div className="fixed w-full z-20  m-auto lg:hidden bottom-0 p-2 bg-black">
+        <div className="fixed left-0 w-full z-20  m-auto lg:hidden bottom-0 p-2 bg-black">
           <Button className="w-full">Trade</Button>
         </div>
       </DrawerTrigger>
