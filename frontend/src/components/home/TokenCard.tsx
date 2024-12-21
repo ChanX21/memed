@@ -3,12 +3,7 @@ import { BigNumberish, formatEther } from "ethers";
 import { useReadContract } from "wagmi";
 import { Link } from "react-router-dom";
 import tokenAbi from "@/abi/erc20.json";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import config from "@/config.json";
 import { formatDistanceToNow } from "date-fns";
@@ -70,8 +65,12 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
   }, [priceData, tokenDecimals]);
 
   // Format addresses to always show 0x prefix
-  const formattedOwnerAddress = coin.owner.startsWith('0x') ? coin.owner : `0x${coin.owner}`;
-  const formattedTokenAddress = coin.token.startsWith('0x') ? coin.token : `0x${coin.token}`;
+  const formattedOwnerAddress = coin.owner.startsWith("0x")
+    ? coin.owner
+    : `0x${coin.owner}`;
+  const formattedTokenAddress = coin.token.startsWith("0x")
+    ? coin.token
+    : `0x${coin.token}`;
 
   // Format creation time safely
   const formattedTime = React.useMemo(() => {
@@ -102,7 +101,7 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
 
   return (
     <Link to={`coin/${formattedTokenAddress}`}>
-      <Card className="w-[350px] h-[480px] relative group transition-all duration-500 hover:scale-[1.02]">
+      <Card className="w-[350px] h-[480px] border-none relative group transition-all duration-500 hover:scale-[1.02]">
         {/* Magical dark glow effects */}
         <div className="absolute -inset-[2px] bg-[#dfe6f7] opacity-0 group-hover:opacity-30 rounded-[24px] blur-sm transition-all duration-1200" />
 
@@ -121,18 +120,22 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
                 {/* Owner Address */}
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 backdrop-blur">
-                    <span className="text-xs text-muted-foreground">creator</span>
+                    <span className="text-xs text-muted-foreground">
+                      creator
+                    </span>
                     <span className="w-1 h-1 rounded-full bg-primary/60" />
                     <p className="font-mono text-xs text-primary/90">
                       {`${formattedOwnerAddress.slice(0, 6)}...${formattedOwnerAddress.slice(-4)}`}
                     </p>
                   </div>
                 </div>
-                
+
                 {/* Token Address - only shown on hover */}
                 <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <div className="flex items-center gap-1.5 px-2 py-0.5">
-                    <span className="text-xs text-muted-foreground">Token Address</span>
+                    <span className="text-xs text-muted-foreground">
+                      Token Address
+                    </span>
                     <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
                     <p className="font-mono text-xs text-muted-foreground/70">
                       {`${formattedTokenAddress.slice(0, 6)}...${formattedTokenAddress.slice(-4)}`}

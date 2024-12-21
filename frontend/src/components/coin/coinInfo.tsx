@@ -38,7 +38,12 @@ interface StatCardProps {
 
 type BattlePositionArray = [string[], number[], number[], number[]];
 
-const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD }) => {
+const CoinInfo: React.FC<Props> = ({
+  supply,
+  description,
+  image,
+  marketCapUSD,
+}) => {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
   const [percCompleted, setPercCompleted] = useState<number>(0);
   const [tokenPrice, setTokenPrice] = useState<string>("0");
@@ -110,8 +115,10 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
 
   // Calculate progress based on collateral and graduation amount
   const collateral = tokenData && Array.isArray(tokenData) ? tokenData[6] : 0n; // Access collateral from tokenData
-  const graduationAmount = factoryData && typeof factoryData === 'bigint' ? factoryData : 1n; // Ensure factoryData is a bigint
-  const progress = graduationAmount > 0n ? (collateral * 100n) / graduationAmount : 0n; // Avoid division by zero
+  const graduationAmount =
+    factoryData && typeof factoryData === "bigint" ? factoryData : 1n; // Ensure factoryData is a bigint
+  const progress =
+    graduationAmount > 0n ? (collateral * 100n) / graduationAmount : 0n; // Avoid division by zero
 
   // Ensure progress does not exceed 100%
   const finalProgress = progress > 100n ? 100n : progress;
@@ -188,9 +195,9 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
   }, [totalSupply]); // Re-run the effect whenever the totalSupply value changes
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8  ">
       {/* Hero Section */}
-      <Card className="p-6 bg-background/60 backdrop-blur-xl">
+      <Card className="p-6 bg-background/60 backdrop-blur-xl border-none dark:shadow-gray-700 shadow-md">
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
           <div className="col-span-1 relative group">
             {/* Image glow effect */}
@@ -221,7 +228,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
                 value="1,234"
               /> */}
               {/* Add more stat cards as needed */}
-            </div>         
+            </div>
           </div>
         </div>
       </Card>
@@ -229,10 +236,10 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
       {/* Progress Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Bonding Curve Progress */}
-        <Card className="p-6 bg-background/60 backdrop-blur-xl relative group">
+        <Card className="p-6 bg-background/60 backdrop-blur-xl border-none shadow-md dark:shadow-gray-700 relative group">
           <div className="absolute -inset-[1px] bg-gradient-to-r from-[#050a30]/20 via-transparent to-[#050a30]/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
-          <div className="relative space-y-4">
+          <div className="relative space-y-4 ">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-lg bg-primary/10">
@@ -284,7 +291,11 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Start</span>
                 <span className="flex items-center">
-                  <img src="https://s2.coinmarketcap.com/static/img/coins/200x200/7186.png" alt="PancakeSwap" className="w-5 h-5 mr-1" />
+                  <img
+                    src="https://s2.coinmarketcap.com/static/img/coins/200x200/7186.png"
+                    alt="PancakeSwap"
+                    className="w-5 h-5 mr-1"
+                  />
                   PancakeSwap Launch
                 </span>
               </div>
@@ -293,7 +304,7 @@ const CoinInfo: React.FC<Props> = ({ supply, description, image, marketCapUSD })
         </Card>
 
         {/* King of the Hill Progress */}
-        <Card className="p-6 bg-background/60 backdrop-blur-xl relative group">
+        <Card className="p-6 bg-background/60 backdrop-blur-xl relative group border-none shadow-md dark:shadow-gray-700">
           <div className="absolute -inset-[1px] bg-gradient-to-r from-[#050a30]/20 via-transparent to-[#050a30]/20 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
           <div className="relative space-y-4">
