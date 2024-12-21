@@ -1,7 +1,25 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Medal, Star, Crown, Swords, Users, TrendingUp, ChevronDown, ChevronUp, Coins, Calendar, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Trophy,
+  Medal,
+  Star,
+  Crown,
+  Swords,
+  Users,
+  TrendingUp,
+  ChevronDown,
+  ChevronUp,
+  Coins,
+  Calendar,
+  Info,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -71,17 +89,19 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   };
 
   const winRate = getWinRate(stats.wins, stats.totalBattles);
-  const averageVotes = stats.totalBattles === 0n 
-    ? "0" 
-    : (Number(stats.totalVotes) / Number(stats.totalBattles)).toFixed(1);
+  const averageVotes =
+    stats.totalBattles === 0n
+      ? "0"
+      : (Number(stats.totalVotes) / Number(stats.totalBattles)).toFixed(1);
 
   return (
-    <Card 
+    <Card
       className={cn(
         "hover:shadow-lg transition-all duration-300",
-        rank === 0 && "bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/20",
+        rank === 0 &&
+          "bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/20",
         rank === 1 && "bg-gradient-to-r from-gray-400/10 to-transparent",
-        rank === 2 && "bg-gradient-to-r from-amber-600/10 to-transparent"
+        rank === 2 && "bg-gradient-to-r from-amber-600/10 to-transparent",
       )}
     >
       <CardContent className="p-6">
@@ -89,7 +109,7 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
           <div className="flex-shrink-0 w-12 h-12 flex items-center justify-center rounded-full bg-primary/10">
             {getRankIcon(rank)}
           </div>
-          
+
           <div className="ml-6 flex-grow">
             <div className="flex items-center gap-2">
               <TooltipProvider>
@@ -110,13 +130,15 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <span className={cn(
-                "text-xs font-medium px-2 py-1 rounded-full",
-                rank === 0 && "text-yellow-500 bg-yellow-500/10",
-                rank === 1 && "text-gray-400 bg-gray-400/10",
-                rank === 2 && "text-amber-600 bg-amber-600/10",
-                rank > 2 && "text-primary bg-primary/10"
-              )}>
+              <span
+                className={cn(
+                  "text-xs font-medium px-2 py-1 rounded-full",
+                  rank === 0 && "text-yellow-500 bg-yellow-500/10",
+                  rank === 1 && "text-gray-400 bg-gray-400/10",
+                  rank === 2 && "text-amber-600 bg-amber-600/10",
+                  rank > 2 && "text-primary bg-primary/10",
+                )}
+              >
                 {getRankBadge(rank)}
               </span>
             </div>
@@ -145,7 +167,10 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                   <Users className="w-3 h-3" />
                   <span>Avg. Votes</span>
                 </div>
-                <p className="font-semibold text-primary">{averageVotes}</p>
+                <p className="font-semibold text-primary">
+                  {" "}
+                  {(Number(averageVotes) / 10 ** 9).toFixed(2)}
+                </p>
               </div>
               <div className="text-center p-2 rounded-lg bg-primary/5">
                 <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mb-1">
@@ -179,7 +204,9 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                 <Coins className="w-4 h-4 text-muted-foreground" />
                 <div>
                   <p className="text-xs text-muted-foreground">Supply</p>
-                  <p className="font-medium">{formatTokenAmount(tokenData.supply)}</p>
+                  <p className="font-medium">
+                    {formatTokenAmount(tokenData.supply)}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -187,7 +214,9 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
                 <div>
                   <p className="text-xs text-muted-foreground">Created</p>
                   <p className="font-medium">
-                    {new Date(tokenData.createdAt * 1000).toLocaleDateString()}
+                    {new Date(
+                      Number(tokenData.createdAt) * 1000,
+                    ).toLocaleDateString()}
                   </p>
                 </div>
               </div>
@@ -212,4 +241,4 @@ const LeaderboardCard: React.FC<LeaderboardCardProps> = ({
   );
 };
 
-export default LeaderboardCard; 
+export default LeaderboardCard;

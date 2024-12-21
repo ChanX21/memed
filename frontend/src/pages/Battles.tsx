@@ -2,17 +2,34 @@ import React, { useState, useEffect } from "react";
 import { useReadContract, useWriteContract, useAccount } from "wagmi";
 import config from "@/config";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Swords, Timer, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import { useBattles } from '@/hooks/useBattles';
-import { Address } from 'viem';
+import { useBattles } from "@/hooks/useBattles";
+import { Address } from "viem";
 import { parseEther } from "viem";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { BattleCard } from '@/components/BattleCard';
-import { formatAddress, formatTokenAmount } from '@/lib/utils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { BattleCard } from "@/components/BattleCard";
+import { formatAddress, formatTokenAmount } from "@/lib/utils";
 
 interface TokenData {
   token: `0x${string}`;
@@ -51,7 +68,10 @@ interface Battle {
   winner?: `0x${string}`;
 }
 
-const calculateProgressValue = (token1Votes: bigint, token2Votes: bigint): number => {
+const calculateProgressValue = (
+  token1Votes: bigint,
+  token2Votes: bigint,
+): number => {
   try {
     if (token1Votes === BigInt(0) && token2Votes === BigInt(0)) {
       return 50;
@@ -60,9 +80,11 @@ const calculateProgressValue = (token1Votes: bigint, token2Votes: bigint): numbe
     if (total === BigInt(0)) {
       return 50;
     }
-    return Number((token1Votes * BigInt(100)).toString()) / Number(total.toString());
+    return (
+      Number((token1Votes * BigInt(100)).toString()) / Number(total.toString())
+    );
   } catch (error) {
-    console.error('Error calculating progress:', error);
+    console.error("Error calculating progress:", error);
     return 50;
   }
 };
@@ -74,23 +96,41 @@ const Battles: React.FC = () => {
   const [isVoting, setIsVoting] = useState<bigint | null>(null);
   const [isSettling, setIsSettling] = useState<bigint | null>(null);
 
-  const { createBattle, voteBattle, settleBattle, useAllBattles } = useBattles();
+  const { createBattle, voteBattle, settleBattle, useAllBattles } =
+    useBattles();
   const { address } = useAccount();
 
-  const { data: tokens, isError: isTokenError, error: tokenError, isLoading: isTokensLoading } = useReadContract({
+  const {
+    data: tokens,
+    isError: isTokenError,
+    error: tokenError,
+    isLoading: isTokensLoading,
+  } = useReadContract({
     address: config.address as Address,
     abi: config.abi,
     functionName: "getTokens",
     args: ["0x0000000000000000000000000000000000000000"] as const,
-  }) as { data: TokenData[] | undefined; isError: boolean; error: Error | null; isLoading: boolean };
+  }) as {
+    data: TokenData[] | undefined;
+    isError: boolean;
+    error: Error | null;
+    isLoading: boolean;
+  };
 
-  const { battles, isError: isBattlesError, error: battlesError, isLoading: isBattlesLoading } = useAllBattles();
+  const {
+    battles,
+    isError: isBattlesError,
+    error: battlesError,
+    isLoading: isBattlesLoading,
+  } = useAllBattles();
 
   // Consolidated token error handling and logging
   useEffect(() => {
     if (isTokenError && tokenError) {
-      console.error('Token fetch error:', tokenError);
-      toast.error('Failed to load tokens. Please check your network connection.');
+      console.error("Token fetch error:", tokenError);
+      toast.error(
+        "Failed to load tokens. Please check your network connection.",
+      );
     }
   }, [isTokenError, tokenError]);
 
@@ -98,16 +138,16 @@ const Battles: React.FC = () => {
   useEffect(() => {
     if (tokens) {
       console.log(import.meta.env.VITE_BSC_TESTNET_RPC);
-      const graduatedTokens = tokens.filter(t => t.stage === 2);
-      console.log('Token data:', {
+      const graduatedTokens = tokens.filter((t) => t.stage === 2);
+      console.log("Token data:", {
         raw: tokens,
         graduated: graduatedTokens,
         count: tokens.length,
-        graduatedCount: graduatedTokens.length
+        graduatedCount: graduatedTokens.length,
       });
-      
+
       if (graduatedTokens.length === 0) {
-        toast.warning('No graduated tokens available for battle');
+        toast.warning("No graduated tokens available for battle");
       }
     }
   }, [tokens]);
@@ -116,11 +156,11 @@ const Battles: React.FC = () => {
   useEffect(() => {
     if (battles) {
       const parsedBattles = parseBattles(battles);
-      console.log('Battle data:', {
+      console.log("Battle data:", {
         raw: battles,
         parsed: parsedBattles,
         active: getActiveBattles(),
-        ended: getEndedBattles()
+        ended: getEndedBattles(),
       });
     }
   }, [battles]);
@@ -128,11 +168,11 @@ const Battles: React.FC = () => {
   // Selection logging
   useEffect(() => {
     if (selectedToken1 || selectedToken2) {
-      console.log('Token selection:', {
+      console.log("Token selection:", {
         token1: selectedToken1,
         token2: selectedToken2,
-        token1Data: tokens?.find(t => t.token === selectedToken1),
-        token2Data: tokens?.find(t => t.token === selectedToken2)
+        token1Data: tokens?.find((t) => t.token === selectedToken1),
+        token2Data: tokens?.find((t) => t.token === selectedToken2),
       });
     }
   }, [selectedToken1, selectedToken2, tokens]);
@@ -153,11 +193,11 @@ const Battles: React.FC = () => {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-4">Error Loading Data</h2>
           <p className="text-muted-foreground mb-4">
-            {tokenError?.message || battlesError?.message || "Failed to load battle data. Please try again."}
+            {tokenError?.message ||
+              battlesError?.message ||
+              "Failed to load battle data. Please try again."}
           </p>
-          <Button onClick={() => window.location.reload()}>
-            Retry
-          </Button>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       </div>
     );
@@ -182,7 +222,7 @@ const Battles: React.FC = () => {
         return false;
       }
     } catch (error) {
-      console.error('Error comparing token supplies:', error);
+      console.error("Error comparing token supplies:", error);
       toast.error("Error validating token supplies");
       return false;
     }
@@ -201,8 +241,8 @@ const Battles: React.FC = () => {
       return;
     }
 
-    const token1Data = tokens?.find(t => t.token === selectedToken1);
-    const token2Data = tokens?.find(t => t.token === selectedToken2);
+    const token1Data = tokens?.find((t) => t.token === selectedToken1);
+    const token2Data = tokens?.find((t) => t.token === selectedToken2);
 
     if (!token1Data || !token2Data) {
       toast.error("Invalid token selection");
@@ -216,9 +256,9 @@ const Battles: React.FC = () => {
     setIsCreating(true);
     try {
       await createBattle(selectedToken1, selectedToken2, {
-        value: parseEther("0.0002")
+        value: parseEther("0.0002"),
       });
-      
+
       toast.success("Battle created successfully!");
       setSelectedToken1("");
       setSelectedToken2("");
@@ -232,19 +272,19 @@ const Battles: React.FC = () => {
 
   const handleVote = async (battleId: bigint, votingFor: string) => {
     if (!address) {
-      toast.error('Please connect your wallet to vote');
+      toast.error("Please connect your wallet to vote");
       return;
     }
-    
+
     setIsVoting(battleId);
     try {
       await voteBattle(Number(battleId), votingFor, address);
     } catch (error: any) {
       console.error(error);
-      if (error.message.includes('must hold')) {
-        toast.error('You must hold one of the battle tokens to vote');
+      if (error.message.includes("must hold")) {
+        toast.error("You must hold one of the battle tokens to vote");
       } else {
-        toast.error(error.message || 'Failed to vote');
+        toast.error(error.message || "Failed to vote");
       }
     } finally {
       setIsVoting(null);
@@ -268,12 +308,12 @@ const Battles: React.FC = () => {
     if (timeLeft <= 0n) return "Ended";
     const minutes = Number(timeLeft / 60n);
     const seconds = Number(timeLeft % 60n);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const parseBattles = (data: any): Battle[] => {
     if (!data || !data[0]) return [];
-    
+
     const battles: Battle[] = [];
     const battleIds = data[0];
     const token1Addresses = data[1];
@@ -295,9 +335,10 @@ const Battles: React.FC = () => {
         startTime: BigInt(startTimes[i]),
         endTime: BigInt(endTimes[i]),
         settled: settled[i],
-        winner: winners[i] === "0x0000000000000000000000000000000000000000" 
-          ? undefined 
-          : winners[i]
+        winner:
+          winners[i] === "0x0000000000000000000000000000000000000000"
+            ? undefined
+            : winners[i],
       });
     }
 
@@ -306,15 +347,15 @@ const Battles: React.FC = () => {
 
   const getActiveBattles = (): Battle[] => {
     if (!battles) {
-      console.log('No battles data');
+      console.log("No battles data");
       return [];
     }
 
     const allBattles = parseBattles(battles);
-    console.log('Parsed battles:', allBattles);
+    console.log("Parsed battles:", allBattles);
 
     const now = BigInt(Math.floor(Date.now() / 1000));
-    return allBattles.filter(battle => {
+    return allBattles.filter((battle) => {
       const isActive = !battle.settled && battle.endTime > now;
       return isActive;
     });
@@ -325,25 +366,25 @@ const Battles: React.FC = () => {
 
     const allBattles = parseBattles(battles);
     const now = BigInt(Math.floor(Date.now() / 1000));
-    
-    return allBattles.filter(battle => 
-      battle.settled || battle.endTime <= now
-    ).sort((a, b) => Number(b.endTime - a.endTime));
+
+    return allBattles
+      .filter((battle) => battle.settled || battle.endTime <= now)
+      .sort((a, b) => Number(b.endTime - a.endTime));
   };
 
   const tokenList = tokens || [];
   const activeBattles = getActiveBattles();
   const endedBattles = getEndedBattles();
 
-  console.log('Raw battles data:', battles);
-  console.log('Active battles:', activeBattles);
-  console.log('Ended battles:', endedBattles);
+  console.log("Raw battles data:", battles);
+  console.log("Active battles:", activeBattles);
+  console.log("Ended battles:", endedBattles);
 
   const isGraduated = (token: TokenData) => {
-    console.log('Checking graduation for token:', {
+    console.log("Checking graduation for token:", {
       name: token.name,
       stage: token.stage,
-      isGraduated: token.stage === 2
+      isGraduated: token.stage === 2,
     });
     return token.stage === 2;
   };
@@ -354,7 +395,8 @@ const Battles: React.FC = () => {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold mb-3">Meme Battles Arena</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Create epic battles between meme tokens and vote for your favorites. Winners earn glory and rewards!
+            Create epic battles between meme tokens and vote for your favorites.
+            Winners earn glory and rewards!
           </p>
         </div>
 
@@ -366,51 +408,75 @@ const Battles: React.FC = () => {
               Create New Battle
             </CardTitle>
             <CardDescription>
-              Select two tokens to start an epic battle. Creation fee: 0.0002 BNB
+              Select two tokens to start an epic battle. Creation fee: 0.0002
+              BNB
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row gap-4 items-center">
               <div className="w-full md:w-1/3">
-                <Select 
+                <Select
                   value={selectedToken1}
                   onValueChange={(value: string) => {
-                    console.log('Selected token 1:', value);
+                    console.log("Selected token 1:", value);
                     setSelectedToken1(value);
                   }}
                 >
                   <SelectTrigger className="w-full" disabled={isTokensLoading}>
-                    <SelectValue placeholder={isTokensLoading ? "Loading tokens..." : "Select First Token"} />
+                    <SelectValue
+                      placeholder={
+                        isTokensLoading
+                          ? "Loading tokens..."
+                          : "Select First Token"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {isTokensLoading ? (
-                      <SelectItem value="loading" disabled>Loading tokens...</SelectItem>
+                      <SelectItem value="loading" disabled>
+                        Loading tokens...
+                      </SelectItem>
                     ) : tokens && tokens.length > 0 ? (
-                      tokens.filter(token => 
-                        isGraduated(token) && token.token !== selectedToken2
-                      ).map((token) => (
-                        <SelectItem 
-                          key={token.token} 
-                          value={token.token}
-                        >
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                          <div className="flex justify-between items-center gap-2">
-                            <span>{token.name || formatAddress(token.token)}</span>
-                            <span className="text-xs text-primary">(Graduated)</span>
-                          </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>Supply: {formatTokenAmount(token.supply)} tokens</p>
-                                <p>Created: {new Date(Number(token.createdAt) * 1000).toLocaleDateString()}</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </SelectItem>
-                      ))
+                      tokens
+                        .filter(
+                          (token) =>
+                            isGraduated(token) &&
+                            token.token !== selectedToken2,
+                        )
+                        .map((token) => (
+                          <SelectItem key={token.token} value={token.token}>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex justify-between items-center gap-2">
+                                    <span>
+                                      {token.name || formatAddress(token.token)}
+                                    </span>
+                                    <span className="text-xs text-primary">
+                                      (Graduated)
+                                    </span>
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    Supply: {formatTokenAmount(token.supply)}{" "}
+                                    tokens
+                                  </p>
+                                  <p>
+                                    Created:{" "}
+                                    {new Date(
+                                      Number(token.createdAt) * 1000,
+                                    ).toLocaleDateString()}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </SelectItem>
+                        ))
                     ) : (
-                      <SelectItem value="none" disabled>No tokens available</SelectItem>
+                      <SelectItem value="none" disabled>
+                        No tokens available
+                      </SelectItem>
                     )}
                   </SelectContent>
                 </Select>
@@ -426,50 +492,67 @@ const Battles: React.FC = () => {
                 <Select
                   value={selectedToken2}
                   onValueChange={(value: string) => {
-                    console.log('Selected token 2:', value);
+                    console.log("Selected token 2:", value);
                     setSelectedToken2(value);
                   }}
                 >
                   <SelectTrigger className="w-full" disabled={isTokensLoading}>
-                    <SelectValue placeholder={isTokensLoading ? "Loading tokens..." : "Select Second Token"} />
+                    <SelectValue
+                      placeholder={
+                        isTokensLoading
+                          ? "Loading tokens..."
+                          : "Select Second Token"
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {tokens?.filter(token => {
-                      const graduated = isGraduated(token);
-                      const notSelected = token.token !== selectedToken1;
-                      console.log('Filtering token:', {
-                        name: token.name,
-                        graduated,
-                        notSelected,
-                        willShow: graduated && notSelected
-                      });
-                      return graduated && notSelected;
-                    }).map((token) => (
-                      <SelectItem 
-                        key={token.token} 
-                        value={token.token}
-                      >
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                        <div className="flex justify-between items-center gap-2">
-                                <span>{token.name || formatAddress(token.token)}</span>
-                          <span className="text-xs text-primary">(Graduated)</span>
-                        </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Supply: {formatTokenAmount(token.supply)} tokens</p>
-                              <p>Created: {new Date(Number(token.createdAt) * 1000).toLocaleDateString()}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </SelectItem>
-                    ))}
+                    {tokens
+                      ?.filter((token) => {
+                        const graduated = isGraduated(token);
+                        const notSelected = token.token !== selectedToken1;
+                        console.log("Filtering token:", {
+                          name: token.name,
+                          graduated,
+                          notSelected,
+                          willShow: graduated && notSelected,
+                        });
+                        return graduated && notSelected;
+                      })
+                      .map((token) => (
+                        <SelectItem key={token.token} value={token.token}>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex justify-between items-center gap-2">
+                                  <span>
+                                    {token.name || formatAddress(token.token)}
+                                  </span>
+                                  <span className="text-xs text-primary">
+                                    (Graduated)
+                                  </span>
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  Supply: {formatTokenAmount(token.supply)}{" "}
+                                  tokens
+                                </p>
+                                <p>
+                                  Created:{" "}
+                                  {new Date(
+                                    Number(token.createdAt) * 1000,
+                                  ).toLocaleDateString()}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button 
+              <Button
                 onClick={handleCreateBattle}
                 disabled={isCreating || !selectedToken1 || !selectedToken2}
                 className="w-full md:w-auto"
@@ -511,8 +594,12 @@ const Battles: React.FC = () => {
               ))
             ) : (
               <div className="col-span-full text-center py-8">
-                <p className="text-muted-foreground">No active battles at the moment</p>
-                <p className="text-sm mt-2">Create a new battle to get started!</p>
+                <p className="text-muted-foreground">
+                  No active battles at the moment
+                </p>
+                <p className="text-sm mt-2">
+                  Create a new battle to get started!
+                </p>
               </div>
             )}
           </div>
@@ -540,7 +627,9 @@ const Battles: React.FC = () => {
             ) : (
               <div className="col-span-full text-center py-8">
                 <p className="text-muted-foreground">No ended battles yet</p>
-                <p className="text-sm mt-2">Active battles will appear here once they end</p>
+                <p className="text-sm mt-2">
+                  Active battles will appear here once they end
+                </p>
               </div>
             )}
           </div>
@@ -550,4 +639,4 @@ const Battles: React.FC = () => {
   );
 };
 
-export default Battles; 
+export default Battles;
