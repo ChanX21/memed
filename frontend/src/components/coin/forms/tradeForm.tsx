@@ -182,7 +182,7 @@ export function TradeForm() {
               Trade BNB token for {tokenName as string}
             </CardDescription>
             <div className="flex justify-end">
-              <Dialog>
+              {/* <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="secondary" className="h-7 flex items-center">
                     set max slippage
@@ -213,7 +213,7 @@ export function TradeForm() {
                     <Button type="submit">Save changes</Button>
                   </DialogFooter>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
             </div>
           </CardHeader>
           <form onSubmit={buy}>
@@ -266,7 +266,7 @@ export function TradeForm() {
               Trade {tokenName as string} token for BNB
             </CardDescription>
             <div className="flex justify-end">
-              <Dialog>
+              {/* <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="secondary" className="h-7 flex items-center">
                     set max slippage
@@ -297,7 +297,7 @@ export function TradeForm() {
                     <Button type="submit">Save changes</Button>
                   </DialogFooter>
                 </DialogContent>
-              </Dialog>
+              </Dialog> */}
             </div>
           </CardHeader>
           <form onSubmit={sell}>
