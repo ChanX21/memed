@@ -108,7 +108,8 @@ const CoinDetailPage: React.FC = () => {
         // Calculate market cap
         if (totalSupply && typeof totalSupply === "bigint") {
           const totalSupplyInBnb = Number(formatEther(totalSupply)); // Convert total supply to BNB
-          const calculatedMarketCap = totalSupplyInBnb * Number(formattedPrice); // Market cap calculation
+          const adjustedTotalSupply = totalSupply > 100_000_000n ? 100_0n : totalSupplyInBnb; // for demonstration purposes
+          const calculatedMarketCap = (typeof adjustedTotalSupply === "bigint" ? Number(adjustedTotalSupply) : adjustedTotalSupply) * Number(formattedPrice); // Market cap calculation
           setMarketCap(calculatedMarketCap.toFixed(2)); // Format to 2 decimal places
 
           // Calculate market cap in USD
