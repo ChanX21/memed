@@ -14,10 +14,10 @@ contract Factory is Ownable {
         IUniswapV2Router01(address(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3));
 
     uint256 public constant maxSupply = (10 ** 9) * 10 ** 18;
-    uint256 public constant k = 46875;
-    uint256 public constant offset = 999999999953125;
-    uint256 public constant SCALING_FACTOR = 10 ** 18;
-    uint256 public graduationAmount = 30 ether; 
+    uint256 public constant k = 1; 
+    uint256 public constant offset = 0;
+    uint256 public constant SCALING_FACTOR = 10 ** 28;
+    uint256 public graduationAmount = 0.005 ether; 
     uint256 public constant creationFee = 0.002 ether;
     uint256 public constant tradeFeePercent = 10;
     uint256 public feesBalance;
@@ -154,7 +154,7 @@ contract Factory is Ownable {
             payable(msg.sender).transfer(excess);
         }
 
-        if (tokenData[_token].collateral >= 0.05 ether) {
+        if (tokenData[_token].collateral >= graduationAmount) {
             graduateToken(_token);
         }
 
