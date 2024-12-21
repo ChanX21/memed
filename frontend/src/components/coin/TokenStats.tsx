@@ -364,7 +364,9 @@ const TokenStats: React.FC = () => {
             <MdFingerprint size={25} className="text-gray-500" />
             <p> Votes</p>
           </div>
-          <div className="font-semibold">{data ? Number(data[4]) : 0}</div>
+          <div className="font-semibold">
+            {data ? (Number(data[4]) / 10 ** 9).toFixed(2) : 0}
+          </div>
         </div>
       </div>
 
