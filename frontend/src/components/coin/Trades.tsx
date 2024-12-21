@@ -64,7 +64,7 @@ const Trades = () => {
   const [trades, setTrades] = useState<DecodedLog[]>([]);
 
   //fetch buy logs
-  const deploymentBlock = 46596979n; // Deployment block number
+  const deploymentBlock = 46680516n; // Deployment block number
 
   const fetchBuyLogs = async () => {
     try {
