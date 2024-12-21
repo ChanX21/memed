@@ -3,7 +3,7 @@ import tokenAbi from "./abi/memedToken.json";
 import { Address } from 'viem';
 
 const config = {
-  address: "0x2f766a04e25D07465877D8084bfBd5a1d7B58ec9" as Address,
+  address: "0x2ebE9162A3c629c6e23689DD302A8efA1AcA6c3B" as Address,
   abi: [
     {
       "inputs": [
@@ -77,7 +77,7 @@ const config = {
       "type": "function"
     }
   ],
-  battleAddress: "0x42719ec5b230F89020464bE44Ba0D68231EFb51B" as Address,
+  battleAddress: "0x6250550d1413F517C58095C248c45aFbF38E4Ff8" as Address,
   battleAbi: battleAbi as any,
   tokenAbi: tokenAbi as any,
 } as const;
