@@ -51,7 +51,7 @@ const CoinDetailPage: React.FC = () => {
     address: config.address as `0x${string}`,
     abi: config.abi,
     functionName: "getBNBAmount",
-    args: [tokenAddress, 1], // Amount for 1 token (1 wei)
+    args: [tokenAddress, 10**21], // Amount for 1 token (1 wei)
   }) as { data: bigint[] };
 
   // Fetch total supply for the token

@@ -35,7 +35,7 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
     address: config.address as `0x${string}`,
     abi: config.abi,
     functionName: "getBNBAmount",
-    args: [coin.token, 1], // Amount for 1 token (1 wei)
+    args: [coin.token, 10**21], // Amount for 1 token
   }) as { data: bigint[] };
 
   // Fetch token decimals for the specified address
@@ -49,10 +49,9 @@ const TokenCard: React.FC<Props> = ({ coin }) => {
   useEffect(() => {
     try {
       if (priceData && tokenDecimals) {
-        const priceInWei = priceData[0]; // Price in wei
+        const priceInWei = priceData[1]; // Price in wei
         const priceInBnb = formatEther(priceInWei); // Convert wei to BNB
         const adjustedPrice = Number(priceInBnb); // Adjust for decimals if necessary
-
         // Format the price to 6 decimal places
         const formattedPrice = adjustedPrice.toFixed(6); // 6 decimal places
 
