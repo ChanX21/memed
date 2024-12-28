@@ -29,6 +29,7 @@ import { useUploady, useItemFinishListener } from "@rpldy/uploady";
 import UploadPreview from "@rpldy/upload-preview";
 import { formatEther } from "ethers";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export function MemeForm() {
   const [open, setOpen] = React.useState(false);
@@ -80,11 +81,11 @@ export function MemeForm() {
             Provide information to create your meme.
           </FormDescription>
         </FormHeader>
-        
+
         <div className="flex-1 overflow-y-auto px-4 py-2">
-          <ProfileForm />
+          <ProfileForm setOpen={setOpen} />
         </div>
-        
+
         {!isDesktop && (
           <DrawerFooter className="flex-none">
             <DrawerClose asChild>
@@ -97,13 +98,18 @@ export function MemeForm() {
   );
 }
 
-function ProfileForm({ className }: React.ComponentProps<"form">) {
+interface PropForm extends React.ComponentProps<"form"> {
+  setOpen: (state: boolean) => void;
+}
+
+function ProfileForm({ className, setOpen }: PropForm) {
   const [name, setName] = React.useState("");
   const [ticker, setTicker] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [imageUrl, setImageUrl] = React.useState("");
   const [isUploading, setIsUploading] = React.useState(false);
+  const [isCreating, setIsCreating] = React.useState(false);
   const { toast } = useToast();
 
   //read bnb const for token creation
@@ -181,9 +187,10 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       return; // Exit the function if any field is missing
     }
 
+    setIsCreating(true);
     try {
       // Call the mintFunction to interact with the blockchain
-      await mintFunction({
+      const tx = await mintFunction({
         abi: config.abi, // Contract ABI to interact with the smart contract
         address: config.address as `0x${string}`, // Contract address (ensured to be a valid Ethereum address)
         functionName: "createMeme", // The function in the smart contract that will be called
@@ -195,20 +202,26 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       toast({
         description: "Meme created successfully!", // Success message
       });
+      setOpen(false);
     } catch (error) {
       // Log any errors that occur during the minting process
       console.error("Minting failed:", error);
+    } finally {
+      setIsCreating(false);
     }
   };
 
   return (
-    <form 
-      className={cn("grid items-start gap-6 pb-6", className)} 
+    <form
+      className={cn("grid items-start gap-6 pb-6", className)}
       onSubmit={mint}
     >
       {/* Name Field */}
       <div className="grid gap-2">
-        <Label htmlFor="name" className="text-sm font-semibold text-foreground/90">
+        <Label
+          htmlFor="name"
+          className="text-sm font-semibold text-foreground/90"
+        >
           Name
         </Label>
         <Input
@@ -227,7 +240,10 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
 
       {/* Ticker Field */}
       <div className="grid gap-2">
-        <Label htmlFor="ticker" className="text-sm font-semibold text-foreground/90">
+        <Label
+          htmlFor="ticker"
+          className="text-sm font-semibold text-foreground/90"
+        >
           Ticker
         </Label>
         <Input
@@ -246,7 +262,10 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
 
       {/* Description Field */}
       <div className="grid gap-2">
-        <Label htmlFor="description" className="text-sm font-semibold text-foreground/90">
+        <Label
+          htmlFor="description"
+          className="text-sm font-semibold text-foreground/90"
+        >
           Description
         </Label>
         <Textarea
@@ -267,10 +286,13 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
 
       {/* Image Upload Field */}
       <div className="grid gap-3">
-        <Label htmlFor="image" className="text-sm font-semibold text-foreground/90">
+        <Label
+          htmlFor="image"
+          className="text-sm font-semibold text-foreground/90"
+        >
           Meme Image
         </Label>
-        
+
         <div className="relative group">
           <Input
             type="file"
@@ -303,8 +325,20 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
             {isUploading ? (
               <div className="flex items-center gap-2">
                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
                 </svg>
                 <span>Uploading...</span>
               </div>
@@ -337,13 +371,17 @@ function ProfileForm({ className }: React.ComponentProps<"form">) {
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={isUploading || !imageUrl}
+        disabled={isUploading || !imageUrl || isCreating}
         className="w-full h-12 bg-primary text-primary-foreground
                   hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(5,10,48,0.5)]
                   disabled:opacity-50 disabled:cursor-not-allowed
                   transition-all duration-300"
       >
-        Create Meme Token
+        {isCreating ? (
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> // Spinner icon with animation
+        ) : (
+          "Create Meme Token" // Button label when not loading
+        )}
       </Button>
     </form>
   );
