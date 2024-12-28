@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useAccount, useBalance } from "wagmi";
 import tokenAbi from "@/abi/erc20.json";
+import { Loader2 } from "lucide-react";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -252,7 +253,11 @@ export function TradeForm() {
             </CardContent>
             <CardFooter className="h-[20%]">
               <Button disabled={tokenBuying} className="w-full">
-                Buy
+                {tokenBuying ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> // Spinner icon with animation
+                ) : (
+                  "Buy" // Button label when not loading
+                )}
               </Button>
             </CardFooter>
           </form>
@@ -343,7 +348,11 @@ export function TradeForm() {
                 variant={"destructive"}
                 className="w-full"
               >
-                Sell
+                {tokenSelling ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> // Spinner icon with animation
+                ) : (
+                  "Sell" // Button label when not loading
+                )}
               </Button>
             </CardFooter>
           </form>
