@@ -1,8 +1,8 @@
 import { useReadContract, useWriteContract, usePublicClient } from 'wagmi';
 import { readContract } from '@wagmi/core';
 import config from '@/config';
-import { toast } from 'sonner';
 import { Address } from 'viem';
+import { useToast } from '@/hooks/use-toast';
 
 export type Battle = {
   token1: Address;
@@ -24,6 +24,7 @@ export type LeaderboardEntry = {
 export function useBattles() {
   const { writeContractAsync } = useWriteContract();
   const publicClient = usePublicClient();
+  const { toast } = useToast();
 
   const createBattle = async (
     token1: string, 
@@ -39,16 +40,40 @@ export function useBattles() {
         value: options.value
       });
 
-      toast.success('Battle creation initiated!');
+      toast({
+        title: "Battle Created Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
+
       return hash;
     } catch (error) {
+      console.error('Error creating battle:', error);
       if (error instanceof Error) {
-        if (error.message.includes("Token combination in cooldown")) {
-          toast.error("These tokens have battled recently. Please wait 24 hours between battles.");
+        if (error.message.includes("User denied transaction signature")) {
+          toast({
+            title: "Transaction Rejected",
+            description: "You rejected the transaction in MetaMask.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes("Token combination in cooldown")) {
+          toast({
+            title: "Error",
+            description: "These tokens have battled recently. Please wait 24 hours between battles.",
+            variant: "destructive",
+          });
         } else if (error.message.includes("Insufficient creation fee")) {
-          toast.error("Insufficient BNB for battle creation fee (0.0002 BNB required)");
+          toast({
+            title: "Error",
+            description: "Insufficient BNB for battle creation fee (0.0002 BNB required)",
+            variant: "destructive",
+          });
         } else {
-          toast.error(error.message || "Failed to create battle");
+          toast({
+            title: "Error",
+            description: "Failed to create battle",
+            variant: "destructive",
+          });
         }
       }
       throw error;
@@ -57,12 +82,6 @@ export function useBattles() {
 
   const voteBattle = async (battleId: number, votingFor: string, userAddress: string) => {
     try {
-      console.log('Voting for battle:', {
-        battleId,
-        votingFor,
-        userAddress
-      });
-
       const hash = await writeContractAsync({
         address: config.battleAddress as Address,
         abi: config.battleAbi.abi,
@@ -70,21 +89,52 @@ export function useBattles() {
         args: [BigInt(battleId), votingFor as Address],
       });
 
-      toast.success('Vote submitted successfully!');
+      toast({
+        title: "Vote Submitted Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
+
       return hash;
     } catch (error) {
       console.error('Error voting:', error);
       if (error instanceof Error) {
-        if (error.message.includes('Already voted')) {
-          toast.error('You have already voted in this battle');
+        if (error.message.includes("User denied transaction signature")) {
+          toast({
+            title: "Transaction Rejected",
+            description: "You rejected the transaction in MetaMask.",
+            variant: "destructive",
+          });
+        } else if (error.message.includes('Already voted')) {
+          toast({
+            title: "Error",
+            description: "You have already voted in this battle",
+            variant: "destructive",
+          });
         } else if (error.message.includes('Battle ended')) {
-          toast.error('This battle has ended');
+          toast({
+            title: "Error",
+            description: "This battle has ended",
+            variant: "destructive",
+          });
         } else if (error.message.includes('Battle not started')) {
-          toast.error('This battle has not started yet');
+          toast({
+            title: "Error",
+            description: "This battle has not started yet",
+            variant: "destructive",
+          });
         } else if (error.message.includes('No voting power')) {
-          toast.error('You need to hold tokens to vote');
+          toast({
+            title: "Error",
+            description: "You need to hold tokens to vote",
+            variant: "destructive",
+          });
         } else {
-          toast.error(error.message || 'Failed to vote');
+          toast({
+            title: "Error",
+            description: "Failed to vote",
+            variant: "destructive",
+          });
         }
       }
       throw error;
@@ -99,12 +149,30 @@ export function useBattles() {
         functionName: 'settleBattle',
         args: [battleId],
       });
-      toast.success('Battle settlement initiated!');
+
+      toast({
+        title: "Battle Settled Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
+
       return hash;
     } catch (error) {
       console.error('Error settling battle:', error);
       if (error instanceof Error) {
-        toast.error(error.message || 'Failed to settle battle');
+        if (error.message.includes("User denied transaction signature")) {
+          toast({
+            title: "Transaction Rejected",
+            description: "You rejected the transaction in MetaMask.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to settle battle",
+            variant: "destructive",
+          });
+        }
       }
       throw error;
     }
