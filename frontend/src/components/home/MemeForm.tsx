@@ -199,8 +199,14 @@ function ProfileForm({ className, setOpen }: PropForm) {
       });
 
       // Display a toast message upon successful minting
+      // toast({
+      //   description: "Meme created successfully!", // Success message
+      // });
+
       toast({
-        description: "Meme created successfully!", // Success message
+        title: "Meme created successfully!",
+        description: `Transaction Hash: ${tx}`,
+        variant: "default",
       });
       setOpen(false);
     } catch (error) {

@@ -16,7 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
+// import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
+
 import { Loader2, Swords, Timer, Trophy } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useBattles } from "@/hooks/useBattles";
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/tooltip";
 import { BattleCard } from "@/components/BattleCard";
 import { formatAddress, formatTokenAmount } from "@/lib/utils";
+
 
 interface TokenData {
   token: `0x${string}`;
@@ -90,6 +93,7 @@ const calculateProgressValue = (
 };
 
 const Battles: React.FC = () => {
+  const { toast } = useToast();
   const [selectedToken1, setSelectedToken1] = useState<string>("");
   const [selectedToken2, setSelectedToken2] = useState<string>("");
   const [isCreating, setIsCreating] = useState(false);
@@ -128,9 +132,11 @@ const Battles: React.FC = () => {
   useEffect(() => {
     if (isTokenError && tokenError) {
       console.error("Token fetch error:", tokenError);
-      toast.error(
-        "Failed to load tokens. Please check your network connection.",
-      );
+      toast({
+        title: "Error Loading Tokens",
+        description: "Failed to load tokens. Please check your network connection.",
+        variant: "destructive",
+      });
     }
   }, [isTokenError, tokenError]);
 
@@ -147,7 +153,11 @@ const Battles: React.FC = () => {
       });
 
       if (graduatedTokens.length === 0) {
-        toast.warning("No graduated tokens available for battle");
+        toast({
+          title: "Warning",
+          description: "No graduated tokens available for battle",
+          variant: "default",
+        });
       }
     }
   }, [tokens]);
@@ -207,23 +217,39 @@ const Battles: React.FC = () => {
     const MIN_TOKENS = BigInt("1000000000000000000000"); // 1000 * 10^18
 
     if (token1.token === token2.token) {
-      toast.error("Cannot battle the same token");
+      toast({
+        title: "Error",
+        description: "Cannot battle the same token",
+        variant: "destructive",
+      });
       return false;
     }
 
     if (token1.stage !== 2 || token2.stage !== 2) {
-      toast.error("Only graduated tokens can battle");
+      toast({
+        title: "Error",
+        description: "Only graduated tokens can battle",
+        variant: "destructive",
+      });
       return false;
     }
 
     try {
       if (token1.supply < MIN_TOKENS || token2.supply < MIN_TOKENS) {
-        toast.error("Both tokens must have minimum supply of 1000 tokens");
+        toast({
+          title: "Error",
+          description: "Both tokens must have minimum supply of 1000 tokens",
+          variant: "destructive",
+        });
         return false;
       }
     } catch (error) {
       console.error("Error comparing token supplies:", error);
-      toast.error("Error validating token supplies");
+      toast({
+        title: "Error",
+        description: "Error validating token supplies",
+        variant: "destructive",
+      });
       return false;
     }
 
@@ -237,7 +263,11 @@ const Battles: React.FC = () => {
 
   const handleCreateBattle = async () => {
     if (!selectedToken1 || !selectedToken2) {
-      toast.error("Please select both tokens");
+      toast({
+        title: "Error",
+        description: "Please select both tokens",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -245,7 +275,11 @@ const Battles: React.FC = () => {
     const token2Data = tokens?.find((t) => t.token === selectedToken2);
 
     if (!token1Data || !token2Data) {
-      toast.error("Invalid token selection");
+      toast({
+        title: "Error",
+        description: "Invalid token selection",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -255,16 +289,25 @@ const Battles: React.FC = () => {
 
     setIsCreating(true);
     try {
-      await createBattle(selectedToken1, selectedToken2, {
+      const hash = await createBattle(selectedToken1, selectedToken2, {
         value: parseEther("0.0002"),
       });
 
-      toast.success("Battle created successfully!");
+      toast({
+        title: "Battle Created Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
+
       setSelectedToken1("");
       setSelectedToken2("");
     } catch (error: any) {
       console.error(error);
-      toast.error(error.message || "Failed to create battle");
+      toast({
+        title: "Error",
+        description: "Failed to create battle",
+        variant: "destructive",
+      });
     } finally {
       setIsCreating(false);
     }
@@ -272,19 +315,36 @@ const Battles: React.FC = () => {
 
   const handleVote = async (battleId: bigint, votingFor: string) => {
     if (!address) {
-      toast.error("Please connect your wallet to vote");
+      toast({
+        title: "Error",
+        description: "Please connect your wallet to vote",
+        variant: "destructive",
+      });
       return;
     }
 
     setIsVoting(battleId);
     try {
-      await voteBattle(Number(battleId), votingFor, address);
+      const hash = await voteBattle(Number(battleId), votingFor, address);
+      toast({
+        title: "Vote Submitted Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
     } catch (error: any) {
       console.error(error);
       if (error.message.includes("must hold")) {
-        toast.error("You must hold one of the battle tokens to vote");
+        toast({
+          title: "Error",
+          description: "You must hold one of the battle tokens to vote",
+          variant: "destructive",
+        });
       } else {
-        toast.error(error.message || "Failed to vote");
+        toast({
+          title: "Error",
+          description: "Failed to vote",
+          variant: "destructive",
+        });
       }
     } finally {
       setIsVoting(null);
@@ -294,7 +354,12 @@ const Battles: React.FC = () => {
   const handleSettleBattle = async (battleId: bigint) => {
     setIsSettling(battleId);
     try {
-      await settleBattle(battleId);
+      const hash = await settleBattle(battleId);
+      toast({
+        title: "Battle Settled Successfully!",
+        description: `Transaction Hash: ${hash}`,
+        variant: "default",
+      });
     } catch (error) {
       console.error(error);
     } finally {
