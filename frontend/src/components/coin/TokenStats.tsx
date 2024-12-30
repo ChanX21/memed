@@ -19,6 +19,7 @@ import { AbiEvent } from "viem";
 import { decodeEventLog } from "viem";
 import { watchContractEvent } from "viem/actions";
 import { config as wagmiConfig } from "@/wagmi";
+import useGlobalStore from "@/store";
 
 interface Props {
   supply: bigint;
@@ -73,6 +74,7 @@ const TokenStats: React.FC = () => {
   const [sells, setSells] = useState<number>(0);
   const [buys, setBuys] = useState<number>(0);
   const publicClient = usePublicClient();
+  const { refresh, setRefresh } = useGlobalStore();
 
   const { data }: { data: BattleStatsArray | undefined } = useReadContract({
     abi: memedBattle.abi,
@@ -217,7 +219,6 @@ const TokenStats: React.FC = () => {
   };
 
   //fetch sell logs
-
   const fetchSellLogs = async () => {
     try {
       const batchSize = 50000n; // Define the maximum block range
@@ -281,7 +282,9 @@ const TokenStats: React.FC = () => {
   useEffect(() => {
     fetchBuyLogs();
     fetchSellLogs();
-  }, [publicClient]);
+    setRefresh(false);
+    console.log("done");
+  }, [publicClient, refresh]);
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4 shadow">
