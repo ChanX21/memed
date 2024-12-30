@@ -278,13 +278,18 @@ const TokenStats: React.FC = () => {
       console.error("Error fetching sell logs:", error);
     }
   };
-
   useEffect(() => {
-    fetchBuyLogs();
-    fetchSellLogs();
-    setRefresh(false);
-    console.log("done");
-  }, [publicClient, refresh]);
+    const fetchLogs = async () => {
+      await fetchBuyLogs();
+      await fetchSellLogs();
+    };
+
+    fetchLogs(); // Initial fetch
+
+    if (refresh) {
+      fetchLogs().then(() => setRefresh(false)); // Fetch again if `refresh` is true
+    }
+  }, [publicClient, refresh, fetchBuyLogs, fetchSellLogs, setRefresh]);
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4 shadow">
