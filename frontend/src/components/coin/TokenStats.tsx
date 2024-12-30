@@ -289,7 +289,7 @@ const TokenStats: React.FC = () => {
     if (refresh) {
       fetchLogs().then(() => setRefresh(false)); // Fetch again if `refresh` is true
     }
-  }, [publicClient, refresh, fetchBuyLogs, fetchSellLogs, setRefresh]);
+  }, [publicClient, refresh]);
 
   return (
     <div className="grid h-full grid-cols-1 lg:grid-cols-2 px-3 gap-4 shadow">
