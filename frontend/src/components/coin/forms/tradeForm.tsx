@@ -28,6 +28,7 @@ import { BigNumberish, formatEther, parseEther } from "ethers";
 import { useAccount, useBalance } from "wagmi";
 import tokenAbi from "@/abi/erc20.json";
 import { Loader2 } from "lucide-react";
+import useGlobalStore from "@/store";
 
 export function TradeForm() {
   const { tokenAddress } = useParams<{ tokenAddress: string }>();
@@ -37,6 +38,7 @@ export function TradeForm() {
   const [tokenSelling, setTokenSelling] = useState(false);
   const { toast } = useToast();
   const { address } = useAccount(); // Get the connected user's address
+  const { setRefresh } = useGlobalStore();
 
   const { data: balance } = useBalance({
     address,
@@ -113,6 +115,7 @@ export function TradeForm() {
         description: "Token purchase failed.",
       });
     } finally {
+      setRefresh(true);
       setTokenBuying(false); // Ensure loading state is reset
       setBuyAmount(""); // Clear input field
     }
@@ -152,6 +155,7 @@ export function TradeForm() {
         description: "Token sale failed.",
       });
     } finally {
+      setRefresh(true);
       // Reset selling state and amount
       setTokenSelling(false);
       setSellAmount("");
