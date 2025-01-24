@@ -527,7 +527,7 @@
 
 "@esbuild/win32-x64@0.24.0":
   version "0.24.0"
-  resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.24.0.tgz"
+  resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.24.0.tgz#168ab1c7e1c318b922637fad8f339d48b01e1244"
   integrity sha512-7IAFPrjSQIJrGsK6flwg7NFmwBoSTyF3rl7If0hNUFQU4ilTsEPL6GuMuU9BfIWVVGuRnuIidkSMC+c0Otu8IA==
 
 "@eslint-community/eslint-utils@^4.2.0", "@eslint-community/eslint-utils@^4.4.0":
@@ -1367,7 +1367,7 @@
 
 "@parcel/watcher-win32-x64@2.5.0":
   version "2.5.0"
-  resolved "https://registry.npmjs.org/@parcel/watcher-win32-x64/-/watcher-win32-x64-2.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/@parcel/watcher-win32-x64/-/watcher-win32-x64-2.5.0.tgz#33873876d0bbc588aacce38e90d1d7480ce81cb7"
   integrity sha512-lPrxve92zEHdgeff3aiu4gDOIt4u7sJYha6wbdEZDCDUhtjTsOMiaJzG5lMY4GkWH8p0fMmO2Ppq5G5XXG+DQw==
 
 "@parcel/watcher@^2.4.1":
@@ -1995,7 +1995,7 @@
 
 "@rollup/rollup-win32-x64-msvc@4.28.0":
   version "4.28.0"
-  resolved "https://registry.npmjs.org/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.28.0.tgz"
+  resolved "https://registry.yarnpkg.com/@rollup/rollup-win32-x64-msvc/-/rollup-win32-x64-msvc-4.28.0.tgz#cb313feef9ac6e3737067fdf34f42804ac65a6f2"
   integrity sha512-Bvno2/aZT6usSa7lRDL2+hMjVAGjuqaymF1ApZm31JXzniR/hvr14jpU+/z4X6Gt5BPlzosscyJZGUvguXIqeQ==
 
 "@rpldy/abort@^1.8.3":
@@ -6605,6 +6605,6 @@ zustand@5.0.0:
   integrity sha512-LE+VcmbartOPM+auOjCCLQOsQ05zUTp8RkgwRzefUk+2jISdMMFnxvyTjA4YNWr5ZGXYbVsEMZosttuxUBkojQ==
 
 zustand@^5.0.2:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/zustand/-/zustand-5.0.2.tgz#f7595ada55a565f1fd6464f002a91e701ee0cfca"
-  integrity sha512-8qNdnJVJlHlrKXi50LDqqUNmUbuBjoKLrYQBnoChIbVph7vni+sY+YpvdjXG9YLd/Bxr6scMcR+rm5H3aSqPaw==
+  version "5.0.3"
+  resolved "https://registry.npmjs.org/zustand/-/zustand-5.0.3.tgz"
+  integrity sha512-14fwWQtU3pH4dE0dOpdMiWjddcH+QzKIgk1cl8epwSE7yag43k/AD/m4L6+K7DytAOr9gGBe3/EXj9g7cdostg==
