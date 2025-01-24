@@ -1,11 +1,11 @@
-# Memed.Fun
+# Memed.Club
 ![image](https://github.com/user-attachments/assets/c5c45d43-d970-419d-b58f-a34dcc5e83ab)
 
 
 ## Overview
 Memed is a decentralized finance (DeFi) platform built on the Binance Smart Chain (BSC) that allows users to create, trade, and engage with meme tokens. The platform combines the fun of meme culture with the innovative features of blockchain technology, enabling users to create unique tokens, participate in battles, and trade seamlessly.
 
-![image](https://github.com/user-attachments/assets/8adb1109-c19b-4bd6-bff9-8c0efb82d414)
+![image](https://github.com/user-attachments/assets/0093421d-5962-40b2-b2cb-0f1d32bc411d)
 
 
 ## Features
