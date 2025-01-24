@@ -2,7 +2,7 @@ import { Button } from "./ui/button";
 import { useTheme } from "./theme-provider";
 import { Moon, Sun, Swords, Trophy } from "lucide-react";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import logo from "../assets/memedlogo2.png";
+import logo from "../../public/assets/41a87f38-4b6f-44ef-9eb9-9496f2eaf842.png";
 import { Link, useLocation } from "react-router-dom";
 import {
   DropdownMenu,

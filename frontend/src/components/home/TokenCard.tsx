@@ -25,7 +25,7 @@ interface Props {
   };
 }
 
-const DEFAULT_LOGO = "/assets/logotrnspt.png";
+const DEFAULT_LOGO = "/assets/LogoMemedClub-removebg-preview.png";
 
 const TokenCard: React.FC<Props> = ({ coin }) => {
   const [tokenPrice, setTokenPrice] = useState<string>("0");
